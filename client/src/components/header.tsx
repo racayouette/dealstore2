@@ -106,6 +106,13 @@ export default function Header() {
               Videos
             </Link>
             <Link 
+              href="/video2" 
+              className="hover:text-blue-200 font-medium"
+              data-testid="nav-video2"
+            >
+              Video2
+            </Link>
+            <Link 
               href="/posts" 
               className="hover:text-blue-200 font-medium"
               data-testid="nav-posts"

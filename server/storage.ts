@@ -6,6 +6,7 @@ import {
   dealProducts,
   videoChannels,
   posts,
+  youtubeVideos,
   type Category, 
   type Store, 
   type Deal, 
@@ -13,6 +14,7 @@ import {
   type DealProduct,
   type VideoChannel,
   type Post,
+  type YoutubeVideo,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -20,6 +22,7 @@ import {
   type InsertDealProduct,
   type InsertVideoChannel,
   type InsertPost,
+  type InsertYoutubeVideo,
   type DealWithRelations,
   type CategoryWithChildren
 } from "@shared/schema";
@@ -68,6 +71,12 @@ export interface IStorage {
   getPostById(id: string): Promise<Post | undefined>;
   searchPosts(query: string, limit?: number): Promise<Post[]>;
   createPost(post: InsertPost): Promise<Post>;
+  
+  // YouTube Videos
+  getYoutubeVideos(limit?: number): Promise<YoutubeVideo[]>;
+  getYoutubeVideoById(id: string): Promise<YoutubeVideo | undefined>;
+  searchYoutubeVideos(query: string, limit?: number): Promise<YoutubeVideo[]>;
+  createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -386,6 +395,35 @@ export class DatabaseStorage implements IStorage {
   async createPost(post: InsertPost): Promise<Post> {
     const [newPost] = await db.insert(posts).values(post).returning();
     return newPost;
+  }
+
+  // YouTube Videos
+  async getYoutubeVideos(limit = 20): Promise<YoutubeVideo[]> {
+    return await db.select().from(youtubeVideos)
+      .where(eq(youtubeVideos.isActive, true))
+      .orderBy(desc(youtubeVideos.createdAt))
+      .limit(limit);
+  }
+
+  async getYoutubeVideoById(id: string): Promise<YoutubeVideo | undefined> {
+    const [video] = await db.select().from(youtubeVideos)
+      .where(and(eq(youtubeVideos.id, id), eq(youtubeVideos.isActive, true)));
+    return video || undefined;
+  }
+
+  async searchYoutubeVideos(query: string, limit = 20): Promise<YoutubeVideo[]> {
+    return await db.select().from(youtubeVideos)
+      .where(and(
+        eq(youtubeVideos.isActive, true),
+        ilike(youtubeVideos.title, `%${query}%`)
+      ))
+      .orderBy(desc(youtubeVideos.createdAt))
+      .limit(limit);
+  }
+
+  async createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo> {
+    const [newVideo] = await db.insert(youtubeVideos).values(video).returning();
+    return newVideo;
   }
 }
 

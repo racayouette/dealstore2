@@ -9,6 +9,7 @@ import Stores from "@/pages/stores";
 import Category from "@/pages/category";
 import DealDetails from "@/pages/deal-details";
 import Videos from "@/pages/videos";
+import Video2 from "@/pages/video2";
 import Posts from "@/pages/posts";
 
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/category/:slug" component={Category} />
       <Route path="/deal/:id" component={DealDetails} />
       <Route path="/videos" component={Videos} />
+      <Route path="/video2" component={Video2} />
       <Route path="/posts" component={Posts} />
       <Route component={NotFound} />
     </Switch>
