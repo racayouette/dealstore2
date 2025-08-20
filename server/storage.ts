@@ -7,6 +7,7 @@ import {
   videoChannels,
   posts,
   youtubeVideos,
+  blogs,
   type Category, 
   type Store, 
   type Deal, 
@@ -15,6 +16,7 @@ import {
   type VideoChannel,
   type Post,
   type YoutubeVideo,
+  type Blog,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -23,6 +25,7 @@ import {
   type InsertVideoChannel,
   type InsertPost,
   type InsertYoutubeVideo,
+  type InsertBlog,
   type DealWithRelations,
   type CategoryWithChildren
 } from "@shared/schema";
@@ -77,6 +80,12 @@ export interface IStorage {
   getYoutubeVideoById(id: string): Promise<YoutubeVideo | undefined>;
   searchYoutubeVideos(query: string, limit?: number): Promise<YoutubeVideo[]>;
   createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
+  
+  // Blogs
+  getBlogs(limit?: number): Promise<Blog[]>;
+  getBlogById(id: string): Promise<Blog | undefined>;
+  searchBlogs(query: string, limit?: number): Promise<Blog[]>;
+  createBlog(blog: InsertBlog): Promise<Blog>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -424,6 +433,35 @@ export class DatabaseStorage implements IStorage {
   async createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo> {
     const [newVideo] = await db.insert(youtubeVideos).values(video).returning();
     return newVideo;
+  }
+
+  // Blogs
+  async getBlogs(limit = 20): Promise<Blog[]> {
+    return await db.select().from(blogs)
+      .where(eq(blogs.isActive, true))
+      .orderBy(desc(blogs.createdAt))
+      .limit(limit);
+  }
+
+  async getBlogById(id: string): Promise<Blog | undefined> {
+    const [blog] = await db.select().from(blogs)
+      .where(and(eq(blogs.id, id), eq(blogs.isActive, true)));
+    return blog || undefined;
+  }
+
+  async searchBlogs(query: string, limit = 20): Promise<Blog[]> {
+    return await db.select().from(blogs)
+      .where(and(
+        eq(blogs.isActive, true),
+        ilike(blogs.title, `%${query}%`)
+      ))
+      .orderBy(desc(blogs.createdAt))
+      .limit(limit);
+  }
+
+  async createBlog(blog: InsertBlog): Promise<Blog> {
+    const [newBlog] = await db.insert(blogs).values(blog).returning();
+    return newBlog;
   }
 }
 

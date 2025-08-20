@@ -11,6 +11,7 @@ import DealDetails from "@/pages/deal-details";
 import Videos from "@/pages/videos";
 import Video2 from "@/pages/video2";
 import Posts from "@/pages/posts";
+import Blogs from "@/pages/blogs";
 
 function Router() {
   return (
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/videos" component={Videos} />
       <Route path="/video2" component={Video2} />
       <Route path="/posts" component={Posts} />
+      <Route path="/blogs" component={Blogs} />
       <Route component={NotFound} />
     </Switch>
   );

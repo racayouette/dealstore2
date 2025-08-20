@@ -119,6 +119,13 @@ export default function Header() {
             >
               Posts
             </Link>
+            <Link 
+              href="/blogs" 
+              className="hover:text-blue-200 font-medium"
+              data-testid="nav-blogs"
+            >
+              Blogs
+            </Link>
           </div>
         </nav>
       </div>
