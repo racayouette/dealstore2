@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -9,8 +10,18 @@ import { Badge } from "@/components/ui/badge";
 import { PlayCircle, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import type { VideoChannel } from "@shared/schema";
+import AdvertisementBanner from "@/components/advertisement-banner";
+import AdvertisementControls from "@/components/advertisement-controls";
 
 export default function Videos() {
+  const [adSettings, setAdSettings] = useState({
+    header: true,
+    top: true,
+    left: true,
+    right: true,
+    bottom: true,
+  });
+
   const { 
     data: videoChannels = [], 
     isLoading, 
@@ -45,7 +56,43 @@ export default function Videos() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
+      {/* Header Banner Advertisement */}
+      {adSettings.header && (
+        <div className="border-b border-gray-200 bg-white">
+          <div className="container mx-auto px-4 py-2">
+            <AdvertisementBanner position="header" size="small" />
+          </div>
+        </div>
+      )}
+
+      {/* Advertisement Controls */}
+      <div className="container mx-auto px-4 py-4">
+        <AdvertisementControls 
+          settings={adSettings} 
+          onSettingsChange={setAdSettings} 
+        />
+      </div>
+
+      {/* Top Banner Advertisement */}
+      {adSettings.top && (
+        <div className="container mx-auto px-4 pb-4">
+          <AdvertisementBanner position="top" size="large" />
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar Advertisement */}
+          {adSettings.left && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="left" size="medium" />
+              </div>
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
         <Breadcrumb items={breadcrumbItems} />
         
         <div className="mb-6">
@@ -170,7 +217,25 @@ export default function Videos() {
             <p className="text-gray-500">Check back later for new video content</p>
           </div>
         )}
+          </div>
+
+          {/* Right Sidebar Advertisement */}
+          {adSettings.right && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="right" size="medium" />
+              </div>
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* Bottom Banner Advertisement */}
+      {adSettings.bottom && (
+        <div className="container mx-auto px-4 pb-6">
+          <AdvertisementBanner position="bottom" size="medium" />
+        </div>
+      )}
       
       <Footer />
     </div>
