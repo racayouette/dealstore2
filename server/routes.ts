@@ -174,6 +174,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Posts endpoints
+  app.get("/api/posts", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const query = req.query.q as string;
+      
+      let posts;
+      if (query) {
+        posts = await storage.searchPosts(query, limit);
+      } else {
+        posts = await storage.getPosts(limit);
+      }
+      
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      res.status(500).json({ error: "Failed to fetch posts" });
+    }
+  });
+
+  app.get("/api/posts/:id", async (req, res) => {
+    try {
+      const post = await storage.getPostById(req.params.id);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      res.status(500).json({ error: "Failed to fetch post" });
+    }
+  });
+
+  // Seed posts endpoint
+  app.post("/api/seed-posts", async (req, res) => {
+    try {
+      console.log("Starting to seed posts...");
+      await seedPosts();
+      console.log("Posts seeded successfully!");
+      res.json({ message: "Posts seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding posts:", error);
+      res.status(500).json({ error: "Failed to seed posts", details: error.message });
+    }
+  });
+
   // Seed video channels endpoint
   app.post("/api/seed-videos", async (req, res) => {
     try {
@@ -703,6 +749,49 @@ async function seedVideoChannels() {
     videoCount: 43,
     followerCount: 35,
     tags: ["bicycles", "brompton", "folding bikes", "commuting"],
+    isActive: true,
+  });
+}
+
+
+async function seedPosts() {
+  // Create houseplant care posts similar to Reddit posts
+  await storage.createPost({
+    title: "My pothos is turning yellow, what am I doing wrong?",
+    content: "I've had this golden pothos for about 6 months and recently the leaves have been turning yellow and dropping. I water it once a week and it sits near a north-facing window. The soil seems to dry out pretty quickly. Any advice would be appreciated!",
+    author: "plantlover123",
+    subreddit: "houseplants",
+    imageUrl: "https://images.unsplash.com/photo-1586094823842-a95e2c7e9203?w=400&h=300&fit=crop",
+    postUrl: "https://reddit.com/r/houseplants/comments/example1",
+    upvotes: 156,
+    commentCount: 23,
+    tags: ["pothos", "yellowing", "help", "watering"],
+    isActive: true,
+  });
+
+  await storage.createPost({
+    title: "Snake plant care guide for beginners",
+    content: "Just got my first snake plant (Sansevieria trifasciata) and want to make sure I don't kill it! Here's what I've learned so far: They prefer bright, indirect light but can tolerate low light. Water sparingly - only when soil is completely dry. They're very forgiving and perfect for beginners.",
+    author: "greenthumb_newbie",
+    subreddit: "plantcarehelp",
+    imageUrl: "https://images.unsplash.com/photo-1599585397600-0c26b0348957?w=400&h=300&fit=crop",
+    postUrl: "https://reddit.com/r/plantcarehelp/comments/example2",
+    upvotes: 89,
+    commentCount: 12,
+    tags: ["snake plant", "sansevieria", "beginner", "care guide"],
+    isActive: true,
+  });
+
+  await storage.createPost({
+    title: "Best low-light plants for a bathroom?",
+    content: "My bathroom has no windows but gets some light from the hallway. Looking for plants that can survive in low light and high humidity. I was thinking about a ZZ plant or maybe a peace lily? Any other suggestions?",
+    author: "bathroomjungle",
+    subreddit: "indoorgarden",
+    imageUrl: "https://images.unsplash.com/photo-1469796466635-455ede028aca?w=400&h=300&fit=crop",
+    postUrl: "https://reddit.com/r/indoorgarden/comments/example6",
+    upvotes: 78,
+    commentCount: 19,
+    tags: ["low light", "bathroom", "humidity", "ZZ plant", "peace lily"],
     isActive: true,
   });
 }
