@@ -95,6 +95,7 @@ export interface IStorage {
   getAdvertisementBannerById(id: string): Promise<AdvertisementBanner | undefined>;
   getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]>;
   createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner>;
+  deleteAdvertisementBanner(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -500,6 +501,10 @@ export class DatabaseStorage implements IStorage {
   async createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner> {
     const [newBanner] = await db.insert(advertisementBanners).values(banner).returning();
     return newBanner;
+  }
+
+  async deleteAdvertisementBanner(id: string): Promise<void> {
+    await db.delete(advertisementBanners).where(eq(advertisementBanners.id, id));
   }
 }
 

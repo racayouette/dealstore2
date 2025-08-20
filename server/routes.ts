@@ -372,6 +372,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seed advertisement banners endpoint
+  app.post('/api/seed-advertisement-banners', async (req, res) => {
+    try {
+      // Clear existing banners first
+      const existingBanners = await storage.getAdvertisementBannersByPosition('header');
+      for (const banner of existingBanners) {
+        await storage.deleteAdvertisementBanner(banner.id);
+      }
+      const existingTop = await storage.getAdvertisementBannersByPosition('top');
+      for (const banner of existingTop) {
+        await storage.deleteAdvertisementBanner(banner.id);
+      }
+      const existingLeft = await storage.getAdvertisementBannersByPosition('left');
+      for (const banner of existingLeft) {
+        await storage.deleteAdvertisementBanner(banner.id);
+      }
+      const existingRight = await storage.getAdvertisementBannersByPosition('right');
+      for (const banner of existingRight) {
+        await storage.deleteAdvertisementBanner(banner.id);
+      }
+      const existingBottom = await storage.getAdvertisementBannersByPosition('bottom');
+      for (const banner of existingBottom) {
+        await storage.deleteAdvertisementBanner(banner.id);
+      }
+      
+      await seedAdvertisementBanners();
+      res.json({ message: 'Advertisement banners seeded successfully' });
+    } catch (error) {
+      console.error('Error seeding advertisement banners:', error);
+      res.status(500).json({ error: 'Failed to seed advertisement banners' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
@@ -1232,16 +1265,16 @@ async function seedBlogs() {
   });
 }
 
-// Seed advertisement banners with real affiliate marketing data
+// Seed advertisement banners with public service announcements
 async function seedAdvertisementBanners() {
   // Header banners - large, prominent placement
   await storage.createAdvertisementBanner({
     position: "header",
     size: "large",
-    title: "Amazon Prime Day Deals",
-    description: "Save up to 70% on electronics, home goods, and more during Prime Day",
-    imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=200&fit=crop&auto=format",
-    clickUrl: "https://amazon.com/prime-day-deals",
+    title: "Digital Safety First",
+    description: "Learn about online privacy, cybersecurity, and protecting your digital identity",
+    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://staysafeonline.org",
     isActive: true,
     displayOrder: 1,
   });
@@ -1249,10 +1282,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "header",
     size: "large", 
-    title: "Best Buy Tech Deals",
-    description: "Discover the latest tech at unbeatable prices with exclusive member savings",
-    imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=200&fit=crop&auto=format",
-    clickUrl: "https://bestbuy.com/deals",
+    title: "Financial Literacy Initiative",
+    description: "Build better money habits with free financial education resources",
+    imageUrl: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://mymoney.gov",
     isActive: true,
     displayOrder: 2,
   });
@@ -1261,10 +1294,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "top",
     size: "medium",
-    title: "Dell Business Laptops Sale",
-    description: "Professional-grade laptops with enterprise security and support",
-    imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=150&fit=crop&auto=format",
-    clickUrl: "https://dell.com/business-laptops",
+    title: "Mental Health Awareness",
+    description: "Find support, resources, and information about mental wellness",
+    imageUrl: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://mentalhealth.gov",
     isActive: true,
     displayOrder: 1,
   });
@@ -1272,10 +1305,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "top",
     size: "medium",
-    title: "Microsoft Surface Pro Deals",
-    description: "Versatile 2-in-1 devices for productivity and creativity",
-    imageUrl: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=600&h=150&fit=crop&auto=format",
-    clickUrl: "https://microsoft.com/surface-deals",
+    title: "Environmental Conservation",
+    description: "Small actions, big impact - Learn how to protect our planet",
+    imageUrl: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://epa.gov/education",
     isActive: true,
     displayOrder: 2,
   });
@@ -1284,10 +1317,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "left",
     size: "medium",
-    title: "HP Instant Ink Subscription",
-    description: "Never run out of ink with automatic delivery and savings up to 70%",
-    imageUrl: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300&h=400&fit=crop&auto=format",
-    clickUrl: "https://hp.com/instant-ink",
+    title: "Community Volunteering",
+    description: "Make a difference in your community through volunteer opportunities",
+    imageUrl: "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=300&h=400&fit=crop&auto=format",
+    clickUrl: "https://volunteermatch.org",
     isActive: true,
     displayOrder: 1,
   });
@@ -1295,10 +1328,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "left",
     size: "small",
-    title: "Lenovo ThinkPad for Business",
-    description: "Reliable business laptops with military-grade durability",
-    imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=300&h=300&fit=crop&auto=format",
-    clickUrl: "https://lenovo.com/thinkpad-business",
+    title: "Digital Wellness",
+    description: "Healthy technology use for better life balance",
+    imageUrl: "https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?w=300&h=300&fit=crop&auto=format",
+    clickUrl: "https://digitalwellness.org",
     isActive: true,
     displayOrder: 2,
   });
@@ -1307,10 +1340,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "right",
     size: "medium",
-    title: "Newegg PC Builder",
-    description: "Build your dream PC with expert guidance and compatibility checking",
-    imageUrl: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=300&h=400&fit=crop&auto=format",
-    clickUrl: "https://newegg.com/pc-builder",
+    title: "Educational Resources",
+    description: "Free online courses and learning materials for all ages",
+    imageUrl: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop&auto=format",
+    clickUrl: "https://coursera.org/browse/free-courses",
     isActive: true,
     displayOrder: 1,
   });
@@ -1318,10 +1351,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "right",
     size: "small",
-    title: "Verizon 5G Home Internet",
-    description: "Ultra-fast wireless internet for your home with no data caps",
-    imageUrl: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?w=300&h=300&fit=crop&auto=format",
-    clickUrl: "https://verizon.com/5g-home",
+    title: "Health & Nutrition",
+    description: "Evidence-based nutrition and health information",
+    imageUrl: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=300&h=300&fit=crop&auto=format",
+    clickUrl: "https://nutrition.gov",
     isActive: true,
     displayOrder: 2,
   });
@@ -1330,10 +1363,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "bottom",
     size: "large",
-    title: "T-Mobile Magenta MAX Plan",
-    description: "Unlimited premium data, Netflix on Us, and international roaming included",
-    imageUrl: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=800&h=200&fit=crop&auto=format",
-    clickUrl: "https://t-mobile.com/magenta-max",
+    title: "Emergency Preparedness",
+    description: "Be ready for emergencies with preparation tips and emergency kits",
+    imageUrl: "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://ready.gov",
     isActive: true,
     displayOrder: 1,
   });
@@ -1341,10 +1374,10 @@ async function seedAdvertisementBanners() {
   await storage.createAdvertisementBanner({
     position: "bottom",
     size: "medium",
-    title: "TechBargains Newsletter",
-    description: "Get exclusive deals and early access to sales delivered to your inbox",
-    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=150&fit=crop&auto=format",
-    clickUrl: "https://techbargains.com/newsletter",
+    title: "Stay Informed",
+    description: "Follow reliable news sources and fact-check information online",
+    imageUrl: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://factcheck.org",
     isActive: true,
     displayOrder: 2,
   });
