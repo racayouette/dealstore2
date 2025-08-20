@@ -65,6 +65,20 @@ export const dealProducts = pgTable("deal_products", {
   productId: uuid("product_id").notNull(),
 });
 
+export const videoChannels = pgTable("video_channels", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  channelUrl: text("channel_url").notNull(),
+  videoCount: integer("video_count").default(0),
+  followerCount: integer("follower_count").default(0),
+  tags: text("tags").array(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -134,18 +148,26 @@ export const insertDealProductSchema = createInsertSchema(dealProducts).omit({
   id: true,
 });
 
+export const insertVideoChannelSchema = createInsertSchema(videoChannels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
 export type Deal = typeof deals.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type DealProduct = typeof dealProducts.$inferSelect;
+export type VideoChannel = typeof videoChannels.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
 export type InsertDeal = z.infer<typeof insertDealSchema>;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type InsertDealProduct = z.infer<typeof insertDealProductSchema>;
+export type InsertVideoChannel = z.infer<typeof insertVideoChannelSchema>;
 
 // Extended types for API responses
 export type DealWithRelations = Deal & {
