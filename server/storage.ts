@@ -5,18 +5,21 @@ import {
   products, 
   dealProducts,
   videoChannels,
+  posts,
   type Category, 
   type Store, 
   type Deal, 
   type Product,
   type DealProduct,
   type VideoChannel,
+  type Post,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
   type InsertProduct,
   type InsertDealProduct,
   type InsertVideoChannel,
+  type InsertPost,
   type DealWithRelations,
   type CategoryWithChildren
 } from "@shared/schema";
@@ -59,6 +62,12 @@ export interface IStorage {
   getVideoChannels(limit?: number): Promise<VideoChannel[]>;
   getVideoChannelById(id: string): Promise<VideoChannel | undefined>;
   createVideoChannel(channel: InsertVideoChannel): Promise<VideoChannel>;
+  
+  // Posts
+  getPosts(limit?: number): Promise<Post[]>;
+  getPostById(id: string): Promise<Post | undefined>;
+  searchPosts(query: string, limit?: number): Promise<Post[]>;
+  createPost(post: InsertPost): Promise<Post>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -355,6 +364,28 @@ export class DatabaseStorage implements IStorage {
   async createVideoChannel(channel: InsertVideoChannel): Promise<VideoChannel> {
     const [newChannel] = await db.insert(videoChannels).values(channel).returning();
     return newChannel;
+  }
+
+  // Posts
+  async getPosts(limit = 20): Promise<Post[]> {
+    return await db.select().from(posts).where(eq(posts.isActive, true)).orderBy(desc(posts.createdAt)).limit(limit);
+  }
+
+  async getPostById(id: string): Promise<Post | undefined> {
+    const [post] = await db.select().from(posts).where(and(eq(posts.id, id), eq(posts.isActive, true)));
+    return post || undefined;
+  }
+
+  async searchPosts(query: string, limit = 20): Promise<Post[]> {
+    return await db.select().from(posts).where(and(
+      eq(posts.isActive, true),
+      ilike(posts.title, `%${query}%`)
+    )).orderBy(desc(posts.createdAt)).limit(limit);
+  }
+
+  async createPost(post: InsertPost): Promise<Post> {
+    const [newPost] = await db.insert(posts).values(post).returning();
+    return newPost;
   }
 }
 
