@@ -132,6 +132,21 @@ export const blogs = pgTable("blogs", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// Advertisement banners table for storing banner ads with images and affiliate links
+export const advertisementBanners = pgTable("advertisement_banners", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  position: text("position").notNull(), // header, top, left, right, bottom
+  size: text("size").notNull(), // small, medium, large
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  clickUrl: text("click_url").notNull(),
+  isActive: boolean("is_active").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -225,6 +240,12 @@ export const insertBlogSchema = createInsertSchema(blogs).omit({
   updatedAt: true,
 });
 
+export const insertAdvertisementBannerSchema = createInsertSchema(advertisementBanners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
@@ -235,6 +256,7 @@ export type VideoChannel = typeof videoChannels.$inferSelect;
 export type Post = typeof posts.$inferSelect;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
 export type Blog = typeof blogs.$inferSelect;
+export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
@@ -245,6 +267,7 @@ export type InsertVideoChannel = z.infer<typeof insertVideoChannelSchema>;
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
+export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 
 // Extended types for API responses
 export type DealWithRelations = Deal & {

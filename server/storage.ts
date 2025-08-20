@@ -8,6 +8,7 @@ import {
   posts,
   youtubeVideos,
   blogs,
+  advertisementBanners,
   type Category, 
   type Store, 
   type Deal, 
@@ -17,6 +18,7 @@ import {
   type Post,
   type YoutubeVideo,
   type Blog,
+  type AdvertisementBanner,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -26,6 +28,7 @@ import {
   type InsertPost,
   type InsertYoutubeVideo,
   type InsertBlog,
+  type InsertAdvertisementBanner,
   type DealWithRelations,
   type CategoryWithChildren
 } from "@shared/schema";
@@ -86,6 +89,12 @@ export interface IStorage {
   getBlogById(id: string): Promise<Blog | undefined>;
   searchBlogs(query: string, limit?: number): Promise<Blog[]>;
   createBlog(blog: InsertBlog): Promise<Blog>;
+  
+  // Advertisement Banners
+  getAdvertisementBanners(position?: string): Promise<AdvertisementBanner[]>;
+  getAdvertisementBannerById(id: string): Promise<AdvertisementBanner | undefined>;
+  getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]>;
+  createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +471,35 @@ export class DatabaseStorage implements IStorage {
   async createBlog(blog: InsertBlog): Promise<Blog> {
     const [newBlog] = await db.insert(blogs).values(blog).returning();
     return newBlog;
+  }
+
+  // Advertisement Banners
+  async getAdvertisementBanners(position?: string): Promise<AdvertisementBanner[]> {
+    if (position) {
+      return await db.select().from(advertisementBanners)
+        .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.position, position)))
+        .orderBy(asc(advertisementBanners.displayOrder));
+    }
+    return await db.select().from(advertisementBanners)
+      .where(eq(advertisementBanners.isActive, true))
+      .orderBy(asc(advertisementBanners.displayOrder));
+  }
+
+  async getAdvertisementBannerById(id: string): Promise<AdvertisementBanner | undefined> {
+    const [banner] = await db.select().from(advertisementBanners)
+      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.isActive, true)));
+    return banner || undefined;
+  }
+
+  async getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]> {
+    return await db.select().from(advertisementBanners)
+      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.position, position)))
+      .orderBy(asc(advertisementBanners.displayOrder));
+  }
+
+  async createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner> {
+    const [newBanner] = await db.insert(advertisementBanners).values(banner).returning();
+    return newBanner;
   }
 }
 
