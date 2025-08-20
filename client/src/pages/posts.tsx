@@ -56,9 +56,9 @@ export default function Posts() {
       )}
 
       {/* Advertisement Controls */}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 pt-6">
         <AdvertisementControls 
-          settings={adSettings} 
+          adSettings={adSettings} 
           onSettingsChange={setAdSettings} 
         />
       </div>

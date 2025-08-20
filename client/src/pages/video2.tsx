@@ -63,9 +63,9 @@ export default function Video2() {
       )}
 
       {/* Advertisement Controls */}
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 pt-6">
         <AdvertisementControls 
-          settings={adSettings} 
+          adSettings={adSettings} 
           onSettingsChange={setAdSettings} 
         />
       </div>
@@ -195,7 +195,7 @@ export default function Video2() {
                     
                     <div className="flex items-center text-sm text-gray-600 mb-2">
                       <Eye className="w-4 h-4 mr-1" />
-                      <span className="mr-4">{formatNumber(video.viewCount)} views</span>
+                      <span className="mr-4">{formatNumber(video.viewCount || 0)} views</span>
                       <Clock className="w-4 h-4 mr-1" />
                       <span>{video.uploadDate}</span>
                     </div>
