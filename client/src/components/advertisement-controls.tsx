@@ -21,6 +21,11 @@ interface AdvertisementControlsProps {
 export function AdvertisementControls({ adSettings, onSettingsChange }: AdvertisementControlsProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  // Add null safety check
+  if (!adSettings) {
+    return null;
+  }
+
   const handleToggle = (position: keyof AdSettings) => {
     onSettingsChange({
       ...adSettings,

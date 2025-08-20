@@ -7,10 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Search, ArrowUp, MessageSquare, ExternalLink, User } from "lucide-react";
 import type { Post } from "@shared/schema";
 import Header from "@/components/header";
+import AdvertisementBanner from "@/components/advertisement-banner";
+import AdvertisementControls from "@/components/advertisement-controls";
 
 export default function Posts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
+  const [adSettings, setAdSettings] = useState({
+    header: true,
+    top: true,
+    left: true,
+    right: true,
+    bottom: true,
+  });
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["/api/posts", currentSearch],
@@ -36,7 +45,44 @@ export default function Posts() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      
+      {/* Header Banner Advertisement */}
+      {adSettings.header && (
+        <div className="border-b border-gray-200 bg-white">
+          <div className="container mx-auto px-4 py-2">
+            <AdvertisementBanner position="header" size="small" />
+          </div>
+        </div>
+      )}
+
+      {/* Advertisement Controls */}
+      <div className="container mx-auto px-4 py-4">
+        <AdvertisementControls 
+          settings={adSettings} 
+          onSettingsChange={setAdSettings} 
+        />
+      </div>
+
+      {/* Top Banner Advertisement */}
+      {adSettings.top && (
+        <div className="container mx-auto px-4 pb-4">
+          <AdvertisementBanner position="top" size="large" />
+        </div>
+      )}
+
       <div className="container mx-auto px-6 py-8">
+        <div className="flex gap-6">
+          {/* Left Sidebar Advertisement */}
+          {adSettings.left && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="left" size="medium" />
+              </div>
+            </div>
+          )}
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
         {/* Header Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2" data-testid="posts-title">
@@ -200,7 +246,25 @@ export default function Posts() {
             )}
           </div>
         )}
+          </div>
+
+          {/* Right Sidebar Advertisement */}
+          {adSettings.right && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="right" size="medium" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom Banner Advertisement */}
+      {adSettings.bottom && (
+        <div className="container mx-auto px-4 pb-6">
+          <AdvertisementBanner position="bottom" size="medium" />
+        </div>
+      )}
     </div>
   );
 }
