@@ -95,6 +95,23 @@ export const posts = pgTable("posts", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const youtubeVideos = pgTable("youtube_videos", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 500 }).notNull(),
+  description: text("description"),
+  channelName: varchar("channel_name", { length: 200 }).notNull(),
+  channelUrl: text("channel_url").notNull(),
+  videoUrl: text("video_url").notNull(),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  duration: varchar("duration", { length: 20 }),
+  viewCount: integer("view_count").default(0),
+  uploadDate: varchar("upload_date", { length: 50 }),
+  tags: text("tags").array(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -176,6 +193,12 @@ export const insertPostSchema = createInsertSchema(posts).omit({
   updatedAt: true,
 });
 
+export const insertYoutubeVideoSchema = createInsertSchema(youtubeVideos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
@@ -184,6 +207,7 @@ export type Product = typeof products.$inferSelect;
 export type DealProduct = typeof dealProducts.$inferSelect;
 export type VideoChannel = typeof videoChannels.$inferSelect;
 export type Post = typeof posts.$inferSelect;
+export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
@@ -192,6 +216,7 @@ export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type InsertDealProduct = z.infer<typeof insertDealProductSchema>;
 export type InsertVideoChannel = z.infer<typeof insertVideoChannelSchema>;
 export type InsertPost = z.infer<typeof insertPostSchema>;
+export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 
 // Extended types for API responses
 export type DealWithRelations = Deal & {

@@ -207,6 +207,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // YouTube Videos API
+  app.get("/api/youtube-videos", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const search = req.query.search as string;
+      
+      let videos;
+      if (search) {
+        videos = await storage.searchYoutubeVideos(search, limit);
+      } else {
+        videos = await storage.getYoutubeVideos(limit);
+      }
+      
+      res.json(videos);
+    } catch (error) {
+      console.error("Error fetching YouTube videos:", error);
+      res.status(500).json({ error: "Failed to fetch YouTube videos" });
+    }
+  });
+
+  app.get("/api/youtube-videos/:id", async (req, res) => {
+    try {
+      const video = await storage.getYoutubeVideoById(req.params.id);
+      if (!video) {
+        return res.status(404).json({ error: "YouTube video not found" });
+      }
+      res.json(video);
+    } catch (error) {
+      console.error("Error fetching YouTube video:", error);
+      res.status(500).json({ error: "Failed to fetch YouTube video" });
+    }
+  });
+
   // Seed posts endpoint
   app.post("/api/seed-posts", async (req, res) => {
     try {
@@ -217,6 +250,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error seeding posts:", error);
       res.status(500).json({ error: "Failed to seed posts", details: error.message });
+    }
+  });
+
+  // Seed YouTube videos endpoint
+  app.post("/api/seed-youtube-videos", async (req, res) => {
+    try {
+      console.log("Starting to seed YouTube videos...");
+      await seedYoutubeVideos();
+      console.log("YouTube videos seeded successfully!");
+      res.json({ message: "YouTube videos seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding YouTube videos:", error);
+      res.status(500).json({ error: "Failed to seed YouTube videos", details: error.message });
     }
   });
 
@@ -792,6 +838,149 @@ async function seedPosts() {
     upvotes: 78,
     commentCount: 19,
     tags: ["low light", "bathroom", "humidity", "ZZ plant", "peace lily"],
+    isActive: true,
+  });
+}
+
+async function seedYoutubeVideos() {
+  // Create YouTube-style houseplant care videos similar to YouTube search results
+  await storage.createYoutubeVideo({
+    title: "Houseplant Care for Beginners: Essential Tips for Indoor Plants",
+    description: "Learn the basics of houseplant care in this comprehensive guide. We cover watering, lighting, fertilizing, and common mistakes to avoid when caring for your indoor plants.",
+    channelName: "Plant Paradise",
+    channelUrl: "https://youtube.com/c/plantparadise",
+    videoUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+    thumbnailUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=480&h=360&fit=crop",
+    duration: "15:42",
+    viewCount: 245678,
+    uploadDate: "2 weeks ago",
+    tags: ["houseplant care", "beginner", "indoor plants", "plant tips"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Why Your Houseplants Keep Dying (and How to Fix It)",
+    description: "Discover the most common reasons why houseplants die and learn proven techniques to keep your plants thriving. This video will transform your plant parent skills!",
+    channelName: "The Plant Doctor",
+    channelUrl: "https://youtube.com/c/theplantdoctor",
+    videoUrl: "https://youtube.com/watch?v=example2",
+    thumbnailUrl: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=480&h=360&fit=crop",
+    duration: "12:18",
+    viewCount: 189543,
+    uploadDate: "1 week ago",
+    tags: ["plant problems", "dying plants", "plant care", "troubleshooting"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "10 Best Low Light Houseplants That Anyone Can Grow",
+    description: "Perfect for apartments and dark spaces! These low-light houseplants are nearly impossible to kill and will thrive in your home with minimal care.",
+    channelName: "Indoor Jungle",
+    channelUrl: "https://youtube.com/c/indoorjungle",
+    videoUrl: "https://youtube.com/watch?v=example3",
+    thumbnailUrl: "https://images.unsplash.com/photo-1469796466635-455ede028aca?w=480&h=360&fit=crop",
+    duration: "18:35",
+    viewCount: 342156,
+    uploadDate: "3 days ago",
+    tags: ["low light plants", "apartment plants", "easy care", "plant collection"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "How to Water Houseplants: The Ultimate Guide",
+    description: "Master the art of watering your houseplants! Learn when, how much, and what type of water to use for different plant species.",
+    channelName: "Green Thumb Academy",
+    channelUrl: "https://youtube.com/c/greenthumbacademy",
+    videoUrl: "https://youtube.com/watch?v=example4",
+    thumbnailUrl: "https://images.unsplash.com/photo-1586094823842-a95e2c7e9203?w=480&h=360&fit=crop",
+    duration: "21:07",
+    viewCount: 156789,
+    uploadDate: "5 days ago",
+    tags: ["watering plants", "plant care", "watering schedule", "plant health"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Propagating Houseplants: Free Plants Forever!",
+    description: "Learn how to propagate popular houseplants like pothos, snake plants, and rubber trees. Turn one plant into dozens with these simple techniques!",
+    channelName: "Propagation Station",
+    channelUrl: "https://youtube.com/c/propagationstation",
+    videoUrl: "https://youtube.com/watch?v=example5",
+    thumbnailUrl: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=480&h=360&fit=crop",
+    duration: "16:23",
+    viewCount: 298745,
+    uploadDate: "1 week ago",
+    tags: ["propagation", "plant propagation", "free plants", "cuttings"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Common Houseplant Pests and How to Get Rid of Them",
+    description: "Identify and eliminate common houseplant pests like spider mites, aphids, and fungus gnats with these proven organic and chemical-free methods.",
+    channelName: "Plant Clinic",
+    channelUrl: "https://youtube.com/c/plantclinic",
+    videoUrl: "https://youtube.com/watch?v=example6",
+    thumbnailUrl: "https://images.unsplash.com/photo-1563789031959-4c02bcb41319?w=480&h=360&fit=crop",
+    duration: "14:52",
+    viewCount: 187632,
+    uploadDate: "4 days ago",
+    tags: ["plant pests", "pest control", "organic solutions", "plant health"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Creating the Perfect Plant Room Tour | 100+ Houseplants",
+    description: "Take a tour of my incredible plant room featuring over 100 different houseplant species! Get inspiration for your own indoor jungle setup.",
+    channelName: "Plant Mama",
+    channelUrl: "https://youtube.com/c/plantmama",
+    videoUrl: "https://youtube.com/watch?v=example7",
+    thumbnailUrl: "https://images.unsplash.com/photo-1558603668-6570496b66f8?w=480&h=360&fit=crop",
+    duration: "25:41",
+    viewCount: 423156,
+    uploadDate: "6 days ago",
+    tags: ["plant room tour", "plant collection", "indoor jungle", "plant inspiration"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Houseplant Fertilizer Guide: When, What, and How Much",
+    description: "Everything you need to know about fertilizing houseplants! Learn about different fertilizer types, feeding schedules, and seasonal care tips.",
+    channelName: "The Plant Guy",
+    channelUrl: "https://youtube.com/c/theplantguy",
+    videoUrl: "https://youtube.com/watch?v=example8",
+    thumbnailUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=480&h=360&fit=crop",
+    duration: "19:15",
+    viewCount: 134567,
+    uploadDate: "2 weeks ago",
+    tags: ["plant fertilizer", "plant nutrition", "fertilizing tips", "plant growth"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Repotting Houseplants: Step-by-Step Tutorial",
+    description: "Learn when and how to repot your houseplants for optimal growth. Includes soil recommendations, pot sizing, and troubleshooting common issues.",
+    channelName: "Roots & Shoots",
+    channelUrl: "https://youtube.com/c/rootsandshoots",
+    videoUrl: "https://youtube.com/watch?v=example9",
+    thumbnailUrl: "https://images.unsplash.com/photo-1510411268840-1c78bc76ac05?w=480&h=360&fit=crop",
+    duration: "13:28",
+    viewCount: 201834,
+    uploadDate: "1 week ago",
+    tags: ["repotting", "plant care", "potting soil", "root bound"],
+    isActive: true,
+  });
+
+  await storage.createYoutubeVideo({
+    title: "Winter Houseplant Care: Keeping Plants Alive in Cold Weather",
+    description: "Discover essential winter care tips for houseplants. Learn how to maintain humidity, adjust watering schedules, and provide adequate light during colder months.",
+    channelName: "Seasonal Plants",
+    channelUrl: "https://youtube.com/c/seasonalplants",
+    videoUrl: "https://youtube.com/watch?v=example10",
+    thumbnailUrl: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=480&h=360&fit=crop",
+    duration: "17:06",
+    viewCount: 156432,
+    uploadDate: "3 weeks ago",
+    tags: ["winter plant care", "humidity", "seasonal care", "plant survival"],
     isActive: true,
   });
 }
