@@ -149,6 +149,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Video Channels
+  app.get("/api/video-channels", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const channels = await storage.getVideoChannels(limit);
+      res.json(channels);
+    } catch (error) {
+      console.error("Error fetching video channels:", error);
+      res.status(500).json({ error: "Failed to fetch video channels" });
+    }
+  });
+
+  app.get("/api/video-channels/:id", async (req, res) => {
+    try {
+      const channel = await storage.getVideoChannelById(req.params.id);
+      if (!channel) {
+        return res.status(404).json({ error: "Video channel not found" });
+      }
+      res.json(channel);
+    } catch (error) {
+      console.error("Error fetching video channel:", error);
+      res.status(500).json({ error: "Failed to fetch video channel" });
+    }
+  });
+
+  // Seed video channels endpoint
+  app.post("/api/seed-videos", async (req, res) => {
+    try {
+      await seedVideoChannels();
+      res.json({ message: "Video channels seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding video channels:", error);
+      res.status(500).json({ error: "Failed to seed video channels" });
+    }
+  });
+
   // Seed data endpoint for development
   app.post("/api/seed", async (req, res) => {
     try {
@@ -400,5 +436,273 @@ async function seedDatabase() {
     isActive: true,
     isFeatured: false,
     authorName: "Microsoft Team",
+  });
+
+  // Create video channels based on Vimeo bicycle channels data
+  await storage.createVideoChannel({
+    title: "Longtail Cargo Utility Bicycles",
+    description: "Specialized content about cargo and utility bicycles for transportation and business use",
+    thumbnailUrl: "https://i.vimeocdn.com/video/235112144-3e096dd7d8437c5f01590af4282e7eb0f4c0416bddbf982c6e1f4279575acd1f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/38189",
+    videoCount: 58,
+    followerCount: 17,
+    tags: ["bicycles", "cargo bikes", "utility", "transportation"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Rocky Mountain Bicycles Service Videos",
+    description: "Professional bicycle service and maintenance tutorials from Rocky Mountain Bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/280896927-f43b01434806378e9fbb51bd1fc8420b4962e54d0763fbe6a1d74dad2c2c9b9b-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/rmbservice",
+    videoCount: 6,
+    followerCount: 57,
+    tags: ["bicycles", "maintenance", "service", "tutorials"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "AUTUM Bicycles Berlin",
+    description: "Urban cycling culture and bicycle lifestyle content from Berlin",
+    thumbnailUrl: "https://i.vimeocdn.com/video/485305348-ee5407bf784aee38cd8baf9fe242efe95a73a8694ea82a7901dec6dfa06ebde9-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/autum",
+    videoCount: 31,
+    followerCount: 16,
+    tags: ["bicycles", "urban", "berlin", "lifestyle"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Riding of Bicycles",
+    description: "General bicycle riding content, techniques, and experiences",
+    thumbnailUrl: "https://i.vimeocdn.com/video/53041787-bd16797821717702a15ce57fd851f19fd86f4dfc447555a0276c6ba5de660a46-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/ridingofbikes",
+    videoCount: 20,
+    followerCount: 16,
+    tags: ["bicycles", "riding", "techniques", "experiences"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Mongoose Bicycles",
+    description: "Official content from Mongoose Bicycles featuring BMX and mountain biking",
+    thumbnailUrl: "https://i.vimeocdn.com/video/270730651-848cf3d9572c3f199d9ad31702acc8491640d04a0fc6dec7490a385c935b2eed-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/280411",
+    videoCount: 13,
+    followerCount: 13,
+    tags: ["bicycles", "mongoose", "bmx", "mountain biking"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Traveling the world on a bicycle",
+    description: "Adventure cycling and bicycle touring around the world",
+    thumbnailUrl: "https://i.vimeocdn.com/video/535849768-767db63193571d33485831ddf4567d477dd2c5e448f69add36ece8d8c2c605dc-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/worldonbicycle",
+    videoCount: 38,
+    followerCount: 160,
+    tags: ["bicycles", "travel", "touring", "adventure"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Trek bicycles",
+    description: "Official Trek Bicycles content showcasing their bike lineup and technology",
+    thumbnailUrl: "https://i.vimeocdn.com/video/491486653-b63308860584c36275baa9221f5e3915328bc64386977672f30dbd5b988155d0-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/818846",
+    videoCount: 7,
+    followerCount: 11,
+    tags: ["bicycles", "trek", "technology", "cycling"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Morvelo",
+    description: "Cycling apparel and lifestyle brand content",
+    thumbnailUrl: "https://i.vimeocdn.com/video/784380627-2881468e06d8dbb6d6ab5606682872023d09c0b163b0d5602340c64c0307dd89-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/morvelo",
+    videoCount: 52,
+    followerCount: 66,
+    tags: ["cycling", "apparel", "lifestyle", "fashion"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "The bicycle channel",
+    description: "General bicycle content covering all aspects of cycling culture",
+    thumbnailUrl: "https://i.vimeocdn.com/video/509023087-d00e24d77621b4c27e4a29ebada6ac67a8ab4074d175ed5b6302d92d2ab91a43-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/349250",
+    videoCount: 15,
+    followerCount: 71,
+    tags: ["bicycles", "cycling", "culture", "general"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Protected Bike Lane Bonanza (Streetfilms)",
+    description: "Advocacy and documentation of protected bike lane infrastructure",
+    thumbnailUrl: "https://i.vimeocdn.com/video/1236149513-909cc7631966deb011586dca6483344b7f19de84126645aada1f7269966b04ab-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/protectedbikelanes",
+    videoCount: 112,
+    followerCount: 43,
+    tags: ["bicycles", "infrastructure", "advocacy", "urban planning"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "One Billion Bicycles - the global bicycle story",
+    description: "Documentary content about the global impact and story of bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/472806633-afcdbadfbbb164601427cd5f51e17f115a08826e1d3ce434a000a843ed707e8f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/onebillionbicycles",
+    videoCount: 11,
+    followerCount: 13,
+    tags: ["bicycles", "documentary", "global", "history"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Brompton",
+    description: "Official content from Brompton folding bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/434477136-facf357d96291c2035017485985a358d976e907ff1fcefa28b55dbb24f5fc20f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/brompton",
+    videoCount: 43,
+    followerCount: 35,
+    tags: ["bicycles", "brompton", "folding bikes", "commuting"],
+    isActive: true,
+  });
+}
+
+async function seedVideoChannels() {
+  // Create video channels based on Vimeo bicycle channels data
+  await storage.createVideoChannel({
+    title: "Longtail Cargo Utility Bicycles",
+    description: "Specialized content about cargo and utility bicycles for transportation and business use",
+    thumbnailUrl: "https://i.vimeocdn.com/video/235112144-3e096dd7d8437c5f01590af4282e7eb0f4c0416bddbf982c6e1f4279575acd1f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/38189",
+    videoCount: 58,
+    followerCount: 17,
+    tags: ["bicycles", "cargo bikes", "utility", "transportation"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Rocky Mountain Bicycles Service Videos",
+    description: "Professional bicycle service and maintenance tutorials from Rocky Mountain Bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/280896927-f43b01434806378e9fbb51bd1fc8420b4962e54d0763fbe6a1d74dad2c2c9b9b-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/rmbservice",
+    videoCount: 6,
+    followerCount: 57,
+    tags: ["bicycles", "maintenance", "service", "tutorials"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "AUTUM Bicycles Berlin",
+    description: "Urban cycling culture and bicycle lifestyle content from Berlin",
+    thumbnailUrl: "https://i.vimeocdn.com/video/485305348-ee5407bf784aee38cd8baf9fe242efe95a73a8694ea82a7901dec6dfa06ebde9-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/autum",
+    videoCount: 31,
+    followerCount: 16,
+    tags: ["bicycles", "urban", "berlin", "lifestyle"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Riding of Bicycles",
+    description: "General bicycle riding content, techniques, and experiences",
+    thumbnailUrl: "https://i.vimeocdn.com/video/53041787-bd16797821717702a15ce57fd851f19fd86f4dfc447555a0276c6ba5de660a46-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/ridingofbikes",
+    videoCount: 20,
+    followerCount: 16,
+    tags: ["bicycles", "riding", "techniques", "experiences"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Mongoose Bicycles",
+    description: "Official content from Mongoose Bicycles featuring BMX and mountain biking",
+    thumbnailUrl: "https://i.vimeocdn.com/video/270730651-848cf3d9572c3f199d9ad31702acc8491640d04a0fc6dec7490a385c935b2eed-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/280411",
+    videoCount: 13,
+    followerCount: 13,
+    tags: ["bicycles", "mongoose", "bmx", "mountain biking"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Traveling the world on a bicycle",
+    description: "Adventure cycling and bicycle touring around the world",
+    thumbnailUrl: "https://i.vimeocdn.com/video/535849768-767db63193571d33485831ddf4567d477dd2c5e448f69add36ece8d8c2c605dc-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/worldonbicycle",
+    videoCount: 38,
+    followerCount: 160,
+    tags: ["bicycles", "travel", "touring", "adventure"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Trek bicycles",
+    description: "Official Trek Bicycles content showcasing their bike lineup and technology",
+    thumbnailUrl: "https://i.vimeocdn.com/video/491486653-b63308860584c36275baa9221f5e3915328bc64386977672f30dbd5b988155d0-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/818846",
+    videoCount: 7,
+    followerCount: 11,
+    tags: ["bicycles", "trek", "technology", "cycling"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Morvelo",
+    description: "Cycling apparel and lifestyle brand content",
+    thumbnailUrl: "https://i.vimeocdn.com/video/784380627-2881468e06d8dbb6d6ab5606682872023d09c0b163b0d5602340c64c0307dd89-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/morvelo",
+    videoCount: 52,
+    followerCount: 66,
+    tags: ["cycling", "apparel", "lifestyle", "fashion"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "The bicycle channel",
+    description: "General bicycle content covering all aspects of cycling culture",
+    thumbnailUrl: "https://i.vimeocdn.com/video/509023087-d00e24d77621b4c27e4a29ebada6ac67a8ab4074d175ed5b6302d92d2ab91a43-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/349250",
+    videoCount: 15,
+    followerCount: 71,
+    tags: ["bicycles", "cycling", "culture", "general"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Protected Bike Lane Bonanza (Streetfilms)",
+    description: "Advocacy and documentation of protected bike lane infrastructure",
+    thumbnailUrl: "https://i.vimeocdn.com/video/1236149513-909cc7631966deb011586dca6483344b7f19de84126645aada1f7269966b04ab-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/protectedbikelanes",
+    videoCount: 112,
+    followerCount: 43,
+    tags: ["bicycles", "infrastructure", "advocacy", "urban planning"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "One Billion Bicycles - the global bicycle story",
+    description: "Documentary content about the global impact and story of bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/472806633-afcdbadfbbb164601427cd5f51e17f115a08826e1d3ce434a000a843ed707e8f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/onebillionbicycles",
+    videoCount: 11,
+    followerCount: 13,
+    tags: ["bicycles", "documentary", "global", "history"],
+    isActive: true,
+  });
+
+  await storage.createVideoChannel({
+    title: "Brompton",
+    description: "Official content from Brompton folding bicycles",
+    thumbnailUrl: "https://i.vimeocdn.com/video/434477136-facf357d96291c2035017485985a358d976e907ff1fcefa28b55dbb24f5fc20f-d_640x360?&r=pad&region=us",
+    channelUrl: "https://vimeo.com/channels/brompton",
+    videoCount: 43,
+    followerCount: 35,
+    tags: ["bicycles", "brompton", "folding bikes", "commuting"],
+    isActive: true,
   });
 }

@@ -4,16 +4,19 @@ import {
   deals, 
   products, 
   dealProducts,
+  videoChannels,
   type Category, 
   type Store, 
   type Deal, 
   type Product,
   type DealProduct,
+  type VideoChannel,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
   type InsertProduct,
   type InsertDealProduct,
+  type InsertVideoChannel,
   type DealWithRelations,
   type CategoryWithChildren
 } from "@shared/schema";
@@ -51,6 +54,11 @@ export interface IStorage {
   
   // Deal Products
   createDealProduct(dealProduct: InsertDealProduct): Promise<DealProduct>;
+  
+  // Video Channels
+  getVideoChannels(limit?: number): Promise<VideoChannel[]>;
+  getVideoChannelById(id: string): Promise<VideoChannel | undefined>;
+  createVideoChannel(channel: InsertVideoChannel): Promise<VideoChannel>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -332,6 +340,21 @@ export class DatabaseStorage implements IStorage {
   async createDealProduct(dealProduct: InsertDealProduct): Promise<DealProduct> {
     const [newDealProduct] = await db.insert(dealProducts).values(dealProduct).returning();
     return newDealProduct;
+  }
+
+  // Video Channels
+  async getVideoChannels(limit = 20): Promise<VideoChannel[]> {
+    return await db.select().from(videoChannels).where(eq(videoChannels.isActive, true)).orderBy(desc(videoChannels.createdAt)).limit(limit);
+  }
+
+  async getVideoChannelById(id: string): Promise<VideoChannel | undefined> {
+    const [channel] = await db.select().from(videoChannels).where(and(eq(videoChannels.id, id), eq(videoChannels.isActive, true)));
+    return channel || undefined;
+  }
+
+  async createVideoChannel(channel: InsertVideoChannel): Promise<VideoChannel> {
+    const [newChannel] = await db.insert(videoChannels).values(channel).returning();
+    return newChannel;
   }
 }
 

@@ -98,6 +98,13 @@ export default function Header() {
                 {category.name}
               </Link>
             ))}
+            <Link 
+              href="/videos" 
+              className="hover:text-blue-200 font-medium"
+              data-testid="nav-videos"
+            >
+              Videos
+            </Link>
           </div>
         </nav>
       </div>

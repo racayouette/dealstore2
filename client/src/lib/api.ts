@@ -3,7 +3,8 @@ import type {
   Category, 
   Store, 
   DealWithRelations, 
-  CategoryWithChildren 
+  CategoryWithChildren,
+  VideoChannel 
 } from "@shared/schema";
 
 export const api = {
@@ -73,6 +74,18 @@ export const api = {
 
   getDealById: async (id: string): Promise<DealWithRelations> => {
     const res = await apiRequest("GET", `/api/deals/${id}`);
+    return res.json();
+  },
+
+  // Video Channels
+  getVideoChannels: async (limit?: number): Promise<VideoChannel[]> => {
+    const params = limit ? `?limit=${limit}` : "";
+    const res = await apiRequest("GET", `/api/video-channels${params}`);
+    return res.json();
+  },
+
+  getVideoChannelById: async (id: string): Promise<VideoChannel> => {
+    const res = await apiRequest("GET", `/api/video-channels/${id}`);
     return res.json();
   },
 
