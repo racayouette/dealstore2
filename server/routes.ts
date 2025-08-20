@@ -273,6 +273,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Advertisement Banners API
+  app.get("/api/advertisement-banners", async (req, res) => {
+    try {
+      const position = req.query.position as string;
+      const banners = await storage.getAdvertisementBanners(position);
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching advertisement banners:", error);
+      res.status(500).json({ error: "Failed to fetch advertisement banners" });
+    }
+  });
+
+  app.get("/api/advertisement-banners/:id", async (req, res) => {
+    try {
+      const banner = await storage.getAdvertisementBannerById(req.params.id);
+      if (!banner) {
+        return res.status(404).json({ error: "Advertisement banner not found" });
+      }
+      res.json(banner);
+    } catch (error) {
+      console.error("Error fetching advertisement banner:", error);
+      res.status(500).json({ error: "Failed to fetch advertisement banner" });
+    }
+  });
+
   // Seed posts endpoint
   app.post("/api/seed-posts", async (req, res) => {
     try {
@@ -282,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Posts seeded successfully" });
     } catch (error) {
       console.error("Error seeding posts:", error);
-      res.status(500).json({ error: "Failed to seed posts", details: error.message });
+      res.status(500).json({ error: "Failed to seed posts", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -295,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "YouTube videos seeded successfully" });
     } catch (error) {
       console.error("Error seeding YouTube videos:", error);
-      res.status(500).json({ error: "Failed to seed YouTube videos", details: error.message });
+      res.status(500).json({ error: "Failed to seed YouTube videos", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -308,7 +333,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Blogs seeded successfully" });
     } catch (error) {
       console.error("Error seeding blogs:", error);
-      res.status(500).json({ error: "Failed to seed blogs", details: error.message });
+      res.status(500).json({ error: "Failed to seed blogs", details: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  // Seed advertisement banners endpoint
+  app.post("/api/seed-advertisement-banners", async (req, res) => {
+    try {
+      console.log("Starting to seed advertisement banners...");
+      await seedAdvertisementBanners();
+      console.log("Advertisement banners seeded successfully!");
+      res.json({ message: "Advertisement banners seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding advertisement banners:", error);
+      res.status(500).json({ error: "Failed to seed advertisement banners", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1191,5 +1229,123 @@ async function seedBlogs() {
     category: "Plant Benefits",
     tags: ["air purifying plants", "NASA study", "indoor air quality", "health benefits"],
     isActive: true,
+  });
+}
+
+// Seed advertisement banners with real affiliate marketing data
+async function seedAdvertisementBanners() {
+  // Header banners - large, prominent placement
+  await storage.createAdvertisementBanner({
+    position: "header",
+    size: "large",
+    title: "Amazon Prime Day Deals",
+    description: "Save up to 70% on electronics, home goods, and more during Prime Day",
+    imageUrl: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://amazon.com/prime-day-deals",
+    isActive: true,
+    displayOrder: 1,
+  });
+
+  await storage.createAdvertisementBanner({
+    position: "header",
+    size: "large", 
+    title: "Best Buy Tech Deals",
+    description: "Discover the latest tech at unbeatable prices with exclusive member savings",
+    imageUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://bestbuy.com/deals",
+    isActive: true,
+    displayOrder: 2,
+  });
+
+  // Top banners - medium size, above content
+  await storage.createAdvertisementBanner({
+    position: "top",
+    size: "medium",
+    title: "Dell Business Laptops Sale",
+    description: "Professional-grade laptops with enterprise security and support",
+    imageUrl: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://dell.com/business-laptops",
+    isActive: true,
+    displayOrder: 1,
+  });
+
+  await storage.createAdvertisementBanner({
+    position: "top",
+    size: "medium",
+    title: "Microsoft Surface Pro Deals",
+    description: "Versatile 2-in-1 devices for productivity and creativity",
+    imageUrl: "https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://microsoft.com/surface-deals",
+    isActive: true,
+    displayOrder: 2,
+  });
+
+  // Left sidebar banners - vertical, complementary content
+  await storage.createAdvertisementBanner({
+    position: "left",
+    size: "medium",
+    title: "HP Instant Ink Subscription",
+    description: "Never run out of ink with automatic delivery and savings up to 70%",
+    imageUrl: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=300&h=400&fit=crop&auto=format",
+    clickUrl: "https://hp.com/instant-ink",
+    isActive: true,
+    displayOrder: 1,
+  });
+
+  await storage.createAdvertisementBanner({
+    position: "left",
+    size: "small",
+    title: "Lenovo ThinkPad for Business",
+    description: "Reliable business laptops with military-grade durability",
+    imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=300&h=300&fit=crop&auto=format",
+    clickUrl: "https://lenovo.com/thinkpad-business",
+    isActive: true,
+    displayOrder: 2,
+  });
+
+  // Right sidebar banners - additional promotional content
+  await storage.createAdvertisementBanner({
+    position: "right",
+    size: "medium",
+    title: "Newegg PC Builder",
+    description: "Build your dream PC with expert guidance and compatibility checking",
+    imageUrl: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=300&h=400&fit=crop&auto=format",
+    clickUrl: "https://newegg.com/pc-builder",
+    isActive: true,
+    displayOrder: 1,
+  });
+
+  await storage.createAdvertisementBanner({
+    position: "right",
+    size: "small",
+    title: "Verizon 5G Home Internet",
+    description: "Ultra-fast wireless internet for your home with no data caps",
+    imageUrl: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a?w=300&h=300&fit=crop&auto=format",
+    clickUrl: "https://verizon.com/5g-home",
+    isActive: true,
+    displayOrder: 2,
+  });
+
+  // Bottom banners - footer area, final call-to-action
+  await storage.createAdvertisementBanner({
+    position: "bottom",
+    size: "large",
+    title: "T-Mobile Magenta MAX Plan",
+    description: "Unlimited premium data, Netflix on Us, and international roaming included",
+    imageUrl: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=800&h=200&fit=crop&auto=format",
+    clickUrl: "https://t-mobile.com/magenta-max",
+    isActive: true,
+    displayOrder: 1,
+  });
+
+  await storage.createAdvertisementBanner({
+    position: "bottom",
+    size: "medium",
+    title: "TechBargains Newsletter",
+    description: "Get exclusive deals and early access to sales delivered to your inbox",
+    imageUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=150&fit=crop&auto=format",
+    clickUrl: "https://techbargains.com/newsletter",
+    isActive: true,
+    displayOrder: 2,
   });
 }
