@@ -240,6 +240,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Blogs API
+  app.get("/api/blogs", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const search = req.query.search as string;
+      
+      let blogs;
+      if (search) {
+        blogs = await storage.searchBlogs(search, limit);
+      } else {
+        blogs = await storage.getBlogs(limit);
+      }
+      
+      res.json(blogs);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+      res.status(500).json({ error: "Failed to fetch blogs" });
+    }
+  });
+
+  app.get("/api/blogs/:id", async (req, res) => {
+    try {
+      const blog = await storage.getBlogById(req.params.id);
+      if (!blog) {
+        return res.status(404).json({ error: "Blog not found" });
+      }
+      res.json(blog);
+    } catch (error) {
+      console.error("Error fetching blog:", error);
+      res.status(500).json({ error: "Failed to fetch blog" });
+    }
+  });
+
   // Seed posts endpoint
   app.post("/api/seed-posts", async (req, res) => {
     try {
@@ -263,6 +296,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error seeding YouTube videos:", error);
       res.status(500).json({ error: "Failed to seed YouTube videos", details: error.message });
+    }
+  });
+
+  // Seed blogs endpoint
+  app.post("/api/seed-blogs", async (req, res) => {
+    try {
+      console.log("Starting to seed blogs...");
+      await seedBlogs();
+      console.log("Blogs seeded successfully!");
+      res.json({ message: "Blogs seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding blogs:", error);
+      res.status(500).json({ error: "Failed to seed blogs", details: error.message });
     }
   });
 
@@ -981,6 +1027,169 @@ async function seedYoutubeVideos() {
     viewCount: 156432,
     uploadDate: "3 weeks ago",
     tags: ["winter plant care", "humidity", "seasonal care", "plant survival"],
+    isActive: true,
+  });
+}
+
+async function seedBlogs() {
+  // Create realistic houseplant care blog posts based on actual popular blogs
+  await storage.createBlog({
+    title: "How to Master Houseplant Light Requirements: An Engineer's Approach",
+    description: "Learn the science behind light requirements for houseplants with practical measurements and realistic expectations. No more guessing about 'bright indirect light' - get real data.",
+    excerpt: "Understanding light requirements is the key to houseplant success. This guide provides scientific methods to measure and optimize light for your plants.",
+    author: "Darryl Cheng",
+    website: "House Plant Journal",
+    websiteUrl: "https://www.houseplantjournal.com",
+    blogUrl: "https://www.houseplantjournal.com/bright-indirect-light-requirements-by-plant/",
+    imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop",
+    publishDate: "March 15, 2024",
+    readTime: "8 min read",
+    category: "Plant Care",
+    tags: ["light requirements", "plant science", "houseplant care", "indoor gardening"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "The Ultimate Guide to Watering Houseplants: When, How Much, and What Type",
+    description: "Master the art of watering your houseplants with this comprehensive guide. Learn when to water, how much water to use, and what type of water is best for different plant species.",
+    excerpt: "Watering is the most crucial skill for plant parents. This guide covers everything from soil moisture to drainage and seasonal adjustments.",
+    author: "Lisa Eldred Steinkopf",
+    website: "The Houseplant Guru",
+    websiteUrl: "https://thehouseplantguru.com",
+    blogUrl: "https://thehouseplantguru.com/watering-houseplants-ultimate-guide/",
+    imageUrl: "https://images.unsplash.com/photo-1586094823842-a95e2c7e9203?w=600&h=400&fit=crop",
+    publishDate: "February 28, 2024",
+    readTime: "12 min read",
+    category: "Plant Care",
+    tags: ["watering", "plant care", "houseplant tips", "plant health"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Best Low-Light Houseplants That Actually Thrive in Dark Spaces",
+    description: "Discover the best low-light houseplants for your dim apartment or office. These plants don't just survive - they thrive in low-light conditions.",
+    excerpt: "Not all plants need bright light to flourish. Here are proven low-light champions that will transform your dark spaces into green oases.",
+    author: "Bloomscape Team",
+    website: "Bloomscape",
+    websiteUrl: "https://bloomscape.com",
+    blogUrl: "https://bloomscape.com/plant-care/best-indoor-plants-small-spaces/",
+    imageUrl: "https://images.unsplash.com/photo-1469796466635-455ede028aca?w=600&h=400&fit=crop",
+    publishDate: "March 8, 2024",
+    readTime: "10 min read",
+    category: "Plant Selection",
+    tags: ["low light plants", "apartment plants", "indoor gardening", "dark spaces"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Propagating Houseplants: Turn One Plant Into a Jungle",
+    description: "Learn how to propagate popular houseplants like pothos, snake plants, and rubber trees. Turn one plant into dozens with these proven techniques!",
+    excerpt: "Plant propagation is like magic - creating new plants from cuttings, divisions, and offsets. Here's how to multiply your plant collection for free.",
+    author: "Jane Perrone",
+    website: "On The Ledge",
+    websiteUrl: "https://www.janeperrone.com",
+    blogUrl: "https://www.janeperrone.com/blog/propagation-guide",
+    imageUrl: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=600&h=400&fit=crop",
+    publishDate: "March 12, 2024",
+    readTime: "15 min read",
+    category: "Propagation",
+    tags: ["propagation", "plant cuttings", "free plants", "plant multiplication"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Common Houseplant Pests: Identification and Organic Treatment",
+    description: "Identify and eliminate common houseplant pests like spider mites, aphids, and fungus gnats with these proven organic and chemical-free methods.",
+    excerpt: "Don't let pests destroy your plant paradise. Learn to identify common houseplant pests and treat them safely without harmful chemicals.",
+    author: "Epic Gardening Team",
+    website: "Epic Gardening",
+    websiteUrl: "https://www.epicgardening.com",
+    blogUrl: "https://www.epicgardening.com/houseplants/pest-control",
+    imageUrl: "https://images.unsplash.com/photo-1563789031959-4c02bcb41319?w=600&h=400&fit=crop",
+    publishDate: "February 20, 2024",
+    readTime: "11 min read",
+    category: "Plant Health",
+    tags: ["plant pests", "pest control", "organic solutions", "plant problems"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Creating Your First Plant Room: Design Tips for Indoor Jungles",
+    description: "Transform any room into a lush indoor jungle with these design tips, plant selection advice, and layout strategies for maximum impact.",
+    excerpt: "Ready to create your dream plant room? Here's how to design a space that's both beautiful and functional for you and your plants.",
+    author: "Urban Jungle Bloggers",
+    website: "Urban Jungle Bloggers",
+    websiteUrl: "https://urbanjunglebloggers.com",
+    blogUrl: "https://urbanjunglebloggers.com/plant-room-design-guide/",
+    imageUrl: "https://images.unsplash.com/photo-1558603668-6570496b66f8?w=600&h=400&fit=crop",
+    publishDate: "March 5, 2024",
+    readTime: "14 min read",
+    category: "Interior Design",
+    tags: ["plant room", "interior design", "plant styling", "indoor jungle"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Houseplant Fertilizer 101: Feed Your Plants Like a Pro",
+    description: "Everything you need to know about fertilizing houseplants! Learn about different fertilizer types, feeding schedules, and seasonal care tips.",
+    excerpt: "Proper nutrition is essential for healthy houseplants. Discover when, what, and how to fertilize your plants for optimal growth and vitality.",
+    author: "Gardening Know How",
+    website: "Gardening Know How",
+    websiteUrl: "https://www.gardeningknowhow.com",
+    blogUrl: "https://www.gardeningknowhow.com/houseplants/hpgen/fertilizing-houseplants.htm",
+    imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=400&fit=crop",
+    publishDate: "February 25, 2024",
+    readTime: "9 min read",
+    category: "Plant Care",
+    tags: ["fertilizer", "plant nutrition", "plant feeding", "plant growth"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Why Your Houseplants Keep Dying (And How to Save Them)",
+    description: "Discover the most common reasons why houseplants die and learn proven techniques to diagnose problems and nurse your plants back to health.",
+    excerpt: "Plant deaths are often preventable. Learn to read the warning signs and take corrective action before it's too late.",
+    author: "Planterina",
+    website: "Planterina",
+    websiteUrl: "https://planterina.com",
+    blogUrl: "https://planterina.com/blogs/care/why-houseplants-die",
+    imageUrl: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=600&h=400&fit=crop",
+    publishDate: "March 1, 2024",
+    readTime: "13 min read",
+    category: "Plant Health",
+    tags: ["plant problems", "dying plants", "plant rescue", "troubleshooting"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "The Science of Repotting: When and How to Give Plants New Homes",
+    description: "Learn when and how to repot your houseplants for optimal growth. Includes soil recommendations, pot sizing, and troubleshooting common issues.",
+    excerpt: "Repotting doesn't have to be stressful. Follow these science-based guidelines to give your plants the space they need to thrive.",
+    author: "Horticulture Magazine",
+    website: "Horticulture",
+    websiteUrl: "https://www.hortmag.com",
+    blogUrl: "https://www.hortmag.com/plants/houseplants/repotting-houseplants/",
+    imageUrl: "https://images.unsplash.com/photo-1510411268840-1c78bc76ac05?w=600&h=400&fit=crop",
+    publishDate: "February 18, 2024",
+    readTime: "10 min read",
+    category: "Plant Care",
+    tags: ["repotting", "plant care", "potting soil", "root bound"],
+    isActive: true,
+  });
+
+  await storage.createBlog({
+    title: "Air-Purifying Plants: Science-Backed Benefits for Your Home",
+    description: "Discover which houseplants actually purify indoor air based on NASA research. Learn how to create a healthier home environment with plants.",
+    excerpt: "Not all air-purifying plant claims are equal. Here's what science says about plants that truly improve indoor air quality.",
+    author: "Good Housekeeping Garden",
+    website: "Good Housekeeping",
+    websiteUrl: "https://www.goodhousekeeping.com",
+    blogUrl: "https://www.goodhousekeeping.com/home/gardening/air-purifying-plants/",
+    imageUrl: "https://images.unsplash.com/photo-1586094823842-a95e2c7e9203?w=600&h=400&fit=crop",
+    publishDate: "March 10, 2024",
+    readTime: "7 min read",
+    category: "Plant Benefits",
+    tags: ["air purifying plants", "NASA study", "indoor air quality", "health benefits"],
     isActive: true,
   });
 }
