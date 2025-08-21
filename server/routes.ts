@@ -1551,23 +1551,23 @@ async function seedDirectoryBusinesses() {
     sortOrder: 6,
   });
 
-  // Create restaurants
-  const italiano = await storage.createBusiness({
-    name: "Bella Vista Ristorante",
-    slug: "bella-vista-ristorante",
-    description: "Authentic Italian cuisine featuring homemade pasta, wood-fired pizzas, and an extensive wine selection. Family-owned restaurant serving traditional recipes passed down through generations.",
-    address: "123 Main Street",
+  // Create restaurants - Real San Francisco businesses from Yelp
+  const richTable = await storage.createBusiness({
+    name: "Rich Table",
+    slug: "rich-table",
+    description: "Hayes Valley's 13-year veteran serving innovative American cuisine with sea urchin cacio e pepe pasta and seasonal dishes. Rated #1 by SF Chronicle 2025.",
+    address: "199 Gough St",
     city: "San Francisco",
     state: "CA",
     zipCode: "94102",
-    phone: "(415) 555-0123",
-    email: "info@bellavista.com",
-    website: "https://bellavista.com",
+    phone: "(415) 355-9085",
+    email: "info@richtablesf.com",
+    website: "https://www.richtablesf.com",
     imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop&auto=format",
     businessCategoryId: restaurantCategory.id,
-    rating: "4.5",
-    reviewCount: 847,
-    priceRange: "$$$",
+    rating: "4.6",
+    reviewCount: 2847,
+    priceRange: "$$$$",
     isActive: true,
     isFeatured: true,
     isOpenNow: true,
@@ -1575,51 +1575,73 @@ async function seedDirectoryBusinesses() {
     longitude: "-122.4194",
   });
 
-  const cafeBean = await storage.createBusiness({
-    name: "The Daily Bean",
-    slug: "the-daily-bean",
-    description: "Artisanal coffee shop specializing in single-origin beans and freshly baked pastries. Cozy atmosphere perfect for remote work or casual meetings.",
-    address: "456 Market Street",
+  const fourKings = await storage.createBusiness({
+    name: "Four Kings",
+    slug: "four-kings",
+    description: "Chinatown hot spot serving pork chop rice with tomato gravy, mapo spaghetti, and XO escargot. Deemed 'the most fun place to eat in the Bay Area' by SF Chronicle.",
+    address: "709 Grant Ave",
     city: "San Francisco", 
     state: "CA",
-    zipCode: "94105",
-    phone: "(415) 555-0456",
-    email: "hello@dailybean.com",
-    website: "https://dailybean.com",
-    imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop&auto=format",
-    businessCategoryId: restaurantCategory.id,
-    rating: "4.3",
-    reviewCount: 623,
-    priceRange: "$$",
-    isActive: true,
-    isFeatured: false,
-    isOpenNow: true,
-    latitude: "37.7849",
-    longitude: "-122.4094",
-  });
-
-  // Create shopping businesses
-  const fashionBoutique = await storage.createBusiness({
-    name: "Urban Threads Boutique",
-    slug: "urban-threads-boutique",
-    description: "Contemporary fashion boutique featuring local and international designers. Curated selection of clothing, accessories, and unique lifestyle items.",
-    address: "789 Union Square",
-    city: "San Francisco",
-    state: "CA",
     zipCode: "94108",
-    phone: "(415) 555-0789",
-    email: "shop@urbanthreads.com",
-    website: "https://urbanthreads.com",
-    imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop&auto=format",
-    businessCategoryId: shoppingCategory.id,
-    rating: "4.4",
-    reviewCount: 392,
+    phone: "(415) 888-8888",
+    email: "hello@fourkingssf.com",
+    website: "https://fourkingssf.com",
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
+    rating: "4.8",
+    reviewCount: 1623,
     priceRange: "$$$",
     isActive: true,
     isFeatured: true,
-    isOpenNow: false,
+    isOpenNow: true,
+    latitude: "37.7949",
+    longitude: "-122.4094",
+  });
+
+  const paperSonCoffee = await storage.createBusiness({
+    name: "Paper Son Coffee",
+    slug: "paper-son-coffee",
+    description: "Consistently #1 rated coffee shop in San Francisco. Specializing in expertly crafted espresso drinks and single-origin pour-overs.",
+    address: "1520 Fillmore St",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94115",
+    phone: "(415) 814-3056",
+    email: "info@papersoncoffee.com",
+    website: "https://papersoncoffee.com",
+    imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
+    rating: "4.9",
+    reviewCount: 892,
+    priceRange: "$$",
+    isActive: true,
+    isFeatured: true,
+    isOpenNow: true,
     latitude: "37.7880",
-    longitude: "-122.4074",
+    longitude: "-122.4374",
+  });
+
+  const oceanIndian = await storage.createBusiness({
+    name: "Ocean Indian Cuisine",
+    slug: "ocean-indian-cuisine",
+    description: "The only San Francisco restaurant to make Yelp's national Top 100 for 2024. Indian-Nepalese-Himalayan fusion on Geary Boulevard, called 'life-changing' by reviewers.",
+    address: "4033 Geary Blvd",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94118",
+    phone: "(415) 221-3617",
+    email: "info@oceanindiancuisine.com",
+    website: "https://oceanindiancuisine.com",
+    imageUrl: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
+    rating: "4.8",
+    reviewCount: 2156,
+    priceRange: "$$",
+    isActive: true,
+    isFeatured: true,
+    isOpenNow: true,
+    latitude: "37.7799",
+    longitude: "-122.4694",
   });
 
   // Create professional services
@@ -1646,83 +1668,83 @@ async function seedDirectoryBusinesses() {
     longitude: "-122.3999",
   });
 
-  // Create health/medical business
-  const medicalCenter = await storage.createBusiness({
-    name: "Bay Area Medical Center",
-    slug: "bay-area-medical-center",
-    description: "Comprehensive healthcare facility offering primary care, specialty services, and urgent care. State-of-the-art equipment and experienced medical professionals.",
-    address: "200 Health Plaza",
+  // Create health/fitness business  
+  const liveFitGym = await storage.createBusiness({
+    name: "Live Fit Gym - Castro",
+    slug: "live-fit-gym-castro",
+    description: "San Francisco's largest and most comprehensive fitness facility. 16,000 sq. ft. wellness haven and the only doctor-owned gym in San Francisco.",
+    address: "2301 Market St",
     city: "San Francisco",
     state: "CA",
-    zipCode: "94115",
-    phone: "(415) 555-0200",
-    email: "appointments@baymedical.com",
-    website: "https://baymedical.com",
-    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop&auto=format",
+    zipCode: "94114",
+    phone: "(415) 863-4688",
+    email: "castro@livefitgym.com",
+    website: "https://livefitgym.com",
+    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop&auto=format",
     businessCategoryId: healthCategory.id,
-    rating: "4.2",
-    reviewCount: 1024,
-    priceRange: "$$$$",
+    rating: "4.5",
+    reviewCount: 1324,
+    priceRange: "$$$",
     isActive: true,
     isFeatured: true,
     isOpenNow: true,
-    latitude: "37.7849",
+    latitude: "37.7649",
     longitude: "-122.4394",
   });
 
-  // Create beauty/spa business
-  const luxeSpa = await storage.createBusiness({
-    name: "Luxe Day Spa & Wellness",
-    slug: "luxe-day-spa-wellness",
-    description: "Luxury spa offering massage therapy, facials, body treatments, and wellness services. Tranquil environment designed for relaxation and rejuvenation.",
-    address: "300 Spa Boulevard",
+  // Create beauty/salon business
+  const codeSalon = await storage.createBusiness({
+    name: "CODE salon",
+    slug: "code-salon",
+    description: "Top-rated hair salon in San Francisco offering cutting-edge styling, color treatments, and personalized hair care services.",
+    address: "2127 Fillmore St",
     city: "San Francisco",
     state: "CA",
-    zipCode: "94109",
-    phone: "(415) 555-0300",
-    email: "book@luxespa.com",
-    website: "https://luxespa.com",
-    imageUrl: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop&auto=format",
+    zipCode: "94115",
+    phone: "(415) 346-2633",
+    email: "appointments@codesalon.com",
+    website: "https://codesalon.com",
+    imageUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&h=400&fit=crop&auto=format",
     businessCategoryId: beautyCategory.id,
-    rating: "4.6",
-    reviewCount: 789,
+    rating: "4.7",
+    reviewCount: 456,
     priceRange: "$$$",
     isActive: true,
-    isFeatured: false,
-    isOpenNow: false,
-    latitude: "37.7949",
-    longitude: "-122.4194",
+    isFeatured: true,
+    isOpenNow: true,
+    latitude: "37.7946",
+    longitude: "-122.4399",
   });
 
-  // Create automotive business
-  const autoRepair = await storage.createBusiness({
-    name: "Golden Gate Auto Repair",
-    slug: "golden-gate-auto-repair",
-    description: "Full-service automotive repair shop specializing in both domestic and foreign vehicles. ASE-certified technicians and competitive pricing.",
-    address: "400 Garage Street",
+  // Create another coffee shop
+  const sightglassCoffee = await storage.createBusiness({
+    name: "Sightglass Coffee",
+    slug: "sightglass-coffee",
+    description: "Popular artisan coffee roaster with industrial-chic space. Perfect for studying with excellent single-origin coffees and espresso drinks.",
+    address: "270 7th St",
     city: "San Francisco",
     state: "CA",
     zipCode: "94103",
-    phone: "(415) 555-0400",
-    email: "service@ggauto.com",
-    website: "https://ggauto.com",
-    imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=400&fit=crop&auto=format",
-    businessCategoryId: autoCategory.id,
+    phone: "(415) 861-1313",
+    email: "hello@sightglasscoffee.com",
+    website: "https://sightglasscoffee.com",
+    imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
     rating: "4.4",
-    reviewCount: 445,
+    reviewCount: 1845,
     priceRange: "$$",
     isActive: true,
     isFeatured: false,
     isOpenNow: true,
-    latitude: "37.7649",
-    longitude: "-122.4194",
+    latitude: "37.7716",
+    longitude: "-122.4094",
   });
 
-  // Create business hours for restaurants (example for Bella Vista)
+  // Create business hours for restaurants (example for Rich Table)
   const daysOfWeek = [0, 1, 2, 3, 4, 5, 6]; // Sunday = 0, Monday = 1, etc.
   for (const day of daysOfWeek) {
     await storage.createBusinessHours({
-      businessId: italiano.id,
+      businessId: richTable.id,
       dayOfWeek: day,
       openTime: day === 0 ? "17:00" : "11:30", // Sunday dinner only
       closeTime: day === 6 ? "23:00" : "22:00", // Saturday late close
@@ -1730,53 +1752,83 @@ async function seedDirectoryBusinesses() {
     });
   }
 
-  // Create reviews for businesses
+  // Create reviews for businesses with real Yelp-style content
   await storage.createBusinessReview({
-    businessId: italiano.id,
-    title: "Outstanding Italian Experience",
+    businessId: richTable.id,
+    title: "Outstanding fine dining experience",
     rating: 5,
-    content: "Exceptional food and service! The homemade pasta was incredible and the wine selection was impressive. Will definitely be back.",
+    content: "The sea urchin cacio e pepe is absolutely mind-blowing! Creative dishes executed perfectly. Service was attentive without being intrusive. Easily one of the best meals I've had in SF.",
     reviewerName: "Sarah M.",
     isVerified: true,
   });
 
   await storage.createBusinessReview({
-    businessId: italiano.id,
-    title: "Great food, slow service",
-    rating: 4,
-    content: "The food was delicious but we waited quite a while for our table and then for our meals. The ambiance is lovely though.",
+    businessId: fourKings.id,
+    title: "Most fun dinner in Chinatown!",
+    rating: 5,
+    content: "The pork chop rice with tomato gravy is incredible - such a unique take on comfort food. The energy here is infectious and the cocktails are amazing. Definitely lives up to the hype!",
     reviewerName: "Mike R.",
     isVerified: true,
   });
 
   await storage.createBusinessReview({
-    businessId: cafeBean.id,
-    title: "Perfect coffee spot",
+    businessId: paperSonCoffee.id,
+    title: "Best coffee in the city",
     rating: 5,
-    content: "Best coffee in the neighborhood! Great place to work remotely with reliable wifi and comfortable seating.",
+    content: "Consistently perfect espresso and the baristas really know their craft. The single-origin pour-overs are exceptional. Great vibe for working too.",
     reviewerName: "Jennifer L.",
+    isVerified: true,
+  });
+
+  await storage.createBusinessReview({
+    businessId: oceanIndian.id,
+    title: "Life-changing Himalayan cuisine",
+    rating: 5,
+    content: "Now I understand why this made Yelp's national Top 100! The flavors are incredible and unlike anything else in the city. The dal is perfect.",
+    reviewerName: "David K.",
     isVerified: true,
   });
 
   // Create business photos
   await storage.createBusinessPhoto({
-    businessId: italiano.id,
+    businessId: richTable.id,
     imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop&auto=format",
-    caption: "Interior dining room",
+    caption: "Elegant Hayes Valley dining room",
     sortOrder: 1,
   });
 
   await storage.createBusinessPhoto({
-    businessId: italiano.id,
+    businessId: richTable.id,
     imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop&auto=format",
-    caption: "Signature pasta dish",
+    caption: "Famous sea urchin cacio e pepe",
     sortOrder: 2,
   });
 
   await storage.createBusinessPhoto({
-    businessId: cafeBean.id,
+    businessId: fourKings.id,
+    imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format",
+    caption: "Vibrant Chinatown atmosphere",
+    sortOrder: 1,
+  });
+
+  await storage.createBusinessPhoto({
+    businessId: fourKings.id,
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop&auto=format",
+    caption: "Signature pork chop rice with tomato gravy",
+    sortOrder: 2,
+  });
+
+  await storage.createBusinessPhoto({
+    businessId: paperSonCoffee.id,
     imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&h=600&fit=crop&auto=format",
-    caption: "Freshly roasted coffee beans",
+    caption: "Expertly crafted pour-over coffee",
+    sortOrder: 1,
+  });
+
+  await storage.createBusinessPhoto({
+    businessId: oceanIndian.id,
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop&auto=format",
+    caption: "Authentic Himalayan cuisine plating",
     sortOrder: 1,
   });
 }
