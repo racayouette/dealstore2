@@ -298,6 +298,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Directory Business Categories API
+  app.get("/api/business-categories", async (req, res) => {
+    try {
+      const categories = await storage.getBusinessCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching business categories:", error);
+      res.status(500).json({ error: "Failed to fetch business categories" });
+    }
+  });
+
+  app.get("/api/business-categories/:slug", async (req, res) => {
+    try {
+      const category = await storage.getBusinessCategoryBySlug(req.params.slug);
+      if (!category) {
+        return res.status(404).json({ error: "Business category not found" });
+      }
+      res.json(category);
+    } catch (error) {
+      console.error("Error fetching business category:", error);
+      res.status(500).json({ error: "Failed to fetch business category" });
+    }
+  });
+
+  // Directory Businesses API
+  app.get("/api/businesses", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const search = req.query.search as string;
+      const location = req.query.location as string;
+      const category = req.query.category as string;
+      const featured = req.query.featured === "true";
+      
+      let businesses;
+      if (search) {
+        businesses = await storage.searchBusinesses(search, location, limit);
+      } else if (category) {
+        businesses = await storage.getBusinessesByCategory(category, limit);
+      } else if (featured) {
+        businesses = await storage.getFeaturedBusinesses(limit);
+      } else {
+        businesses = await storage.getBusinesses(limit);
+      }
+      
+      res.json(businesses);
+    } catch (error) {
+      console.error("Error fetching businesses:", error);
+      res.status(500).json({ error: "Failed to fetch businesses" });
+    }
+  });
+
+  app.get("/api/businesses/:id", async (req, res) => {
+    try {
+      const business = await storage.getBusinessById(req.params.id);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      res.json(business);
+    } catch (error) {
+      console.error("Error fetching business:", error);
+      res.status(500).json({ error: "Failed to fetch business" });
+    }
+  });
+
+  // Business Hours API
+  app.get("/api/businesses/:id/hours", async (req, res) => {
+    try {
+      const hours = await storage.getBusinessHours(req.params.id);
+      res.json(hours);
+    } catch (error) {
+      console.error("Error fetching business hours:", error);
+      res.status(500).json({ error: "Failed to fetch business hours" });
+    }
+  });
+
+  // Business Reviews API
+  app.get("/api/businesses/:id/reviews", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const reviews = await storage.getBusinessReviews(req.params.id, limit);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching business reviews:", error);
+      res.status(500).json({ error: "Failed to fetch business reviews" });
+    }
+  });
+
+  // Business Photos API
+  app.get("/api/businesses/:id/photos", async (req, res) => {
+    try {
+      const photos = await storage.getBusinessPhotos(req.params.id);
+      res.json(photos);
+    } catch (error) {
+      console.error("Error fetching business photos:", error);
+      res.status(500).json({ error: "Failed to fetch business photos" });
+    }
+  });
+
   // Seed posts endpoint
   app.post("/api/seed-posts", async (req, res) => {
     try {
@@ -358,6 +456,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error seeding video channels:", error);
       res.status(500).json({ error: "Failed to seed video channels" });
+    }
+  });
+
+  // Seed directory businesses endpoint
+  app.post("/api/seed-businesses", async (req, res) => {
+    try {
+      console.log("Starting to seed directory businesses...");
+      await seedDirectoryBusinesses();
+      console.log("Directory businesses seeded successfully!");
+      res.json({ message: "Directory businesses seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding directory businesses:", error);
+      res.status(500).json({ error: "Failed to seed directory businesses", details: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -1380,5 +1491,292 @@ async function seedAdvertisementBanners() {
     clickUrl: "https://factcheck.org",
     isActive: true,
     displayOrder: 2,
+  });
+}
+
+// Seed directory businesses with Yelp-style business data
+async function seedDirectoryBusinesses() {
+  // First create business categories
+  const restaurantCategory = await storage.createBusinessCategory({
+    name: "Restaurants",
+    slug: "restaurants",
+    description: "Dining establishments, cafes, and food services",
+    iconName: "utensils",
+    isActive: true,
+    sortOrder: 1,
+  });
+
+  const shoppingCategory = await storage.createBusinessCategory({
+    name: "Shopping",
+    slug: "shopping",
+    description: "Retail stores, boutiques, and shopping centers",
+    iconName: "shopping-bag",
+    isActive: true,
+    sortOrder: 2,
+  });
+
+  const servicesCategory = await storage.createBusinessCategory({
+    name: "Professional Services",
+    slug: "professional-services",
+    description: "Legal, financial, consulting, and other professional services",
+    iconName: "briefcase",
+    isActive: true,
+    sortOrder: 3,
+  });
+
+  const healthCategory = await storage.createBusinessCategory({
+    name: "Health & Medical",
+    slug: "health-medical",
+    description: "Hospitals, clinics, doctors, and medical services",
+    iconName: "heart-pulse",
+    isActive: true,
+    sortOrder: 4,
+  });
+
+  const beautyCategory = await storage.createBusinessCategory({
+    name: "Beauty & Spas",
+    slug: "beauty-spas",
+    description: "Salons, spas, beauty treatments, and wellness services",
+    iconName: "sparkles",
+    isActive: true,
+    sortOrder: 5,
+  });
+
+  const autoCategory = await storage.createBusinessCategory({
+    name: "Automotive",
+    slug: "automotive",
+    description: "Car dealers, repair shops, and automotive services",
+    iconName: "car",
+    isActive: true,
+    sortOrder: 6,
+  });
+
+  // Create restaurants
+  const italiano = await storage.createBusiness({
+    name: "Bella Vista Ristorante",
+    slug: "bella-vista-ristorante",
+    description: "Authentic Italian cuisine featuring homemade pasta, wood-fired pizzas, and an extensive wine selection. Family-owned restaurant serving traditional recipes passed down through generations.",
+    address: "123 Main Street",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94102",
+    phone: "(415) 555-0123",
+    email: "info@bellavista.com",
+    website: "https://bellavista.com",
+    imageUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
+    rating: "4.5",
+    reviewCount: 847,
+    priceRange: "$$$",
+    isActive: true,
+    isFeatured: true,
+    isOpenNow: true,
+    latitude: "37.7749",
+    longitude: "-122.4194",
+  });
+
+  const cafeBean = await storage.createBusiness({
+    name: "The Daily Bean",
+    slug: "the-daily-bean",
+    description: "Artisanal coffee shop specializing in single-origin beans and freshly baked pastries. Cozy atmosphere perfect for remote work or casual meetings.",
+    address: "456 Market Street",
+    city: "San Francisco", 
+    state: "CA",
+    zipCode: "94105",
+    phone: "(415) 555-0456",
+    email: "hello@dailybean.com",
+    website: "https://dailybean.com",
+    imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: restaurantCategory.id,
+    rating: "4.3",
+    reviewCount: 623,
+    priceRange: "$$",
+    isActive: true,
+    isFeatured: false,
+    isOpenNow: true,
+    latitude: "37.7849",
+    longitude: "-122.4094",
+  });
+
+  // Create shopping businesses
+  const fashionBoutique = await storage.createBusiness({
+    name: "Urban Threads Boutique",
+    slug: "urban-threads-boutique",
+    description: "Contemporary fashion boutique featuring local and international designers. Curated selection of clothing, accessories, and unique lifestyle items.",
+    address: "789 Union Square",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94108",
+    phone: "(415) 555-0789",
+    email: "shop@urbanthreads.com",
+    website: "https://urbanthreads.com",
+    imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: shoppingCategory.id,
+    rating: "4.4",
+    reviewCount: 392,
+    priceRange: "$$$",
+    isActive: true,
+    isFeatured: true,
+    isOpenNow: false,
+    latitude: "37.7880",
+    longitude: "-122.4074",
+  });
+
+  // Create professional services
+  const lawFirm = await storage.createBusiness({
+    name: "Smith & Associates Law Firm",
+    slug: "smith-associates-law",
+    description: "Full-service law firm specializing in business law, real estate, and estate planning. Over 25 years of experience serving Bay Area clients.",
+    address: "100 Financial District",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94111",
+    phone: "(415) 555-0100",
+    email: "contact@smithlaw.com",
+    website: "https://smithlaw.com",
+    imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: servicesCategory.id,
+    rating: "4.7",
+    reviewCount: 156,
+    priceRange: "$$$$",
+    isActive: true,
+    isFeatured: false,
+    isOpenNow: true,
+    latitude: "37.7946",
+    longitude: "-122.3999",
+  });
+
+  // Create health/medical business
+  const medicalCenter = await storage.createBusiness({
+    name: "Bay Area Medical Center",
+    slug: "bay-area-medical-center",
+    description: "Comprehensive healthcare facility offering primary care, specialty services, and urgent care. State-of-the-art equipment and experienced medical professionals.",
+    address: "200 Health Plaza",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94115",
+    phone: "(415) 555-0200",
+    email: "appointments@baymedical.com",
+    website: "https://baymedical.com",
+    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: healthCategory.id,
+    rating: "4.2",
+    reviewCount: 1024,
+    priceRange: "$$$$",
+    isActive: true,
+    isFeatured: true,
+    isOpenNow: true,
+    latitude: "37.7849",
+    longitude: "-122.4394",
+  });
+
+  // Create beauty/spa business
+  const luxeSpa = await storage.createBusiness({
+    name: "Luxe Day Spa & Wellness",
+    slug: "luxe-day-spa-wellness",
+    description: "Luxury spa offering massage therapy, facials, body treatments, and wellness services. Tranquil environment designed for relaxation and rejuvenation.",
+    address: "300 Spa Boulevard",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94109",
+    phone: "(415) 555-0300",
+    email: "book@luxespa.com",
+    website: "https://luxespa.com",
+    imageUrl: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: beautyCategory.id,
+    rating: "4.6",
+    reviewCount: 789,
+    priceRange: "$$$",
+    isActive: true,
+    isFeatured: false,
+    isOpenNow: false,
+    latitude: "37.7949",
+    longitude: "-122.4194",
+  });
+
+  // Create automotive business
+  const autoRepair = await storage.createBusiness({
+    name: "Golden Gate Auto Repair",
+    slug: "golden-gate-auto-repair",
+    description: "Full-service automotive repair shop specializing in both domestic and foreign vehicles. ASE-certified technicians and competitive pricing.",
+    address: "400 Garage Street",
+    city: "San Francisco",
+    state: "CA",
+    zipCode: "94103",
+    phone: "(415) 555-0400",
+    email: "service@ggauto.com",
+    website: "https://ggauto.com",
+    imageUrl: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&h=400&fit=crop&auto=format",
+    businessCategoryId: autoCategory.id,
+    rating: "4.4",
+    reviewCount: 445,
+    priceRange: "$$",
+    isActive: true,
+    isFeatured: false,
+    isOpenNow: true,
+    latitude: "37.7649",
+    longitude: "-122.4194",
+  });
+
+  // Create business hours for restaurants (example for Bella Vista)
+  const daysOfWeek = [0, 1, 2, 3, 4, 5, 6]; // Sunday = 0, Monday = 1, etc.
+  for (const day of daysOfWeek) {
+    await storage.createBusinessHours({
+      businessId: italiano.id,
+      dayOfWeek: day,
+      openTime: day === 0 ? "17:00" : "11:30", // Sunday dinner only
+      closeTime: day === 6 ? "23:00" : "22:00", // Saturday late close
+      isClosed: false,
+    });
+  }
+
+  // Create reviews for businesses
+  await storage.createBusinessReview({
+    businessId: italiano.id,
+    title: "Outstanding Italian Experience",
+    rating: 5,
+    content: "Exceptional food and service! The homemade pasta was incredible and the wine selection was impressive. Will definitely be back.",
+    reviewerName: "Sarah M.",
+    isVerified: true,
+  });
+
+  await storage.createBusinessReview({
+    businessId: italiano.id,
+    title: "Great food, slow service",
+    rating: 4,
+    content: "The food was delicious but we waited quite a while for our table and then for our meals. The ambiance is lovely though.",
+    reviewerName: "Mike R.",
+    isVerified: true,
+  });
+
+  await storage.createBusinessReview({
+    businessId: cafeBean.id,
+    title: "Perfect coffee spot",
+    rating: 5,
+    content: "Best coffee in the neighborhood! Great place to work remotely with reliable wifi and comfortable seating.",
+    reviewerName: "Jennifer L.",
+    isVerified: true,
+  });
+
+  // Create business photos
+  await storage.createBusinessPhoto({
+    businessId: italiano.id,
+    imageUrl: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&h=600&fit=crop&auto=format",
+    caption: "Interior dining room",
+    sortOrder: 1,
+  });
+
+  await storage.createBusinessPhoto({
+    businessId: italiano.id,
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop&auto=format",
+    caption: "Signature pasta dish",
+    sortOrder: 2,
+  });
+
+  await storage.createBusinessPhoto({
+    businessId: cafeBean.id,
+    imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&h=600&fit=crop&auto=format",
+    caption: "Freshly roasted coffee beans",
+    sortOrder: 1,
   });
 }
