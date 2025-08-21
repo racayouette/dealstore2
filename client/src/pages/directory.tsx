@@ -10,12 +10,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import AdvertisementBanner from '@/components/advertisement-banner';
+import AdvertisementControls, { type AdSettings } from '@/components/advertisement-controls';
 import type { BusinessCategory, BusinessWithCategory, BusinessWithDetails } from '@shared/schema';
 
 export default function Directory() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [adSettings, setAdSettings] = useState<AdSettings>({
+    top: true,
+    left: true,
+    right: true,
+    bottom: true,
+    header: true
+  });
 
   // Fetch business categories
   const { data: categories } = useQuery<BusinessCategory[]>({
@@ -137,7 +146,43 @@ export default function Directory() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      
+      {/* Header Banner Advertisement */}
+      {adSettings.header && (
+        <div className="w-full">
+          <AdvertisementBanner position="header" size="medium" className="rounded-none" />
+        </div>
+      )}
+
+      {/* Advertisement Controls */}
+      <div className="container mx-auto px-4 pt-6">
+        <AdvertisementControls 
+          adSettings={adSettings} 
+          onSettingsChange={setAdSettings} 
+        />
+      </div>
+
+      {/* Top Banner Advertisement */}
+      {adSettings.top && (
+        <div className="container mx-auto px-4 mb-6">
+          <AdvertisementBanner position="top" size="medium" />
+        </div>
+      )}
+
+      {/* Main Layout with Sidebars */}
+      <div className="container mx-auto px-4 pb-6">
+        <div className="flex gap-6">
+          {/* Left Sidebar Advertisement */}
+          {adSettings.left && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="left" size="medium" />
+              </div>
+            </div>
+          )}
+
+          {/* Main Content Area */}
+          <div className="flex-1 min-w-0">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -334,8 +379,25 @@ export default function Directory() {
           </Button>
         </div>
       )}
+          </div>
+
+          {/* Right Sidebar Advertisement */}
+          {adSettings.right && (
+            <div className="hidden lg:block flex-shrink-0">
+              <div className="sticky top-6">
+                <AdvertisementBanner position="right" size="medium" />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-      <Footer />
+
+      {/* Bottom Banner Advertisement */}
+      {adSettings.bottom && (
+        <div className="container mx-auto px-4 pb-6">
+          <AdvertisementBanner position="bottom" size="medium" />
+        </div>
+      )}
     </div>
   );
 }
