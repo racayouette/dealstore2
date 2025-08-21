@@ -19,17 +19,18 @@ export default function Directory() {
 
   // Fetch business categories
   const { data: categories } = useQuery<BusinessCategory[]>({
-    queryKey: ['/api/directory/categories'],
+    queryKey: ['/api/business-categories'],
   });
 
   // Fetch businesses
   const { data: businesses, isLoading } = useQuery<BusinessWithCategory[]>({
-    queryKey: ['/api/directory/businesses', searchQuery, selectedCategory],
+    queryKey: ['/api/businesses', searchQuery, selectedCategory],
   });
 
   // Fetch featured businesses
   const { data: featuredBusinesses } = useQuery<BusinessWithCategory[]>({
-    queryKey: ['/api/directory/businesses/featured'],
+    queryKey: ['/api/businesses', 'featured'],
+    queryFn: () => fetch('/api/businesses?featured=true').then(res => res.json()),
   });
 
   const filteredBusinesses = businesses?.filter(business => {
