@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 import type { BusinessCategory, BusinessWithCategory, BusinessWithDetails } from '@shared/schema';
 
 export default function Directory() {
@@ -132,7 +134,9 @@ export default function Directory() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -329,6 +333,8 @@ export default function Directory() {
           </Button>
         </div>
       )}
+      </div>
+      <Footer />
     </div>
   );
 }
