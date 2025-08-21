@@ -126,6 +126,13 @@ export default function Header() {
             >
               Blogs
             </Link>
+            <Link 
+              href="/directory" 
+              className="hover:text-blue-200 font-medium"
+              data-testid="nav-directory"
+            >
+              Directory
+            </Link>
           </div>
         </nav>
       </div>

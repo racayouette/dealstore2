@@ -246,6 +246,76 @@ export const insertAdvertisementBannerSchema = createInsertSchema(advertisementB
   updatedAt: true,
 });
 
+// Directory Business Models
+export const businessCategories = pgTable("business_categories", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  iconName: varchar("icon_name", { length: 100 }),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const businesses = pgTable("businesses", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  address: text("address").notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  state: varchar("state", { length: 50 }).notNull(),
+  zipCode: varchar("zip_code", { length: 20 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  email: varchar("email", { length: 255 }),
+  website: text("website"),
+  imageUrl: text("image_url"),
+  businessCategoryId: uuid("business_category_id").notNull(),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
+  reviewCount: integer("review_count").default(0),
+  priceRange: varchar("price_range", { length: 10 }).default("$$"),
+  isActive: boolean("is_active").default(true),
+  isFeatured: boolean("is_featured").default(false),
+  isOpenNow: boolean("is_open_now").default(false),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const businessHours = pgTable("business_hours", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: uuid("business_id").notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 (Sunday-Saturday)
+  openTime: varchar("open_time", { length: 8 }), // Format: "09:00:00"
+  closeTime: varchar("close_time", { length: 8 }), // Format: "17:00:00"
+  isClosed: boolean("is_closed").default(false),
+});
+
+export const businessReviews = pgTable("business_reviews", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: uuid("business_id").notNull(),
+  reviewerName: varchar("reviewer_name", { length: 255 }).notNull(),
+  reviewerAvatar: text("reviewer_avatar"),
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: varchar("title", { length: 255 }),
+  content: text("content").notNull(),
+  isVerified: boolean("is_verified").default(false),
+  helpfulCount: integer("helpful_count").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const businessPhotos = pgTable("business_photos", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: uuid("business_id").notNull(),
+  imageUrl: text("image_url").notNull(),
+  caption: varchar("caption", { length: 255 }),
+  isMainPhoto: boolean("is_main_photo").default(false),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
@@ -269,6 +339,45 @@ export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 
+// Directory insert schemas
+export const insertBusinessCategorySchema = createInsertSchema(businessCategories).omit({
+  id: true,
+});
+
+export const insertBusinessSchema = createInsertSchema(businesses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBusinessHoursSchema = createInsertSchema(businessHours).omit({
+  id: true,
+});
+
+export const insertBusinessReviewSchema = createInsertSchema(businessReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBusinessPhotoSchema = createInsertSchema(businessPhotos).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Directory types
+export type BusinessCategory = typeof businessCategories.$inferSelect;
+export type Business = typeof businesses.$inferSelect;
+export type BusinessHours = typeof businessHours.$inferSelect;
+export type BusinessReview = typeof businessReviews.$inferSelect;
+export type BusinessPhoto = typeof businessPhotos.$inferSelect;
+
+export type InsertBusinessCategory = z.infer<typeof insertBusinessCategorySchema>;
+export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
+export type InsertBusinessHours = z.infer<typeof insertBusinessHoursSchema>;
+export type InsertBusinessReview = z.infer<typeof insertBusinessReviewSchema>;
+export type InsertBusinessPhoto = z.infer<typeof insertBusinessPhotoSchema>;
+
 // Extended types for API responses
 export type DealWithRelations = Deal & {
   store: Store;
@@ -278,3 +387,51 @@ export type DealWithRelations = Deal & {
 export type CategoryWithChildren = Category & {
   children: Category[];
 };
+
+// Directory extended types for API responses
+export type BusinessWithDetails = Business & {
+  category: BusinessCategory | null;
+  hours: BusinessHours[];
+  reviews: BusinessReview[];
+  photos: BusinessPhoto[];
+};
+
+export type BusinessWithCategory = Business & {
+  category: BusinessCategory | null;
+};
+
+// Directory relations (added after table definitions)
+export const businessCategoriesRelations = relations(businessCategories, ({ many }) => ({
+  businesses: many(businesses),
+}));
+
+export const businessesRelations = relations(businesses, ({ one, many }) => ({
+  category: one(businessCategories, {
+    fields: [businesses.businessCategoryId],
+    references: [businessCategories.id],
+  }),
+  hours: many(businessHours),
+  reviews: many(businessReviews),
+  photos: many(businessPhotos),
+}));
+
+export const businessHoursRelations = relations(businessHours, ({ one }) => ({
+  business: one(businesses, {
+    fields: [businessHours.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const businessReviewsRelations = relations(businessReviews, ({ one }) => ({
+  business: one(businesses, {
+    fields: [businessReviews.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const businessPhotosRelations = relations(businessPhotos, ({ one }) => ({
+  business: one(businesses, {
+    fields: [businessPhotos.businessId],
+    references: [businesses.id],
+  }),
+}));

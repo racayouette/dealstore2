@@ -9,6 +9,11 @@ import {
   youtubeVideos,
   blogs,
   advertisementBanners,
+  businessCategories,
+  businesses,
+  businessHours,
+  businessReviews,
+  businessPhotos,
   type Category, 
   type Store, 
   type Deal, 
@@ -19,6 +24,11 @@ import {
   type YoutubeVideo,
   type Blog,
   type AdvertisementBanner,
+  type BusinessCategory,
+  type Business,
+  type BusinessHours,
+  type BusinessReview,
+  type BusinessPhoto,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -29,8 +39,15 @@ import {
   type InsertYoutubeVideo,
   type InsertBlog,
   type InsertAdvertisementBanner,
+  type InsertBusinessCategory,
+  type InsertBusiness,
+  type InsertBusinessHours,
+  type InsertBusinessReview,
+  type InsertBusinessPhoto,
   type DealWithRelations,
-  type CategoryWithChildren
+  type CategoryWithChildren,
+  type BusinessWithDetails,
+  type BusinessWithCategory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, like, and, sql, ilike, isNull } from "drizzle-orm";
@@ -96,6 +113,32 @@ export interface IStorage {
   getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]>;
   createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner>;
   deleteAdvertisementBanner(id: string): Promise<void>;
+  
+  // Directory Business Categories
+  getBusinessCategories(): Promise<BusinessCategory[]>;
+  getBusinessCategoryBySlug(slug: string): Promise<BusinessCategory | undefined>;
+  createBusinessCategory(category: InsertBusinessCategory): Promise<BusinessCategory>;
+  
+  // Directory Businesses
+  getBusinesses(limit?: number): Promise<BusinessWithCategory[]>;
+  getBusinessById(id: string): Promise<BusinessWithDetails | undefined>;
+  getBusinessesByCategory(categorySlug: string, limit?: number): Promise<BusinessWithCategory[]>;
+  getBusinessesByLocation(city: string, state: string, limit?: number): Promise<BusinessWithCategory[]>;
+  searchBusinesses(query: string, location?: string, limit?: number): Promise<BusinessWithCategory[]>;
+  getFeaturedBusinesses(limit?: number): Promise<BusinessWithCategory[]>;
+  createBusiness(business: InsertBusiness): Promise<Business>;
+  
+  // Business Hours
+  getBusinessHours(businessId: string): Promise<BusinessHours[]>;
+  createBusinessHours(hours: InsertBusinessHours): Promise<BusinessHours>;
+  
+  // Business Reviews
+  getBusinessReviews(businessId: string, limit?: number): Promise<BusinessReview[]>;
+  createBusinessReview(review: InsertBusinessReview): Promise<BusinessReview>;
+  
+  // Business Photos
+  getBusinessPhotos(businessId: string): Promise<BusinessPhoto[]>;
+  createBusinessPhoto(photo: InsertBusinessPhoto): Promise<BusinessPhoto>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -505,6 +548,306 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAdvertisementBanner(id: string): Promise<void> {
     await db.delete(advertisementBanners).where(eq(advertisementBanners.id, id));
+  }
+
+  // Directory Business Categories
+  async getBusinessCategories(): Promise<BusinessCategory[]> {
+    return await db.select().from(businessCategories)
+      .where(eq(businessCategories.isActive, true))
+      .orderBy(asc(businessCategories.sortOrder));
+  }
+
+  async getBusinessCategoryBySlug(slug: string): Promise<BusinessCategory | undefined> {
+    const [category] = await db.select().from(businessCategories)
+      .where(and(eq(businessCategories.slug, slug), eq(businessCategories.isActive, true)));
+    return category || undefined;
+  }
+
+  async createBusinessCategory(category: InsertBusinessCategory): Promise<BusinessCategory> {
+    const [newCategory] = await db.insert(businessCategories).values(category).returning();
+    return newCategory;
+  }
+
+  // Directory Businesses
+  async getBusinesses(limit = 20): Promise<BusinessWithCategory[]> {
+    return await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(eq(businesses.isActive, true))
+    .orderBy(desc(businesses.createdAt))
+    .limit(limit);
+  }
+
+  async getBusinessById(id: string): Promise<BusinessWithDetails | undefined> {
+    const businessResult = await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(and(eq(businesses.id, id), eq(businesses.isActive, true)))
+    .limit(1);
+
+    if (!businessResult[0]) return undefined;
+
+    const business = businessResult[0];
+    const hours = await this.getBusinessHours(id);
+    const reviews = await this.getBusinessReviews(id);
+    const photos = await this.getBusinessPhotos(id);
+
+    return {
+      ...business,
+      hours,
+      reviews,
+      photos
+    };
+  }
+
+  async getBusinessesByCategory(categorySlug: string, limit = 20): Promise<BusinessWithCategory[]> {
+    return await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(and(
+      eq(businesses.isActive, true),
+      eq(businessCategories.slug, categorySlug)
+    ))
+    .orderBy(desc(businesses.createdAt))
+    .limit(limit);
+  }
+
+  async getBusinessesByLocation(city: string, state: string, limit = 20): Promise<BusinessWithCategory[]> {
+    return await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(and(
+      eq(businesses.isActive, true),
+      eq(businesses.city, city),
+      eq(businesses.state, state)
+    ))
+    .orderBy(desc(businesses.createdAt))
+    .limit(limit);
+  }
+
+  async searchBusinesses(query: string, location?: string, limit = 20): Promise<BusinessWithCategory[]> {
+    let whereCondition = and(
+      eq(businesses.isActive, true),
+      ilike(businesses.name, `%${query}%`)
+    );
+
+    if (location) {
+      whereCondition = and(
+        whereCondition,
+        ilike(businesses.city, `%${location}%`)
+      );
+    }
+
+    return await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(whereCondition)
+    .orderBy(desc(businesses.createdAt))
+    .limit(limit);
+  }
+
+  async getFeaturedBusinesses(limit = 20): Promise<BusinessWithCategory[]> {
+    return await db.select({
+      id: businesses.id,
+      name: businesses.name,
+      slug: businesses.slug,
+      description: businesses.description,
+      address: businesses.address,
+      city: businesses.city,
+      state: businesses.state,
+      zipCode: businesses.zipCode,
+      phone: businesses.phone,
+      email: businesses.email,
+      website: businesses.website,
+      imageUrl: businesses.imageUrl,
+      businessCategoryId: businesses.businessCategoryId,
+      rating: businesses.rating,
+      reviewCount: businesses.reviewCount,
+      priceRange: businesses.priceRange,
+      isActive: businesses.isActive,
+      isFeatured: businesses.isFeatured,
+      isOpenNow: businesses.isOpenNow,
+      latitude: businesses.latitude,
+      longitude: businesses.longitude,
+      createdAt: businesses.createdAt,
+      updatedAt: businesses.updatedAt,
+      category: businessCategories
+    })
+    .from(businesses)
+    .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
+    .where(and(
+      eq(businesses.isActive, true),
+      eq(businesses.isFeatured, true)
+    ))
+    .orderBy(desc(businesses.createdAt))
+    .limit(limit);
+  }
+
+  async createBusiness(business: InsertBusiness): Promise<Business> {
+    const [newBusiness] = await db.insert(businesses).values(business).returning();
+    return newBusiness;
+  }
+
+  // Business Hours
+  async getBusinessHours(businessId: string): Promise<BusinessHours[]> {
+    return await db.select().from(businessHours)
+      .where(eq(businessHours.businessId, businessId))
+      .orderBy(asc(businessHours.dayOfWeek));
+  }
+
+  async createBusinessHours(hours: InsertBusinessHours): Promise<BusinessHours> {
+    const [newHours] = await db.insert(businessHours).values(hours).returning();
+    return newHours;
+  }
+
+  // Business Reviews
+  async getBusinessReviews(businessId: string, limit = 10): Promise<BusinessReview[]> {
+    return await db.select().from(businessReviews)
+      .where(eq(businessReviews.businessId, businessId))
+      .orderBy(desc(businessReviews.createdAt))
+      .limit(limit);
+  }
+
+  async createBusinessReview(review: InsertBusinessReview): Promise<BusinessReview> {
+    const [newReview] = await db.insert(businessReviews).values(review).returning();
+    return newReview;
+  }
+
+  // Business Photos
+  async getBusinessPhotos(businessId: string): Promise<BusinessPhoto[]> {
+    return await db.select().from(businessPhotos)
+      .where(eq(businessPhotos.businessId, businessId))
+      .orderBy(asc(businessPhotos.sortOrder));
+  }
+
+  async createBusinessPhoto(photo: InsertBusinessPhoto): Promise<BusinessPhoto> {
+    const [newPhoto] = await db.insert(businessPhotos).values(photo).returning();
+    return newPhoto;
   }
 }
 
