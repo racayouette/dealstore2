@@ -59,7 +59,7 @@ export default function SearchPage() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-tech-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function SearchPage() {
           <div className="flex-1">
             {/* Search Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-tech-dark mb-4">
+              <h1 className="text-3xl font-bold text-net-dark mb-4">
                 {currentQuery ? `Search Results for "${currentQuery}"` : 'Search Deals'}
               </h1>
               
@@ -88,7 +88,7 @@ export default function SearchPage() {
                 />
                 <Button 
                   type="submit"
-                  className="bg-tech-blue hover:bg-tech-blue-dark"
+                  className="bg-net-blue hover:bg-net-blue-dark"
                   data-testid="button-search-page"
                 >
                   <Search className="w-4 h-4 mr-2" />
@@ -130,7 +130,7 @@ export default function SearchPage() {
                 ) : searchResults.length > 0 ? (
                   <>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-semibold text-tech-dark">
+                      <h2 className="text-xl font-semibold text-net-dark">
                         Found {searchResults.length} deal{searchResults.length !== 1 ? 's' : ''}
                       </h2>
                     </div>
@@ -170,7 +170,7 @@ export default function SearchPage() {
             {/* Search Tips */}
             {!currentQuery && (
               <section className="bg-white rounded-lg shadow-sm border p-6">
-                <h2 className="text-xl font-bold text-tech-dark mb-4">Search Tips</h2>
+                <h2 className="text-xl font-bold text-net-dark mb-4">Search Tips</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-2">Popular Searches</h3>
@@ -201,18 +201,18 @@ export default function SearchPage() {
           <aside className="w-80 space-y-8">
             {/* Search Categories */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Browse by Category</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Browse by Category</h3>
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Computers & Laptops
                 </a>
-                <a href="/category/electronics" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
                   Electronics & Gadgets
                 </a>
-                <a href="/category/lifestyle-home" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/lifestyle-home" className="block text-net-blue hover:underline text-sm">
                   Home & Lifestyle
                 </a>
-                <a href="/category/small-business" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/small-business" className="block text-net-blue hover:underline text-sm">
                   Business Solutions
                 </a>
               </div>
@@ -220,21 +220,21 @@ export default function SearchPage() {
 
             {/* Popular Stores */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Popular Stores</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Popular Stores</h3>
               <div className="space-y-2">
-                <a href="/stores/amazon" className="block text-tech-blue hover:underline text-sm">
+                <a href="/stores/amazon" className="block text-net-blue hover:underline text-sm">
                   Amazon
                 </a>
-                <a href="/stores/dell" className="block text-tech-blue hover:underline text-sm">
+                <a href="/stores/dell" className="block text-net-blue hover:underline text-sm">
                   Dell
                 </a>
-                <a href="/stores/hp" className="block text-tech-blue hover:underline text-sm">
+                <a href="/stores/hp" className="block text-net-blue hover:underline text-sm">
                   HP
                 </a>
-                <a href="/stores/microsoft" className="block text-tech-blue hover:underline text-sm">
+                <a href="/stores/microsoft" className="block text-net-blue hover:underline text-sm">
                   Microsoft
                 </a>
-                <a href="/stores" className="block text-tech-blue hover:underline text-sm font-medium">
+                <a href="/stores" className="block text-net-blue hover:underline text-sm font-medium">
                   View All Stores →
                 </a>
               </div>
@@ -243,7 +243,7 @@ export default function SearchPage() {
             {/* Search Stats */}
             {currentQuery && searchResults.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-lg font-bold text-tech-dark mb-4">Search Results</h3>
+                <h3 className="text-lg font-bold text-net-dark mb-4">Search Results</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Total Results:</span>

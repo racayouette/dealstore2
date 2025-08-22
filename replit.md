@@ -1,8 +1,8 @@
-# TechBargains - Deal Aggregation Platform
+# NetDiscount - Deal Aggregation Platform
 
 ## Overview
 
-TechBargains is a modern web application for aggregating and displaying technology deals, coupons, and bargains from various retailers. The platform allows users to browse deals by categories, search for specific products, and discover featured offers from popular stores. Built with a React frontend and Express backend, it provides a comprehensive deal discovery experience with features like deal categorization, store browsing, search functionality, and detailed deal pages.
+NetDiscount is a modern web application for aggregating and displaying net deals, coupons, and discounts from various retailers. The platform allows users to browse deals by categories, search for specific products, and discover featured offers from popular stores. Built with a React frontend and Express backend, it provides a comprehensive deal discovery experience with features like deal categorization, store browsing, search functionality, and detailed deal pages.
 
 ## User Preferences
 

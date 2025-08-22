@@ -64,7 +64,7 @@ export default function Category() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-tech-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function Category() {
         {categoryLoading ? (
           <Skeleton className="h-8 w-64 mb-6" />
         ) : (
-          <h1 className="text-3xl font-bold text-tech-dark mb-6" data-testid={`title-category-${slug}`}>
+          <h1 className="text-3xl font-bold text-net-dark mb-6" data-testid={`title-category-${slug}`}>
             {category?.name} Deals
           </h1>
         )}
@@ -117,7 +117,7 @@ export default function Category() {
                 </div>
               ) : deals.length > 0 ? (
                 <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-tech-dark mb-6">
+                  <h2 className="text-2xl font-bold text-net-dark mb-6">
                     Latest {category?.name} Deals
                   </h2>
                   {deals.map((deal) => (
@@ -142,7 +142,7 @@ export default function Category() {
             {/* Category Information */}
             {category && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-xl font-bold text-tech-dark mb-4">
+                <h3 className="text-xl font-bold text-net-dark mb-4">
                   About {category.name}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
@@ -159,19 +159,19 @@ export default function Category() {
 
             {/* Quick Links */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Related Categories</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Related Categories</h3>
               
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Computers
                 </a>
-                <a href="/category/electronics" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
                   Electronics
                 </a>
-                <a href="/category/lifestyle-home" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/lifestyle-home" className="block text-net-blue hover:underline text-sm">
                   Lifestyle & Home
                 </a>
-                <a href="/category/small-business" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/small-business" className="block text-net-blue hover:underline text-sm">
                   Small Business
                 </a>
               </div>
@@ -179,7 +179,7 @@ export default function Category() {
 
             {/* Deal Alert */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Deal Alerts</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Deal Alerts</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Get notified when new deals are posted in {category?.name}.
               </p>

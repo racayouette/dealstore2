@@ -3,14 +3,14 @@ import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-tech-dark text-white mt-16">
+    <footer className="bg-net-dark text-white mt-16">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">TechBargains</h3>
+            <h3 className="text-lg font-bold mb-4">NetDiscount</h3>
             <p className="text-gray-300 text-sm mb-4">
-              Your destination for the best tech deals, coupons, and bargains from top retailers.
+              Your destination for the best net deals, coupons, and discounts from top retailers.
             </p>
             <div className="flex space-x-4">
               <Link href="#" className="text-gray-300 hover:text-white" data-testid="social-facebook">
@@ -88,7 +88,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="text-gray-300 text-sm">
-            © 2024 TechBargains. All rights reserved.
+            © 2024 NetDiscount. All rights reserved.
             <span className="ml-2">Made with ❤️ for deal hunters everywhere</span>
           </p>
         </div>

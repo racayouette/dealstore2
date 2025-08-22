@@ -96,7 +96,7 @@ export default function Videos() {
         <Breadcrumb items={breadcrumbItems} />
         
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-tech-dark mb-2">Video Channels</h1>
+          <h1 className="text-3xl font-bold text-net-dark mb-2">Video Channels</h1>
           <p className="text-gray-600">
             Discover bicycle channels from around the world featuring everything from maintenance tutorials to adventure cycling
           </p>
@@ -165,7 +165,7 @@ export default function Videos() {
                 </div>
                 
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-tech-blue transition-colors">
+                  <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-net-blue transition-colors">
                     <a 
                       href={channel.channelUrl} 
                       target="_blank" 

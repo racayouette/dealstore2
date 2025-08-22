@@ -51,11 +51,11 @@
   --tracking-normal: 0em;
   --spacing: 0.25rem;
   
-  /* TechBargains specific colors */
-  --tech-blue: hsl(213.7143 73.4177% 58.2353%);
-  --tech-blue-dark: hsl(218.4 100% 66.6667%);
-  --tech-gray: hsl(215 20.2% 65.1%);
-  --tech-dark: hsl(215.3 25% 26.7%);
+  /* NetDiscount specific colors */
+  --net-blue: hsl(213.7143 73.4177% 58.2353%);
+  --net-blue-dark: hsl(218.4 100% 66.6667%);
+  --net-gray: hsl(215 20.2% 65.1%);
+  --net-dark: hsl(215.3 25% 26.7%);
 }
 
 .dark {

@@ -55,7 +55,7 @@ export default function Stores() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-tech-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function Stores() {
       <main className="container mx-auto px-4 py-6">
         <Breadcrumb items={breadcrumbItems} />
         
-        <h1 className="text-3xl font-bold text-tech-dark mb-6">All Stores</h1>
+        <h1 className="text-3xl font-bold text-net-dark mb-6">All Stores</h1>
 
         {/* Featured Ad Banner */}
         <div className="mb-8 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-1">
@@ -74,7 +74,7 @@ export default function Stores() {
               className="w-32 h-24 object-cover rounded-lg"
             />
             <div className="flex-1">
-              <h3 className="font-semibold text-lg text-tech-dark mb-2">
+              <h3 className="font-semibold text-lg text-net-dark mb-2">
                 ULTRALOQ Bolt Fingerprint Smart Lock, Works with Apple HomeKit
               </h3>
               <div className="flex items-center space-x-2 mb-2">
@@ -100,7 +100,7 @@ export default function Stores() {
             {/* Popular Stores Section */}
             {!selectedLetter && (
               <section className="mb-12">
-                <h2 className="text-2xl font-bold text-tech-dark mb-6">Popular Stores</h2>
+                <h2 className="text-2xl font-bold text-net-dark mb-6">Popular Stores</h2>
                 
                 {error && (
                   <Alert className="mb-6">
@@ -138,7 +138,7 @@ export default function Stores() {
 
             {/* Stores by Letter Section */}
             <section>
-              <h2 className="text-2xl font-bold text-tech-dark mb-6">Stores by Letter</h2>
+              <h2 className="text-2xl font-bold text-net-dark mb-6">Stores by Letter</h2>
               
               {/* Alphabetical Navigation */}
               <div className="flex flex-wrap gap-2 mb-8 pb-4 border-b border-gray-200">
@@ -156,7 +156,7 @@ export default function Stores() {
                     key={letter}
                     variant={selectedLetter === letter ? "default" : "outline"}
                     size="sm"
-                    className="w-8 h-8 p-0 text-tech-blue hover:bg-tech-blue hover:text-white"
+                    className="w-8 h-8 p-0 text-net-blue hover:bg-net-blue hover:text-white"
                     onClick={() => setSelectedLetter(letter)}
                     data-testid={`letter-${letter.toLowerCase()}`}
                   >
@@ -168,7 +168,7 @@ export default function Stores() {
               {/* Selected Letter Stores */}
               {selectedLetter && (
                 <div>
-                  <h3 className="text-xl font-semibold text-tech-dark mb-4">
+                  <h3 className="text-xl font-semibold text-net-dark mb-4">
                     Stores starting with "{selectedLetter}"
                   </h3>
 
@@ -214,7 +214,7 @@ export default function Stores() {
           <aside className="w-80 space-y-8">
             {/* Store Information */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-xl font-bold text-tech-dark mb-4">Find Your Favorite Stores</h3>
+              <h3 className="text-xl font-bold text-net-dark mb-4">Find Your Favorite Stores</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Browse through our extensive collection of partner stores to find the best deals and coupons. 
                 From technology retailers to lifestyle brands, we have partnerships with the most trusted names in retail.
@@ -223,19 +223,19 @@ export default function Stores() {
 
             {/* Quick Links */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Popular Categories</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Popular Categories</h3>
               
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Computer Stores
                 </a>
-                <a href="/category/electronics" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
                   Electronics Stores
                 </a>
-                <a href="/category/lifestyle-home" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/lifestyle-home" className="block text-net-blue hover:underline text-sm">
                   Home & Lifestyle
                 </a>
-                <a href="/category/small-business" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/small-business" className="block text-net-blue hover:underline text-sm">
                   Business Solutions
                 </a>
               </div>
@@ -243,7 +243,7 @@ export default function Stores() {
 
             {/* Store Stats */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Store Directory</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Store Directory</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Total Stores:</span>

@@ -15,7 +15,7 @@ export default function StoreCard({ store }: StoreCardProps) {
           className="w-20 h-12 mx-auto mb-4 object-contain"
           data-testid={`img-store-logo-${store.slug}`}
         />
-        <h3 className="font-semibold text-tech-dark group-hover:text-tech-blue transition-colors" data-testid={`text-store-name-${store.slug}`}>
+        <h3 className="font-semibold text-net-dark group-hover:text-net-blue transition-colors" data-testid={`text-store-name-${store.slug}`}>
           {store.name}
         </h3>
         {store.description && (

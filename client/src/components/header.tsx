@@ -24,15 +24,15 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-tech-blue text-white">
+    <header className="bg-net-blue text-white">
       <div className="container mx-auto px-4">
         {/* Top bar with logo and search */}
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center space-x-4">
             <Link href="/" data-testid="link-logo">
               <h1 className="text-2xl font-bold cursor-pointer">
-                <span className="text-white">tech</span>
-                <span className="text-blue-200">bargains</span>
+                <span className="text-white">net</span>
+                <span className="text-blue-200">discount</span>
               </h1>
             </Link>
           </div>
