@@ -67,14 +67,16 @@ export default function Header() {
               <Mail className="w-4 h-4" />
               <span>Newsletter</span>
             </Button>
-            <Button 
-              variant="ghost" 
-              className="hover:text-blue-200 text-white"
-              data-testid="button-login"
-            >
-              <User className="w-4 h-4" />
-              <span className="ml-1">Login</span>
-            </Button>
+            <Link href="/auth">
+              <Button 
+                variant="ghost" 
+                className="hover:text-blue-200 text-white"
+                data-testid="button-login"
+              >
+                <User className="w-4 h-4" />
+                <span className="ml-1">Login</span>
+              </Button>
+            </Link>
           </div>
         </div>
         

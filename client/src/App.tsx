@@ -13,6 +13,7 @@ import Video2 from "@/pages/video2";
 import Posts from "@/pages/posts";
 import Blogs from "@/pages/blogs";
 import Directory from "@/pages/directory";
+import Auth from "@/pages/auth";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/posts" component={Posts} />
       <Route path="/blogs" component={Blogs} />
       <Route path="/directory" component={Directory} />
+      <Route path="/auth" component={Auth} />
       <Route component={NotFound} />
     </Switch>
   );
