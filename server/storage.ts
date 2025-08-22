@@ -14,6 +14,7 @@ import {
   businessHours,
   businessReviews,
   businessPhotos,
+  users,
   type Category, 
   type Store, 
   type Deal, 
@@ -29,6 +30,7 @@ import {
   type BusinessHours,
   type BusinessReview,
   type BusinessPhoto,
+  type User,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -44,6 +46,7 @@ import {
   type InsertBusinessHours,
   type InsertBusinessReview,
   type InsertBusinessPhoto,
+  type InsertUser,
   type DealWithRelations,
   type CategoryWithChildren,
   type BusinessWithDetails,
@@ -139,6 +142,11 @@ export interface IStorage {
   // Business Photos
   getBusinessPhotos(businessId: string): Promise<BusinessPhoto[]>;
   createBusinessPhoto(photo: InsertBusinessPhoto): Promise<BusinessPhoto>;
+  
+  // Users
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -848,6 +856,22 @@ export class DatabaseStorage implements IStorage {
   async createBusinessPhoto(photo: InsertBusinessPhoto): Promise<BusinessPhoto> {
     const [newPhoto] = await db.insert(businessPhotos).values(photo).returning();
     return newPhoto;
+  }
+
+  // Users
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
   }
 }
 

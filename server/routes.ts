@@ -4,6 +4,64 @@ import { storage } from "./storage";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post("/api/register", async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+      
+      if (!username || !email || !password) {
+        return res.status(400).send("Username, email, and password are required");
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).send("Username already exists");
+      }
+
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).send("Email already exists");
+      }
+
+      // Create new user
+      const user = await storage.createUser({
+        username,
+        email,
+        password, // In production, this should be hashed
+      });
+
+      // Remove password from response
+      const { password: _, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).send("Registration failed");
+    }
+  });
+
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).send("Username and password are required");
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user || user.password !== password) { // In production, use proper password hashing
+        return res.status(401).send("Invalid username or password");
+      }
+
+      // Remove password from response
+      const { password: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error("Error logging in user:", error);
+      res.status(500).send("Login failed");
+    }
+  });
+
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {

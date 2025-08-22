@@ -316,6 +316,15 @@ export const businessPhotos = pgTable("business_photos", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
@@ -365,18 +374,26 @@ export const insertBusinessPhotoSchema = createInsertSchema(businessPhotos).omit
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Directory types
 export type BusinessCategory = typeof businessCategories.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
 export type BusinessHours = typeof businessHours.$inferSelect;
 export type BusinessReview = typeof businessReviews.$inferSelect;
 export type BusinessPhoto = typeof businessPhotos.$inferSelect;
+export type User = typeof users.$inferSelect;
 
 export type InsertBusinessCategory = z.infer<typeof insertBusinessCategorySchema>;
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
 export type InsertBusinessHours = z.infer<typeof insertBusinessHoursSchema>;
 export type InsertBusinessReview = z.infer<typeof insertBusinessReviewSchema>;
 export type InsertBusinessPhoto = z.infer<typeof insertBusinessPhotoSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 
 // Extended types for API responses
 export type DealWithRelations = Deal & {
