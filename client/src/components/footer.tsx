@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import { Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -12,20 +11,6 @@ export default function Footer() {
             <p className="text-gray-300 text-sm mb-4">
               Your destination for the best net deals, coupons, and discounts from top retailers.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="text-gray-300 hover:text-white" data-testid="social-facebook">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-300 hover:text-white" data-testid="social-twitter">
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-300 hover:text-white" data-testid="social-instagram">
-                <Instagram className="w-5 h-5" />
-              </Link>
-              <Link href="#" className="text-gray-300 hover:text-white" data-testid="social-youtube">
-                <Youtube className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
 
           {/* Categories */}
@@ -88,8 +73,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="text-gray-300 text-sm">
-            © 2024 NetDiscount. All rights reserved.
-            <span className="ml-2">Made with ❤️ for deal hunters everywhere</span>
+            © {new Date().getFullYear()} NetDiscount. All rights reserved.
           </p>
         </div>
       </div>
