@@ -59,7 +59,7 @@ export default function SearchPage() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function SearchPage() {
                 />
                 <Button 
                   type="submit"
-                  className="bg-net-blue hover:bg-net-blue-dark"
+                  className="bg-net-green hover:bg-net-green-dark"
                   data-testid="button-search-page"
                 >
                   <Search className="w-4 h-4 mr-2" />
@@ -203,16 +203,16 @@ export default function SearchPage() {
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-bold text-net-dark mb-4">Browse by Category</h3>
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Computers & Laptops
                 </a>
-                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-green hover:underline text-sm">
                   Electronics & Gadgets
                 </a>
-                <a href="/category/lifestyle-home" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/lifestyle-home" className="block text-net-green hover:underline text-sm">
                   Home & Lifestyle
                 </a>
-                <a href="/category/small-business" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/small-business" className="block text-net-green hover:underline text-sm">
                   Business Solutions
                 </a>
               </div>
@@ -222,19 +222,19 @@ export default function SearchPage() {
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-bold text-net-dark mb-4">Popular Stores</h3>
               <div className="space-y-2">
-                <a href="/stores/amazon" className="block text-net-blue hover:underline text-sm">
+                <a href="/stores/amazon" className="block text-net-green hover:underline text-sm">
                   Amazon
                 </a>
-                <a href="/stores/dell" className="block text-net-blue hover:underline text-sm">
+                <a href="/stores/dell" className="block text-net-green hover:underline text-sm">
                   Dell
                 </a>
-                <a href="/stores/hp" className="block text-net-blue hover:underline text-sm">
+                <a href="/stores/hp" className="block text-net-green hover:underline text-sm">
                   HP
                 </a>
-                <a href="/stores/microsoft" className="block text-net-blue hover:underline text-sm">
+                <a href="/stores/microsoft" className="block text-net-green hover:underline text-sm">
                   Microsoft
                 </a>
-                <a href="/stores" className="block text-net-blue hover:underline text-sm font-medium">
+                <a href="/stores" className="block text-net-green hover:underline text-sm font-medium">
                   View All Stores →
                 </a>
               </div>

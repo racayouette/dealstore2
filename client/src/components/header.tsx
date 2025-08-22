@@ -24,7 +24,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-net-blue text-white">
+    <header className="bg-net-green text-white">
       <div className="container mx-auto px-4">
         {/* Top bar with logo and search */}
         <div className="flex items-center justify-between py-3">

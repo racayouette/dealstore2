@@ -109,7 +109,7 @@ export default function DealDetails() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -233,7 +233,7 @@ export default function DealDetails() {
                         <div className="flex space-x-3">
                           <Button 
                             size="lg"
-                            className="bg-net-blue hover:bg-net-blue-dark text-white px-8"
+                            className="bg-net-green hover:bg-net-green-dark text-white px-8"
                             asChild
                             data-testid={`button-get-deal-${deal.id}`}
                           >
@@ -330,7 +330,7 @@ export default function DealDetails() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-600">Category:</span>
-                      <Link href={`/category/${deal.category.slug}`} className="text-sm font-medium text-net-blue hover:underline">
+                      <Link href={`/category/${deal.category.slug}`} className="text-sm font-medium text-net-green hover:underline">
                         {deal.category.name}
                       </Link>
                     </div>
@@ -355,13 +355,13 @@ export default function DealDetails() {
                     <CardTitle className="text-lg">Related</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Link href={`/category/${deal.category.slug}`} className="block text-net-blue hover:underline text-sm">
+                    <Link href={`/category/${deal.category.slug}`} className="block text-net-green hover:underline text-sm">
                       More {deal.category.name} Deals
                     </Link>
-                    <Link href={`/stores/${deal.store.slug}`} className="block text-net-blue hover:underline text-sm">
+                    <Link href={`/stores/${deal.store.slug}`} className="block text-net-green hover:underline text-sm">
                       More {deal.store.name} Deals
                     </Link>
-                    <Link href="/deals" className="block text-net-blue hover:underline text-sm">
+                    <Link href="/deals" className="block text-net-green hover:underline text-sm">
                       All Active Deals
                     </Link>
                   </CardContent>

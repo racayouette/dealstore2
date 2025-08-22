@@ -69,7 +69,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Netdiscount.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -200,19 +200,19 @@ export default function Home() {
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <h3 className="text-lg font-bold text-net-dark mb-4">Quick Links</h3>
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Laptop Deals
                 </a>
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Desktop Deals
                 </a>
-                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-green hover:underline text-sm">
                   Electronics Deals
                 </a>
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Gaming Deals
                 </a>
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Computer Accessories
                 </a>
               </div>
