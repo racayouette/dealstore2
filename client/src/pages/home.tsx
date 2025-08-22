@@ -68,8 +68,8 @@ export default function Home() {
       <div className="bg-gray-100 border-b">
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
-            Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-tech-blue hover:underline ml-1">Learn More</a>
+            Netdiscount.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -77,7 +77,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6">
         <Breadcrumb items={breadcrumbItems} />
         
-        <h1 className="text-3xl font-bold text-tech-dark mb-6">Featured Tech Deals</h1>
+        <h1 className="text-3xl font-bold text-net-dark mb-6">Featured Net Deals</h1>
 
         {/* Error States */}
         {dealsError && (
@@ -108,7 +108,7 @@ export default function Home() {
                   className="w-32 h-24 object-cover rounded-lg"
                 />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-tech-dark mb-2">
+                  <h3 className="font-semibold text-lg text-net-dark mb-2">
                     ULTRALOQ Bolt Fingerprint Smart Lock, Works with Apple HomeKit
                   </h3>
                   <div className="flex items-center space-x-2 mb-2">
@@ -130,7 +130,7 @@ export default function Home() {
 
             {/* Featured Deals Section */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold text-tech-dark mb-6">Featured Deals</h2>
+              <h2 className="text-2xl font-bold text-net-dark mb-6">Featured Deals</h2>
               
               {dealsLoading ? (
                 <div className="space-y-6">
@@ -166,7 +166,7 @@ export default function Home() {
 
             {/* Popular Stores Section */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold text-tech-dark mb-6">Popular Stores</h2>
+              <h2 className="text-2xl font-bold text-net-dark mb-6">Popular Stores</h2>
               
               {storesLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -198,21 +198,21 @@ export default function Home() {
           <aside className="w-80 space-y-8">
             {/* Quick Links */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Quick Links</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Quick Links</h3>
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Laptop Deals
                 </a>
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Desktop Deals
                 </a>
-                <a href="/category/electronics" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
                   Electronics Deals
                 </a>
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Gaming Deals
                 </a>
-                <a href="/category/computers" className="block text-tech-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
                   Computer Accessories
                 </a>
               </div>
@@ -220,7 +220,7 @@ export default function Home() {
 
             {/* Featured Computer Stores */}
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-tech-dark mb-4">Featured Computer Stores</h3>
+              <h3 className="text-lg font-bold text-net-dark mb-4">Featured Computer Stores</h3>
               
               <div className="space-y-4">
                 {featuredStores.slice(0, 3).map((store) => (
@@ -231,7 +231,7 @@ export default function Home() {
                       className="w-16 h-10 object-contain"
                     />
                     <div className="ml-3">
-                      <h4 className="font-medium text-tech-dark">{store.name}</h4>
+                      <h4 className="font-medium text-net-dark">{store.name}</h4>
                     </div>
                   </div>
                 ))}

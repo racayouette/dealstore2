@@ -105,7 +105,7 @@ export default function Auth() {
             <div className="space-y-6">
               <div className="text-center md:text-left">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Welcome to TechBargains
+                  Welcome to NetDiscount
                 </h1>
                 <p className="text-gray-600">
                   Sign in to access exclusive deals and personalized recommendations

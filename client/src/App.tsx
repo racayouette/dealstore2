@@ -14,6 +14,8 @@ import Posts from "@/pages/posts";
 import Blogs from "@/pages/blogs";
 import Directory from "@/pages/directory";
 import Auth from "@/pages/auth";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 
 function Router() {
   return (
@@ -28,6 +30,8 @@ function Router() {
       <Route path="/blogs" component={Blogs} />
       <Route path="/directory" component={Directory} />
       <Route path="/auth" component={Auth} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );

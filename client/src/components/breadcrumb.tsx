@@ -15,7 +15,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
     <nav className="mb-6" aria-label="Breadcrumb">
       <ol className="flex items-center space-x-2 text-sm">
         <li>
-          <Link href="/" className="text-tech-blue hover:underline flex items-center" data-testid="breadcrumb-home">
+          <Link href="/" className="text-net-blue hover:underline flex items-center" data-testid="breadcrumb-home">
             <Home className="w-4 h-4 mr-1" />
             Home
           </Link>
@@ -26,7 +26,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
             {item.href ? (
               <Link 
                 href={item.href} 
-                className="text-tech-blue hover:underline"
+                className="text-net-blue hover:underline"
                 data-testid={`breadcrumb-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
                 {item.label}

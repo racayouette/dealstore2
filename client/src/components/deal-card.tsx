@@ -102,7 +102,7 @@ export default function DealCard({ deal, featured = false }: DealCardProps) {
           <div className="flex-1">
             {/* Deal Title */}
             <Link href={`/deal/${deal.id}`}>
-              <h3 className="text-xl font-semibold text-tech-dark mb-3 hover:text-tech-blue cursor-pointer" data-testid={`title-deal-${deal.id}`}>
+              <h3 className="text-xl font-semibold text-net-dark mb-3 hover:text-net-blue cursor-pointer" data-testid={`title-deal-${deal.id}`}>
                 {deal.title}
               </h3>
             </Link>
@@ -157,7 +157,7 @@ export default function DealCard({ deal, featured = false }: DealCardProps) {
                   </Button>
                 ) : (
                   <Button 
-                    className="bg-tech-blue hover:bg-tech-blue-dark text-white"
+                    className="bg-net-blue hover:bg-net-blue-dark text-white"
                     asChild
                     data-testid={`button-view-deal-${deal.id}`}
                   >
