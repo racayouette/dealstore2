@@ -55,7 +55,7 @@ export default function Stores() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-net-blue hover:underline ml-1">Learn More</a>
+            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function Stores() {
                     key={letter}
                     variant={selectedLetter === letter ? "default" : "outline"}
                     size="sm"
-                    className="w-8 h-8 p-0 text-net-blue hover:bg-net-blue hover:text-white"
+                    className="w-8 h-8 p-0 text-net-green hover:bg-net-green hover:text-white"
                     onClick={() => setSelectedLetter(letter)}
                     data-testid={`letter-${letter.toLowerCase()}`}
                   >
@@ -226,16 +226,16 @@ export default function Stores() {
               <h3 className="text-lg font-bold text-net-dark mb-4">Popular Categories</h3>
               
               <div className="space-y-2">
-                <a href="/category/computers" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
                   Computer Stores
                 </a>
-                <a href="/category/electronics" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/electronics" className="block text-net-green hover:underline text-sm">
                   Electronics Stores
                 </a>
-                <a href="/category/lifestyle-home" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/lifestyle-home" className="block text-net-green hover:underline text-sm">
                   Home & Lifestyle
                 </a>
-                <a href="/category/small-business" className="block text-net-blue hover:underline text-sm">
+                <a href="/category/small-business" className="block text-net-green hover:underline text-sm">
                   Business Solutions
                 </a>
               </div>

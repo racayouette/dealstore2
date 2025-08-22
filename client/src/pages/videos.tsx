@@ -165,7 +165,7 @@ export default function Videos() {
                 </div>
                 
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-net-blue transition-colors">
+                  <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-net-green transition-colors">
                     <a 
                       href={channel.channelUrl} 
                       target="_blank" 
