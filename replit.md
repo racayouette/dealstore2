@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
+### Page Visibility & SEO Management
+The application features a comprehensive page visibility system that allows administrators to dynamically control which pages are accessible to users and search engines:
+
+- **Dynamic Navigation**: Header menu automatically updates to show/hide pages based on visibility settings
+- **DOM Protection**: Hidden pages render 404 errors instead of content when accessed directly
+- **Database-Driven Controls**: All visibility settings stored in PostgreSQL with real-time updates
+- **SEO Integration**: Dynamic sitemap generation (`/sitemap.xml`) includes only visible pages
+- **Search Engine Optimization**: Automated `robots.txt` generation with proper admin area exclusions
+- **Admin Interface**: Visual toggle controls in Advertising Panel with Eye/EyeOff icons
+- **Real-time Updates**: Changes take effect immediately across navigation and sitemap
+
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript using Vite as the build tool
 - **UI Components**: Radix UI components with shadcn/ui styling system
@@ -51,6 +62,9 @@ The backend provides RESTful endpoints for:
 - Banner settings per page with centralized control through the Advertising Panel
 - Real-time banner content editing with auto-save functionality
 - Impression-based banner display controls (always show vs. limited impressions)
+- Page visibility management system with dynamic navigation and SEO integration
+- Dynamic sitemap generation based on visible pages for optimal SEO crawling
+- Robots.txt generation with proper admin area exclusions
 
 ### Error Handling and Logging
 - Centralized error handling middleware with appropriate HTTP status codes
