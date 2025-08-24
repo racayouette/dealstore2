@@ -4,12 +4,14 @@ import TopNav from "@/components/top-nav";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -425,7 +427,7 @@ interface Page {
   description: string;
 }
 
-const PAGES: Page[] = [
+const STATIC_PAGES: Page[] = [
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
@@ -438,12 +440,14 @@ function PageListItem({
   page, 
   selectedPage, 
   setSelectedPage, 
-  updateSettingsMutation 
+  updateSettingsMutation,
+  onDuplicate 
 }: { 
   page: Page; 
   selectedPage: Page; 
   setSelectedPage: (page: Page) => void;
   updateSettingsMutation: any;
+  onDuplicate: (page: Page) => void;
 }) {
   const { toast } = useToast();
   const IconComponent = page.icon;
@@ -535,6 +539,18 @@ function PageListItem({
           </div>
         </button>
         <button
+          onClick={() => onDuplicate(page)}
+          className={`px-3 py-3 transition-colors border-l ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
+          }`}
+          title={`Duplicate ${page.name} page`}
+          data-testid={`duplicate-page-${page.url.replace('/', '')}`}
+        >
+          <Copy className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => window.open(page.url, '_blank')}
           className={`px-3 py-3 rounded-r-lg transition-colors border-l ${
             selectedPage.url === page.url 
@@ -557,13 +573,34 @@ export default function AdvertisingPanelPage() {
   const [, setLocation] = useLocation();
   const adminSession = getAdminSession();
   
-  const [selectedPage, setSelectedPage] = useState<Page>(PAGES[0]);
+  const [selectedPage, setSelectedPage] = useState<Page>(STATIC_PAGES[0]);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [pageToDuplicate, setPageToDuplicate] = useState<Page | null>(null);
+  const [duplicateForm, setDuplicateForm] = useState({
+    name: '',
+    url: '',
+    description: ''
+  });
 
   // Query for page visibility status
   const { data: visiblePages } = useQuery({
     queryKey: ['/api/visible-pages'],
     queryFn: () => fetch('/api/visible-pages').then(res => res.json())
   });
+
+  // Create dynamic pages list from database
+  const dynamicPages: Page[] = visiblePages ? visiblePages.map((page: any) => {
+    // Find matching static page for icon, or use default
+    const staticMatch = STATIC_PAGES.find(sp => sp.url === page.pageUrl);
+    return {
+      name: page.pageName,
+      url: page.pageUrl,
+      icon: staticMatch?.icon || FileText,
+      description: staticMatch?.description || page.pageName
+    };
+  }) : [];
+
+  const allPages = dynamicPages.length > 0 ? dynamicPages : STATIC_PAGES;
   const [pageSettings, setPageSettings] = useState<PageBannerSettings>({
     pageName: selectedPage.name,
     pageUrl: selectedPage.url,
@@ -609,6 +646,33 @@ export default function AdvertisingPanelPage() {
       toast({
         title: "Error",
         description: "Failed to save banner settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const duplicatePageMutation = useMutation({
+    mutationFn: async (data: { originalPageUrl?: string; newPage: { name: string; url: string; description: string } }) => {
+      const endpoint = data.originalPageUrl ? "/api/duplicate-page" : "/api/create-page";
+      const response = await apiRequest("POST", endpoint, data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/advertisement-banners'] });
+      setIsDuplicateDialogOpen(false);
+      setDuplicateForm({ name: '', url: '', description: '' });
+      setPageToDuplicate(null);
+      toast({
+        title: pageToDuplicate ? "Page Duplicated" : "Page Created",
+        description: `Page "${data.name}" has been ${pageToDuplicate ? 'duplicated' : 'created'} successfully.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: `Failed to ${pageToDuplicate ? 'duplicate' : 'create'} page.`,
         variant: "destructive",
       });
     },
@@ -703,6 +767,39 @@ export default function AdvertisingPanelPage() {
     setLocation('/wp-admin');
   };
 
+  const handleDuplicatePage = (page: Page) => {
+    setPageToDuplicate(page);
+    setDuplicateForm({
+      name: `${page.name} Copy`,
+      url: `${page.url}-copy`,
+      description: `Copy of ${page.description}`
+    });
+    setIsDuplicateDialogOpen(true);
+  };
+
+  const handleDuplicateSubmit = () => {
+    if (!pageToDuplicate || !duplicateForm.name || !duplicateForm.url) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Ensure URL starts with /
+    const formattedUrl = duplicateForm.url.startsWith('/') ? duplicateForm.url : `/${duplicateForm.url}`;
+
+    duplicatePageMutation.mutate({
+      originalPageUrl: pageToDuplicate?.url,
+      newPage: {
+        name: duplicateForm.name,
+        url: formattedUrl,
+        description: duplicateForm.description
+      }
+    });
+  };
+
   return (
     <ProtectedAdminRoute>
       <div className="min-h-screen bg-gray-50">
@@ -721,9 +818,24 @@ export default function AdvertisingPanelPage() {
           
           <ScrollArea className="h-[calc(100vh-120px)]">
             <div className="p-4">
-              <h2 className="font-semibold text-gray-900 mb-3">Pages</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-semibold text-gray-900">Pages</h2>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setPageToDuplicate(null);
+                    setDuplicateForm({ name: '', url: '', description: '' });
+                    setIsDuplicateDialogOpen(true);
+                  }}
+                  className="flex items-center gap-1 bg-net-green hover:bg-net-green-dark"
+                  data-testid="button-add-new-page"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add
+                </Button>
+              </div>
               <div className="space-y-1">
-                {PAGES.map((page) => {
+                {allPages.map((page) => {
                   const IconComponent = page.icon;
                   return (
                     <PageListItem 
@@ -732,6 +844,7 @@ export default function AdvertisingPanelPage() {
                       selectedPage={selectedPage} 
                       setSelectedPage={setSelectedPage}
                       updateSettingsMutation={updateSettingsMutation}
+                      onDuplicate={handleDuplicatePage}
                     />
                   );
                 })}
@@ -1038,6 +1151,80 @@ export default function AdvertisingPanelPage() {
         
         <Footer />
       </div>
+
+      {/* Duplicate Page Dialog */}
+      <Dialog open={isDuplicateDialogOpen} onOpenChange={setIsDuplicateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{pageToDuplicate ? 'Duplicate Page' : 'Create New Page'}</DialogTitle>
+            <DialogDescription>
+              {pageToDuplicate 
+                ? `Create a copy of "${pageToDuplicate.name}" with all its banner settings and configurations.`
+                : 'Create a new page with default banner settings and configurations.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="page-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="page-name"
+                value={duplicateForm.name}
+                onChange={(e) => setDuplicateForm(prev => ({ ...prev, name: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter page name"
+                data-testid="input-duplicate-name"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="page-url" className="text-right">
+                URL
+              </Label>
+              <Input
+                id="page-url"
+                value={duplicateForm.url}
+                onChange={(e) => setDuplicateForm(prev => ({ ...prev, url: e.target.value }))}
+                className="col-span-3"
+                placeholder="/page-url"
+                data-testid="input-duplicate-url"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="page-description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="page-description"
+                value={duplicateForm.description}
+                onChange={(e) => setDuplicateForm(prev => ({ ...prev, description: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter description"
+                data-testid="input-duplicate-description"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDuplicateDialogOpen(false)}
+              data-testid="button-cancel-duplicate"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDuplicateSubmit}
+              disabled={duplicatePageMutation.isPending || !duplicateForm.name || !duplicateForm.url}
+              data-testid="button-confirm-duplicate"
+            >
+              {duplicatePageMutation.isPending ? "Creating..." : "Create Page"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ProtectedAdminRoute>
   );
 }
