@@ -63,11 +63,6 @@ function BannerEditForm({ banner, updateBannerMutation }: { banner: Advertisemen
             {banner.alwaysShow ? 'Always Show' : `Max Impressions: ${banner.maxImpressions === 0 ? 'Unlimited' : banner.maxImpressions}`}
           </p>
         </div>
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          banner.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-        }`}>
-          {banner.isActive ? 'Active' : 'Inactive'}
-        </span>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
