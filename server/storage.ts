@@ -128,6 +128,7 @@ export interface IStorage {
   // Banner Settings
   getBannerSettings(pageUrl?: string): Promise<BannerSettings[]>;
   getBannerSettingByPage(pageUrl: string): Promise<BannerSettings | undefined>;
+  getVisiblePages(): Promise<BannerSettings[]>;
   createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings>;
   updateBannerSettings(pageUrl: string, updates: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined>;
   upsertBannerSettings(pageUrl: string, settings: InsertBannerSettings): Promise<BannerSettings>;
@@ -610,6 +611,12 @@ export class DatabaseStorage implements IStorage {
     return setting || undefined;
   }
 
+  async getVisiblePages(): Promise<BannerSettings[]> {
+    return await db.select().from(bannerSettings)
+      .where(eq(bannerSettings.isVisible, true))
+      .orderBy(asc(bannerSettings.pageName));
+  }
+
   async createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings> {
     // Remove any timestamp fields to let database defaults handle them
     const { createdAt, updatedAt, ...insertData } = settings as any;
@@ -959,13 +966,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPageViews(pageName?: string, limit = 100): Promise<PageView[]> {
-    let query = db.select().from(pageViews);
-    
     if (pageName) {
-      query = query.where(eq(pageViews.pageName, pageName));
+      return await db.select().from(pageViews)
+        .where(eq(pageViews.pageName, pageName))
+        .orderBy(desc(pageViews.createdAt))
+        .limit(limit);
     }
     
-    return await query.orderBy(desc(pageViews.createdAt)).limit(limit);
+    return await db.select().from(pageViews)
+      .orderBy(desc(pageViews.createdAt))
+      .limit(limit);
   }
 
   async getPageViewCount(pageName: string, ipAddress?: string): Promise<number> {

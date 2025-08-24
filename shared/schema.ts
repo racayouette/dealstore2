@@ -164,6 +164,7 @@ export const bannerSettings = pgTable("banner_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   pageName: text("page_name").notNull(),
   pageUrl: text("page_url").notNull().unique(),
+  isVisible: boolean("is_visible").default(true),
   showHeader: boolean("show_header").default(true),
   showTop: boolean("show_top").default(true),
   showLeft: boolean("show_left").default(true),

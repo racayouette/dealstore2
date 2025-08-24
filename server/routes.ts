@@ -468,6 +468,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get visible pages for navigation
+  app.get("/api/visible-pages", async (req, res) => {
+    try {
+      const visiblePages = await storage.getVisiblePages();
+      res.json(visiblePages);
+    } catch (error) {
+      console.error("Error fetching visible pages:", error);
+      res.status(500).json({ error: "Failed to fetch visible pages" });
+    }
+  });
+
   // Directory Business Categories API
   app.get("/api/business-categories", async (req, res) => {
     try {
