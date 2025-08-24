@@ -69,18 +69,18 @@ function BannerSection({ position, positionName, banners, isVisible, updateBanne
             ({banners.length} banner{banners.length !== 1 ? 's' : ''})
           </span>
         </div>
-        {banners.length > 0 && (
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <Edit3 className="h-4 w-4" />
-                Edit Content
-                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-4">
-              <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
-                {banners.map((banner) => (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="flex items-center gap-2">
+              <Edit3 className="h-4 w-4" />
+              Edit Content
+              {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+              {banners.length > 0 ? (
+                banners.map((banner) => (
                   <div key={banner.id} className="bg-white border rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -232,19 +232,17 @@ function BannerSection({ position, positionName, banners, isVisible, updateBanne
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 bg-white border rounded-lg">
+                  <p className="text-sm">No banners found for this position.</p>
+                  <p className="text-xs">Create banners for this position to edit their content here.</p>
+                </div>
+              )}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
-      
-      {banners.length === 0 && (
-        <div className="text-center py-4 text-gray-500">
-          <p className="text-sm">No banners found for this position.</p>
-          <p className="text-xs">Create banners for this position to edit their content here.</p>
-        </div>
-      )}
     </div>
   );
 }
