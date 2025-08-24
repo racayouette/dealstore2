@@ -5,7 +5,7 @@ import { Search, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import type { CategoryWithChildren } from "@shared/schema";
+import type { CategoryWithChildren, BannerSettings } from "@shared/schema";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +14,14 @@ export default function Header() {
   const { data: categories = [] } = useQuery<CategoryWithChildren[]>({
     queryKey: ["/api/categories"],
     queryFn: () => api.getCategories(),
+  });
+
+  const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
+    queryKey: ["/api/visible-pages"],
+    queryFn: async () => {
+      const response = await fetch("/api/visible-pages");
+      return response.json();
+    },
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -100,41 +108,16 @@ export default function Header() {
                 {category.name}
               </Link>
             ))}
-            <Link 
-              href="/videos" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-videos"
-            >
-              Videos
-            </Link>
-            <Link 
-              href="/video2" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-video2"
-            >
-              Video2
-            </Link>
-            <Link 
-              href="/posts" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-posts"
-            >
-              Posts
-            </Link>
-            <Link 
-              href="/blogs" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-blogs"
-            >
-              Blogs
-            </Link>
-            <Link 
-              href="/directory" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-directory"
-            >
-              Directory
-            </Link>
+            {visiblePages.map((page) => (
+              <Link
+                key={page.pageUrl}
+                href={page.pageUrl}
+                className="hover:text-blue-200 font-medium"
+                data-testid={`nav-${page.pageUrl.replace('/', '')}`}
+              >
+                {page.pageName}
+              </Link>
+            ))}
           </div>
         </nav>
       </div>

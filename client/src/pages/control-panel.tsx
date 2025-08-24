@@ -20,6 +20,7 @@ interface PageBannerSettings {
   id?: string;
   pageName: string;
   pageUrl: string;
+  isVisible: boolean;
   showHeader: boolean;
   showTop: boolean;
   showLeft: boolean;
@@ -258,7 +259,11 @@ function CreateBannerForm({ position, positionName, updateBannerMutation }: { po
         </span>
       </div>
       
-      <form action={handleCreateBanner} className="space-y-3">
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        handleCreateBanner(formData);
+      }} className="space-y-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor={`new-title-${position}`} className="text-sm font-medium">
@@ -429,6 +434,123 @@ const PAGES: Page[] = [
   { name: "Search", url: "/search", icon: Search, description: "Search results page" },
 ];
 
+function PageListItem({ 
+  page, 
+  selectedPage, 
+  setSelectedPage, 
+  updateSettingsMutation 
+}: { 
+  page: Page; 
+  selectedPage: Page; 
+  setSelectedPage: (page: Page) => void;
+  updateSettingsMutation: any;
+}) {
+  const { toast } = useToast();
+  const IconComponent = page.icon;
+  
+  // Fetch current page settings to get visibility status
+  const { data: pageSettings } = useQuery({
+    queryKey: ['/api/banner-settings', page.url],
+    queryFn: async () => {
+      const response = await fetch(`/api/banner-settings${page.url === '/' ? '' : page.url}`);
+      return response.json();
+    },
+  });
+
+  const isVisible = pageSettings?.isVisible ?? true;
+
+  const handleVisibilityToggle = async () => {
+    try {
+      const newSettings = {
+        pageName: page.name,
+        pageUrl: page.url,
+        isVisible: !isVisible,
+        showHeader: pageSettings?.showHeader ?? true,
+        showTop: pageSettings?.showTop ?? true,
+        showLeft: pageSettings?.showLeft ?? true,
+        showRight: pageSettings?.showRight ?? true,
+        showBottom: pageSettings?.showBottom ?? true
+      };
+      
+      await apiRequest('POST', '/api/banner-settings', newSettings);
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
+      
+      toast({
+        title: isVisible ? "Page Hidden" : "Page Visible",
+        description: `${page.name} page is now ${!isVisible ? 'visible' : 'hidden'} in navigation.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update page visibility.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div
+      className={`rounded-lg border ${
+        selectedPage.url === page.url 
+          ? 'border-net-green bg-net-green' 
+          : 'border-transparent'
+      }`}
+    >
+      <div className="flex items-center">
+        <button
+          onClick={handleVisibilityToggle}
+          className={`px-2 py-3 rounded-l-lg transition-colors border-r ${
+            selectedPage.url === page.url 
+              ? `${isVisible ? 'bg-net-green-dark hover:bg-net-green' : 'bg-red-600 hover:bg-red-500'} text-white border-net-green-dark` 
+              : `${isVisible ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'} hover:text-gray-700 border-gray-200`
+          }`}
+          title={`${isVisible ? 'Hide' : 'Show'} ${page.name} page from navigation`}
+          data-testid={`toggle-visibility-${page.url.replace('/', '')}`}
+        >
+          {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+        </button>
+        <button
+          onClick={() => setSelectedPage(page)}
+          className={`flex-1 text-left p-3 transition-colors flex items-center gap-3 ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green text-white' 
+              : 'hover:bg-gray-100 text-gray-700'
+          }`}
+          data-testid={`page-${page.url.replace('/', '')}`}
+        >
+          <IconComponent className="w-4 h-4 flex-shrink-0" />
+          <div className="min-w-0">
+            <div className="font-medium truncate">
+              {page.name}
+              {!isVisible && <span className="ml-2 text-xs opacity-75">(Hidden)</span>}
+            </div>
+            <div className={`text-xs truncate ${
+              selectedPage.url === page.url ? 'text-green-100' : 'text-gray-500'
+            }`}>
+              {page.description}
+            </div>
+          </div>
+        </button>
+        <button
+          onClick={() => window.open(page.url, '_blank')}
+          className={`px-3 py-3 rounded-r-lg transition-colors border-l ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
+          }`}
+          title={`View ${page.name} page in new tab`}
+          data-testid={`view-page-${page.url.replace('/', '')}`}
+        >
+          <ExternalLink className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdvertisingPanelPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -439,6 +561,7 @@ export default function AdvertisingPanelPage() {
   const [pageSettings, setPageSettings] = useState<PageBannerSettings>({
     pageName: selectedPage.name,
     pageUrl: selectedPage.url,
+    isVisible: true,
     showHeader: true,
     showTop: true,
     showLeft: true,
@@ -514,6 +637,7 @@ export default function AdvertisingPanelPage() {
       setPageSettings({
         pageName: selectedPage.name,
         pageUrl: selectedPage.url,
+        isVisible: true,
         showHeader: true,
         showTop: true,
         showLeft: true,
@@ -596,48 +720,13 @@ export default function AdvertisingPanelPage() {
                 {PAGES.map((page) => {
                   const IconComponent = page.icon;
                   return (
-                    <div
-                      key={page.url}
-                      className={`rounded-lg border ${
-                        selectedPage.url === page.url 
-                          ? 'border-net-green bg-net-green' 
-                          : 'border-transparent'
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        <button
-                          onClick={() => setSelectedPage(page)}
-                          className={`flex-1 text-left p-3 rounded-l-lg transition-colors flex items-center gap-3 ${
-                            selectedPage.url === page.url 
-                              ? 'bg-net-green text-white' 
-                              : 'hover:bg-gray-100 text-gray-700'
-                          }`}
-                          data-testid={`page-${page.url.replace('/', '')}`}
-                        >
-                          <IconComponent className="w-4 h-4 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <div className="font-medium truncate">{page.name}</div>
-                            <div className={`text-xs truncate ${
-                              selectedPage.url === page.url ? 'text-green-100' : 'text-gray-500'
-                            }`}>
-                              {page.description}
-                            </div>
-                          </div>
-                        </button>
-                        <button
-                          onClick={() => window.open(page.url, '_blank')}
-                          className={`px-3 py-3 rounded-r-lg transition-colors border-l ${
-                            selectedPage.url === page.url 
-                              ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
-                              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
-                          }`}
-                          title={`View ${page.name} page in new tab`}
-                          data-testid={`view-page-${page.url.replace('/', '')}`}
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
+                    <PageListItem 
+                      key={page.url} 
+                      page={page} 
+                      selectedPage={selectedPage} 
+                      setSelectedPage={setSelectedPage}
+                      updateSettingsMutation={updateSettingsMutation}
+                    />
                   );
                 })}
               </div>
