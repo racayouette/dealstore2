@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -41,6 +42,211 @@ interface AdvertisementBanner {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface BannerSectionProps {
+  position: string;
+  positionName: string;
+  banners: AdvertisementBanner[];
+  isVisible: boolean;
+  updateBannerMutation: any;
+}
+
+function BannerSection({ position, positionName, banners, isVisible, updateBannerMutation }: BannerSectionProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <h4 className="font-medium">{positionName}</h4>
+          <span className={`px-2 py-1 rounded-full text-xs ${
+            isVisible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {isVisible ? 'Visible' : 'Hidden'}
+          </span>
+          <span className="text-sm text-gray-500">
+            ({banners.length} banner{banners.length !== 1 ? 's' : ''})
+          </span>
+        </div>
+        {banners.length > 0 && (
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Edit3 className="h-4 w-4" />
+                Edit Content
+                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                {banners.map((banner) => (
+                  <div key={banner.id} className="bg-white border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="font-medium text-sm">{banner.title}</h5>
+                        <p className="text-xs text-gray-500">Size: {banner.size}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {banner.alwaysShow ? 'Always Show' : `Max Impressions: ${banner.maxImpressions === 0 ? 'Unlimited' : banner.maxImpressions}`}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        banner.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {banner.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`title-${banner.id}`} className="text-sm font-medium">
+                          Banner Title
+                        </Label>
+                        <input
+                          id={`title-${banner.id}`}
+                          type="text"
+                          defaultValue={banner.title}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                          onChange={(e) => {
+                            const title = e.target.value;
+                            setTimeout(() => {
+                              updateBannerMutation.mutate({
+                                bannerId: banner.id,
+                                updates: { title }
+                              });
+                            }, 1000);
+                          }}
+                          data-testid={`input-banner-title-${banner.id}`}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`url-${banner.id}`} className="text-sm font-medium">
+                          Click URL
+                        </Label>
+                        <input
+                          id={`url-${banner.id}`}
+                          type="url"
+                          defaultValue={banner.clickUrl}
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                          onChange={(e) => {
+                            const clickUrl = e.target.value;
+                            setTimeout(() => {
+                              updateBannerMutation.mutate({
+                                bannerId: banner.id,
+                                updates: { clickUrl }
+                              });
+                            }, 1000);
+                          }}
+                          data-testid={`input-banner-url-${banner.id}`}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`description-${banner.id}`} className="text-sm font-medium">
+                        Description
+                      </Label>
+                      <textarea
+                        id={`description-${banner.id}`}
+                        defaultValue={banner.description}
+                        rows={3}
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                        onChange={(e) => {
+                          const description = e.target.value;
+                          setTimeout(() => {
+                            updateBannerMutation.mutate({
+                              bannerId: banner.id,
+                              updates: { description }
+                            });
+                          }, 1000);
+                        }}
+                        data-testid={`textarea-banner-description-${banner.id}`}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`image-${banner.id}`} className="text-sm font-medium">
+                        Image URL
+                      </Label>
+                      <input
+                        id={`image-${banner.id}`}
+                        type="url"
+                        defaultValue={banner.imageUrl}
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                        onChange={(e) => {
+                          const imageUrl = e.target.value;
+                          setTimeout(() => {
+                            updateBannerMutation.mutate({
+                              bannerId: banner.id,
+                              updates: { imageUrl }
+                            });
+                          }, 1000);
+                        }}
+                        data-testid={`input-banner-image-${banner.id}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-3">
+                        <Switch
+                          id={`always-show-${banner.id}`}
+                          checked={banner.alwaysShow}
+                          onCheckedChange={(checked) => {
+                            updateBannerMutation.mutate({
+                              bannerId: banner.id,
+                              updates: { alwaysShow: checked }
+                            });
+                          }}
+                          data-testid={`switch-always-show-${banner.id}`}
+                        />
+                        <Label htmlFor={`always-show-${banner.id}`} className="text-sm font-medium">
+                          Always Show Banner
+                        </Label>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`impressions-${banner.id}`} className="text-sm font-medium">
+                          Max Impressions {banner.alwaysShow ? '(Ignored when Always Show is on)' : '(0 = Unlimited)'}
+                        </Label>
+                        <input
+                          id={`impressions-${banner.id}`}
+                          type="number"
+                          min="0"
+                          defaultValue={banner.maxImpressions}
+                          disabled={banner.alwaysShow}
+                          className={`mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green ${
+                            banner.alwaysShow ? 'bg-gray-100 text-gray-400' : ''
+                          }`}
+                          onChange={(e) => {
+                            const maxImpressions = parseInt(e.target.value) || 0;
+                            setTimeout(() => {
+                              updateBannerMutation.mutate({
+                                bannerId: banner.id,
+                                updates: { maxImpressions }
+                              });
+                            }, 1000);
+                          }}
+                          data-testid={`input-banner-impressions-${banner.id}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+      </div>
+      
+      {banners.length === 0 && (
+        <div className="text-center py-4 text-gray-500">
+          <p className="text-sm">No banners found for this position.</p>
+          <p className="text-xs">Create banners for this position to edit their content here.</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 interface Page {
@@ -423,173 +629,33 @@ export default function AdvertisingPanelPage() {
 
                 <Separator />
 
-                {/* Banner Content Editor */}
-                <div className="space-y-4">
+{/* Banner sections organized by position */}
+                <div className="space-y-6">
                   <h3 className="text-lg font-semibold">Edit Banner Content</h3>
-                  <p className="text-sm text-gray-600">Edit the content of advertisement banners for this page. Changes are saved automatically.</p>
+                  <p className="text-sm text-gray-600">Edit the content and settings of advertisement banners for this page. Changes are saved automatically.</p>
                   
-                  {pageBanners && pageBanners.length > 0 ? (
-                    <div className="space-y-4">
-                      {pageBanners.map((banner) => (
-                        <div key={banner.id} className="border rounded-lg p-4 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{banner.title}</h4>
-                              <p className="text-sm text-gray-500">Position: {banner.position} • Size: {banner.size}</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {banner.alwaysShow ? 'Always Show' : `Max Impressions: ${banner.maxImpressions === 0 ? 'Unlimited' : banner.maxImpressions}`}
-                              </p>
-                            </div>
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              banner.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {banner.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor={`title-${banner.id}`} className="text-sm font-medium">
-                                Banner Title
-                              </Label>
-                              <input
-                                id={`title-${banner.id}`}
-                                type="text"
-                                defaultValue={banner.title}
-                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
-                                onChange={(e) => {
-                                  const title = e.target.value;
-                                  setTimeout(() => {
-                                    updateBannerMutation.mutate({
-                                      bannerId: banner.id,
-                                      updates: { title }
-                                    });
-                                  }, 1000);
-                                }}
-                                data-testid={`input-banner-title-${banner.id}`}
-                              />
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor={`url-${banner.id}`} className="text-sm font-medium">
-                                Click URL
-                              </Label>
-                              <input
-                                id={`url-${banner.id}`}
-                                type="url"
-                                defaultValue={banner.clickUrl}
-                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
-                                onChange={(e) => {
-                                  const clickUrl = e.target.value;
-                                  setTimeout(() => {
-                                    updateBannerMutation.mutate({
-                                      bannerId: banner.id,
-                                      updates: { clickUrl }
-                                    });
-                                  }, 1000);
-                                }}
-                                data-testid={`input-banner-url-${banner.id}`}
-                              />
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor={`description-${banner.id}`} className="text-sm font-medium">
-                              Description
-                            </Label>
-                            <textarea
-                              id={`description-${banner.id}`}
-                              defaultValue={banner.description}
-                              rows={3}
-                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
-                              onChange={(e) => {
-                                const description = e.target.value;
-                                setTimeout(() => {
-                                  updateBannerMutation.mutate({
-                                    bannerId: banner.id,
-                                    updates: { description }
-                                  });
-                                }, 1000);
-                              }}
-                              data-testid={`textarea-banner-description-${banner.id}`}
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor={`image-${banner.id}`} className="text-sm font-medium">
-                              Image URL
-                            </Label>
-                            <input
-                              id={`image-${banner.id}`}
-                              type="url"
-                              defaultValue={banner.imageUrl}
-                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
-                              onChange={(e) => {
-                                const imageUrl = e.target.value;
-                                setTimeout(() => {
-                                  updateBannerMutation.mutate({
-                                    bannerId: banner.id,
-                                    updates: { imageUrl }
-                                  });
-                                }, 1000);
-                              }}
-                              data-testid={`input-banner-image-${banner.id}`}
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center space-x-3">
-                              <Switch
-                                id={`always-show-${banner.id}`}
-                                checked={banner.alwaysShow}
-                                onCheckedChange={(checked) => {
-                                  updateBannerMutation.mutate({
-                                    bannerId: banner.id,
-                                    updates: { alwaysShow: checked }
-                                  });
-                                }}
-                                data-testid={`switch-always-show-${banner.id}`}
-                              />
-                              <Label htmlFor={`always-show-${banner.id}`} className="text-sm font-medium">
-                                Always Show Banner
-                              </Label>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor={`impressions-${banner.id}`} className="text-sm font-medium">
-                                Max Impressions {banner.alwaysShow ? '(Ignored when Always Show is on)' : '(0 = Unlimited)'}
-                              </Label>
-                              <input
-                                id={`impressions-${banner.id}`}
-                                type="number"
-                                min="0"
-                                defaultValue={banner.maxImpressions}
-                                disabled={banner.alwaysShow}
-                                className={`mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green ${
-                                  banner.alwaysShow ? 'bg-gray-100 text-gray-400' : ''
-                                }`}
-                                onChange={(e) => {
-                                  const maxImpressions = parseInt(e.target.value) || 0;
-                                  setTimeout(() => {
-                                    updateBannerMutation.mutate({
-                                      bannerId: banner.id,
-                                      updates: { maxImpressions }
-                                    });
-                                  }, 1000);
-                                }}
-                                data-testid={`input-banner-impressions-${banner.id}`}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p>No banners found for this page.</p>
-                      <p className="text-sm">Create banners for this page to edit their content here.</p>
-                    </div>
-                  )}
+                  {['header', 'top', 'left', 'right', 'bottom'].map((position) => {
+                    const positionBanners = pageBanners?.filter(banner => banner.position === position) || [];
+                    const positionName = position === 'left' ? 'Left Sidebar Banner' : 
+                                       position === 'right' ? 'Right Sidebar Banner' :
+                                       position.charAt(0).toUpperCase() + position.slice(1) + ' Banner';
+                    const isVisible = position === 'header' ? pageSettings.showHeader :
+                                    position === 'top' ? pageSettings.showTop :
+                                    position === 'left' ? pageSettings.showLeft :
+                                    position === 'right' ? pageSettings.showRight :
+                                    pageSettings.showBottom;
+                    
+                    return (
+                      <BannerSection
+                        key={position}
+                        position={position}
+                        positionName={positionName}
+                        banners={positionBanners}
+                        isVisible={isVisible}
+                        updateBannerMutation={updateBannerMutation}
+                      />
+                    );
+                  })}
                 </div>
 
                 <Separator />
