@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { generateSitemap, generateRobotsTxt } from "./sitemap";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -476,6 +477,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching visible pages:", error);
       res.status(500).json({ error: "Failed to fetch visible pages" });
+    }
+  });
+
+  // SEO Routes - Sitemap and Robots.txt
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const sitemap = await generateSitemap();
+      res.set('Content-Type', 'application/xml');
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  app.get("/robots.txt", async (req, res) => {
+    try {
+      const robotsTxt = await generateRobotsTxt();
+      res.set('Content-Type', 'text/plain');
+      res.send(robotsTxt);
+    } catch (error) {
+      console.error("Error generating robots.txt:", error);
+      res.status(500).send("Error generating robots.txt");
     }
   });
 
