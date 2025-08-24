@@ -105,26 +105,6 @@ export default function Blogs() {
               </form>
             </div>
 
-            {/* Filter tabs (Google-style) */}
-            <div className="mb-6 border-b border-gray-200">
-              <div className="flex space-x-8 overflow-x-auto">
-                <button className="pb-2 px-1 text-sm font-medium border-b-2 border-blue-600 text-blue-600">
-                  All
-                </button>
-                <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Plant Care
-                </button>
-                <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Plant Health
-                </button>
-                <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Propagation
-                </button>
-                <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Interior Design
-                </button>
-              </div>
-            </div>
 
             {isLoading ? (
               <div className="text-center py-8">
