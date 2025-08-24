@@ -44,32 +44,28 @@ function getSizeClasses(position: string, size: string) {
 export function AdvertisementBanner({ position, size = 'medium', className = '' }: AdvertisementBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
 
-  // Check banner settings from localStorage
+  // Get current page URL for banner settings lookup
+  const currentPath = window.location.pathname;
+
+  // Check banner settings from database
+  const { data: bannerSettings } = useQuery({
+    queryKey: ['/api/banner-settings', currentPath],
+    queryFn: async () => {
+      const response = await fetch(`/api/banner-settings${currentPath === '/' ? '' : currentPath}`);
+      return response.json();
+    },
+  });
+
   useEffect(() => {
-    const checkBannerVisibility = () => {
-      const savedSettings = localStorage.getItem('bannerSettings');
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        const positionKey = position === 'header' ? 'showHeader' : 
-                          position === 'top' ? 'showTop' :
-                          position === 'left' ? 'showLeft' :
-                          position === 'right' ? 'showRight' :
-                          position === 'bottom' ? 'showBottom' : 'showTop';
-        setIsVisible(settings[positionKey] !== false);
-      }
-    };
-
-    // Check initial visibility
-    checkBannerVisibility();
-
-    // Listen for changes from control panel
-    const handleSettingsChange = () => {
-      checkBannerVisibility();
-    };
-
-    window.addEventListener('bannerSettingsChanged', handleSettingsChange);
-    return () => window.removeEventListener('bannerSettingsChanged', handleSettingsChange);
-  }, [position]);
+    if (bannerSettings) {
+      const positionKey = position === 'header' ? 'showHeader' : 
+                        position === 'top' ? 'showTop' :
+                        position === 'left' ? 'showLeft' :
+                        position === 'right' ? 'showRight' :
+                        position === 'bottom' ? 'showBottom' : 'showTop';
+      setIsVisible(bannerSettings[positionKey] !== false);
+    }
+  }, [bannerSettings, position]);
 
   const { data: banners, isLoading, error } = useQuery<BannerType[]>({
     queryKey: ['/api/advertisement-banners', position],

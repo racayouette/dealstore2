@@ -110,6 +110,8 @@ export default function ControlPanelPage() {
   const handleToggle = (position: keyof Omit<PageBannerSettings, 'id' | 'pageName' | 'pageUrl'>) => {
     const newSettings = {
       ...pageSettings,
+      pageName: selectedPage.name,
+      pageUrl: selectedPage.url,
       [position]: !pageSettings[position]
     };
     setPageSettings(newSettings);
@@ -119,6 +121,8 @@ export default function ControlPanelPage() {
   const showAllBanners = () => {
     const newSettings = {
       ...pageSettings,
+      pageName: selectedPage.name,
+      pageUrl: selectedPage.url,
       showHeader: true,
       showTop: true,
       showLeft: true,
@@ -132,6 +136,8 @@ export default function ControlPanelPage() {
   const hideAllBanners = () => {
     const newSettings = {
       ...pageSettings,
+      pageName: selectedPage.name,
+      pageUrl: selectedPage.url,
       showHeader: false,
       showTop: false,
       showLeft: false,
