@@ -31,7 +31,6 @@ interface Page {
 }
 
 const PAGES: Page[] = [
-  { name: "Category - Electronics", url: "/category/electronics", icon: ShoppingBag, description: "Electronic devices and gadgets" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
