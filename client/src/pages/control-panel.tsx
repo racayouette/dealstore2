@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -179,26 +179,48 @@ export default function AdvertisingPanelPage() {
                 {PAGES.map((page) => {
                   const IconComponent = page.icon;
                   return (
-                    <button
+                    <div
                       key={page.url}
-                      onClick={() => setSelectedPage(page)}
-                      className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 ${
+                      className={`rounded-lg border ${
                         selectedPage.url === page.url 
-                          ? 'bg-net-green text-white' 
-                          : 'hover:bg-gray-100 text-gray-700'
+                          ? 'border-net-green bg-net-green' 
+                          : 'border-transparent'
                       }`}
-                      data-testid={`page-${page.url.replace('/', '')}`}
                     >
-                      <IconComponent className="w-4 h-4 flex-shrink-0" />
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{page.name}</div>
-                        <div className={`text-xs truncate ${
-                          selectedPage.url === page.url ? 'text-green-100' : 'text-gray-500'
-                        }`}>
-                          {page.description}
-                        </div>
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => setSelectedPage(page)}
+                          className={`flex-1 text-left p-3 rounded-l-lg transition-colors flex items-center gap-3 ${
+                            selectedPage.url === page.url 
+                              ? 'bg-net-green text-white' 
+                              : 'hover:bg-gray-100 text-gray-700'
+                          }`}
+                          data-testid={`page-${page.url.replace('/', '')}`}
+                        >
+                          <IconComponent className="w-4 h-4 flex-shrink-0" />
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{page.name}</div>
+                            <div className={`text-xs truncate ${
+                              selectedPage.url === page.url ? 'text-green-100' : 'text-gray-500'
+                            }`}>
+                              {page.description}
+                            </div>
+                          </div>
+                        </button>
+                        <button
+                          onClick={() => window.open(page.url, '_blank')}
+                          className={`px-3 py-3 rounded-r-lg transition-colors border-l ${
+                            selectedPage.url === page.url 
+                              ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
+                              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
+                          }`}
+                          title={`View ${page.name} page in new tab`}
+                          data-testid={`view-page-${page.url.replace('/', '')}`}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

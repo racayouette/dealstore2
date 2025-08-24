@@ -54,6 +54,7 @@
   /* NetDiscount specific colors - Green theme for savings/money */
   --net-green: hsl(142 76% 36%);
   --net-green-dark: hsl(142 76% 26%);
+  --net-green-light: hsl(142 69% 58%);
   --net-gray: hsl(215 20.2% 65.1%);
   --net-dark: hsl(215.3 25% 26.7%);
 }
