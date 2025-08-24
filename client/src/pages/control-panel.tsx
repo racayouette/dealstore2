@@ -36,6 +36,8 @@ interface AdvertisementBanner {
   imageUrl: string;
   clickUrl: string;
   isActive: boolean;
+  alwaysShow: boolean;
+  maxImpressions: number;
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -434,6 +436,9 @@ export default function AdvertisingPanelPage() {
                             <div>
                               <h4 className="font-medium">{banner.title}</h4>
                               <p className="text-sm text-gray-500">Position: {banner.position} • Size: {banner.size}</p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {banner.alwaysShow ? 'Always Show' : `Max Impressions: ${banner.maxImpressions === 0 ? 'Unlimited' : banner.maxImpressions}`}
+                              </p>
                             </div>
                             <span className={`px-2 py-1 rounded-full text-xs ${
                               banner.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -530,6 +535,51 @@ export default function AdvertisingPanelPage() {
                               }}
                               data-testid={`input-banner-image-${banner.id}`}
                             />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-center space-x-3">
+                              <Switch
+                                id={`always-show-${banner.id}`}
+                                checked={banner.alwaysShow}
+                                onCheckedChange={(checked) => {
+                                  updateBannerMutation.mutate({
+                                    bannerId: banner.id,
+                                    updates: { alwaysShow: checked }
+                                  });
+                                }}
+                                data-testid={`switch-always-show-${banner.id}`}
+                              />
+                              <Label htmlFor={`always-show-${banner.id}`} className="text-sm font-medium">
+                                Always Show Banner
+                              </Label>
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor={`impressions-${banner.id}`} className="text-sm font-medium">
+                                Max Impressions {banner.alwaysShow ? '(Ignored when Always Show is on)' : '(0 = Unlimited)'}
+                              </Label>
+                              <input
+                                id={`impressions-${banner.id}`}
+                                type="number"
+                                min="0"
+                                defaultValue={banner.maxImpressions}
+                                disabled={banner.alwaysShow}
+                                className={`mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green ${
+                                  banner.alwaysShow ? 'bg-gray-100 text-gray-400' : ''
+                                }`}
+                                onChange={(e) => {
+                                  const maxImpressions = parseInt(e.target.value) || 0;
+                                  setTimeout(() => {
+                                    updateBannerMutation.mutate({
+                                      bannerId: banner.id,
+                                      updates: { maxImpressions }
+                                    });
+                                  }, 1000);
+                                }}
+                                data-testid={`input-banner-impressions-${banner.id}`}
+                              />
+                            </div>
                           </div>
                         </div>
                       ))}
