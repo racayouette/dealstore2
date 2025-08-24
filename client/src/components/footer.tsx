@@ -67,6 +67,9 @@ export default function Footer() {
               <Link href="/terms" className="block text-gray-300 hover:text-white text-sm" data-testid="footer-terms">
                 Terms of Service
               </Link>
+              <Link href="/control-panel" className="block text-gray-300 hover:text-white text-sm" data-testid="footer-control-panel">
+                Control Panel
+              </Link>
             </div>
           </div>
         </div>

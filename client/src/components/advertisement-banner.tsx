@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import type { AdvertisementBanner as BannerType } from "@shared/schema";
 
 interface AdvertisementBannerProps {
@@ -41,6 +42,35 @@ function getSizeClasses(position: string, size: string) {
 }
 
 export function AdvertisementBanner({ position, size = 'medium', className = '' }: AdvertisementBannerProps) {
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Check banner settings from localStorage
+  useEffect(() => {
+    const checkBannerVisibility = () => {
+      const savedSettings = localStorage.getItem('bannerSettings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        const positionKey = position === 'header' ? 'showHeader' : 
+                          position === 'top' ? 'showTop' :
+                          position === 'left' ? 'showLeft' :
+                          position === 'right' ? 'showRight' :
+                          position === 'bottom' ? 'showBottom' : 'showTop';
+        setIsVisible(settings[positionKey] !== false);
+      }
+    };
+
+    // Check initial visibility
+    checkBannerVisibility();
+
+    // Listen for changes from control panel
+    const handleSettingsChange = () => {
+      checkBannerVisibility();
+    };
+
+    window.addEventListener('bannerSettingsChanged', handleSettingsChange);
+    return () => window.removeEventListener('bannerSettingsChanged', handleSettingsChange);
+  }, [position]);
+
   const { data: banners, isLoading, error } = useQuery<BannerType[]>({
     queryKey: ['/api/advertisement-banners', position],
     queryFn: async () => {
@@ -49,6 +79,11 @@ export function AdvertisementBanner({ position, size = 'medium', className = '' 
       return response.json();
     },
   });
+
+  // Don't render if banner is set to be hidden
+  if (!isVisible) {
+    return null;
+  }
 
   const sizeClasses = getSizeClasses(position, size);
   const isVertical = position === 'left' || position === 'right';

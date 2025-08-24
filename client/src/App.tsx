@@ -16,6 +16,7 @@ import Directory from "@/pages/directory";
 import Auth from "@/pages/auth";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
+import ControlPanel from "@/pages/control-panel";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/control-panel" component={ControlPanel} />
       <Route component={NotFound} />
     </Switch>
   );
