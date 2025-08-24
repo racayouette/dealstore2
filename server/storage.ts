@@ -168,6 +168,10 @@ export interface IStorage {
   createPageView(pageView: InsertPageView): Promise<PageView>;
   getPageViews(pageName?: string, limit?: number): Promise<PageView[]>;
   getPageViewCount(pageName: string, ipAddress?: string): Promise<number>;
+  
+  // Analytics
+  getPageViewAnalytics(days: number): Promise<any[]>;
+  getDailySummary(days: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -990,6 +994,62 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions));
     
     return Number(result.count) || 0;
+  }
+
+  // Analytics methods
+  async getPageViewAnalytics(days: number): Promise<any[]> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const result = await db.select({
+      pageName: pageViews.pageName,
+      pageUrl: pageViews.pageUrl,
+      date: sql`DATE(${pageViews.createdAt})`.as('date'),
+      viewCount: sql`COUNT(*)`.as('viewCount'),
+      uniqueVisitors: sql`COUNT(DISTINCT ${pageViews.ipAddress})`.as('uniqueVisitors')
+    })
+    .from(pageViews)
+    .where(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`)
+    .groupBy(pageViews.pageName, pageViews.pageUrl, sql`DATE(${pageViews.createdAt})`)
+    .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
+
+    return result.map(row => ({
+      pageName: row.pageName,
+      pageUrl: row.pageUrl,
+      date: row.date,
+      viewCount: Number(row.viewCount),
+      uniqueVisitors: Number(row.uniqueVisitors)
+    }));
+  }
+
+  async getDailySummary(days: number): Promise<any[]> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const result = await db.select({
+      date: sql`DATE(${pageViews.createdAt})`.as('date'),
+      totalViews: sql`COUNT(*)`.as('totalViews'),
+      uniquePages: sql`COUNT(DISTINCT ${pageViews.pageUrl})`.as('uniquePages'),
+      topPage: sql`
+        (SELECT ${pageViews.pageName} 
+         FROM ${pageViews} pv2 
+         WHERE DATE(pv2.created_at) = DATE(${pageViews.createdAt})
+         GROUP BY pv2.page_name 
+         ORDER BY COUNT(*) DESC 
+         LIMIT 1)
+      `.as('topPage')
+    })
+    .from(pageViews)
+    .where(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`)
+    .groupBy(sql`DATE(${pageViews.createdAt})`)
+    .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
+
+    return result.map(row => ({
+      date: row.date,
+      totalViews: Number(row.totalViews),
+      uniquePages: Number(row.uniquePages),
+      topPage: row.topPage || 'N/A'
+    }));
   }
 }
 
