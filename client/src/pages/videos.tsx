@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PlayCircle, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PlayCircle, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "@/lib/api";
 import type { VideoChannel } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
@@ -18,14 +19,39 @@ export default function Videos() {
   // Track page view for analytics
   usePageTracking("Videos", "/videos");
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const videosPerPage = 9;
+
   const { 
-    data: videoChannels = [], 
+    data: allVideoChannels = [], 
     isLoading, 
     error 
   } = useQuery<VideoChannel[]>({
     queryKey: ["/api/video-channels"],
     queryFn: () => api.getVideoChannels(24),
   });
+
+  // Calculate pagination
+  const totalVideos = allVideoChannels.length;
+  const totalPages = Math.ceil(totalVideos / videosPerPage);
+  const startIndex = (currentPage - 1) * videosPerPage;
+  const endIndex = startIndex + videosPerPage;
+  const videoChannels = allVideoChannels.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -191,8 +217,44 @@ export default function Videos() {
           )}
         </div>
 
+        {/* Pagination Controls */}
+        {!isLoading && totalVideos > videosPerPage && (
+          <div className="flex justify-center items-center gap-4 mt-8 mb-6">
+            <Button
+              variant="outline"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2"
+              data-testid="button-previous-page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </span>
+              <span className="text-xs text-gray-400">
+                ({totalVideos} total videos)
+              </span>
+            </div>
+            
+            <Button
+              variant="outline"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2"
+              data-testid="button-next-page"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
         {/* Empty State */}
-        {!isLoading && videoChannels.length === 0 && (
+        {!isLoading && allVideoChannels.length === 0 && (
           <div className="text-center py-12">
             <PlayCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-600 mb-2">No Video Channels Found</h3>
