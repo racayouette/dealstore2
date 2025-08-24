@@ -8,18 +8,12 @@ import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-re
 import type { Blog } from "@shared/schema";
 import Header from "@/components/header";
 import AdvertisementBanner from "@/components/advertisement-banner";
-import AdvertisementControls, { type AdSettings } from "@/components/advertisement-controls";
+
 
 export default function Blogs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
-  const [adSettings, setAdSettings] = useState<AdSettings>({
-    top: true,
-    left: true,
-    right: true,
-    bottom: true,
-    header: true
-  });
+
 
   const { data: blogs = [], isLoading } = useQuery<Blog[]>({
     queryKey: ["/api/blogs", currentSearch],
@@ -54,38 +48,24 @@ export default function Blogs() {
       <Header />
       
       {/* Header Banner Advertisement */}
-      {adSettings.header && (
-        <div className="w-full">
-          <AdvertisementBanner position="header" size="medium" className="rounded-none" />
-        </div>
-      )}
-
-      {/* Advertisement Controls */}
-      <div className="container mx-auto px-4 pt-6">
-        <AdvertisementControls 
-          adSettings={adSettings} 
-          onSettingsChange={setAdSettings} 
-        />
+      <div className="w-full">
+        <AdvertisementBanner position="header" size="medium" className="rounded-none" />
       </div>
 
       {/* Top Banner Advertisement */}
-      {adSettings.top && (
-        <div className="container mx-auto px-4 mb-6">
-          <AdvertisementBanner position="top" size="medium" />
-        </div>
-      )}
+      <div className="container mx-auto px-4 mb-6">
+        <AdvertisementBanner position="top" size="medium" />
+      </div>
 
       {/* Main Layout with Sidebars */}
       <div className="container mx-auto px-4 pb-6">
         <div className="flex gap-6">
           {/* Left Sidebar Advertisement */}
-          {adSettings.left && (
-            <div className="hidden lg:block flex-shrink-0">
-              <div className="sticky top-6">
-                <AdvertisementBanner position="left" size="medium" />
-              </div>
+          <div className="hidden lg:block flex-shrink-0">
+            <div className="sticky top-6">
+              <AdvertisementBanner position="left" size="medium" />
             </div>
-          )}
+          </div>
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
@@ -278,22 +258,18 @@ export default function Blogs() {
           </div>
 
           {/* Right Sidebar Advertisement */}
-          {adSettings.right && (
-            <div className="hidden lg:block flex-shrink-0">
-              <div className="sticky top-6">
-                <AdvertisementBanner position="right" size="medium" />
-              </div>
+          <div className="hidden lg:block flex-shrink-0">
+            <div className="sticky top-6">
+              <AdvertisementBanner position="right" size="medium" />
             </div>
-          )}
+          </div>
         </div>
       </div>
 
       {/* Bottom Banner Advertisement */}
-      {adSettings.bottom && (
-        <div className="container mx-auto px-4 pb-6">
-          <AdvertisementBanner position="bottom" size="medium" />
-        </div>
-      )}
+      <div className="container mx-auto px-4 pb-6">
+        <AdvertisementBanner position="bottom" size="medium" />
+      </div>
     </div>
   );
 }
