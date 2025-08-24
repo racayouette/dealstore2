@@ -26,6 +26,21 @@ interface PageBannerSettings {
   showBottom: boolean;
 }
 
+interface AdvertisementBanner {
+  id: string;
+  pageUrl: string | null;
+  position: string;
+  size: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  clickUrl: string;
+  isActive: boolean;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface Page {
   name: string;
   url: string;
@@ -68,6 +83,15 @@ export default function AdvertisingPanelPage() {
     },
   });
 
+  // Fetch advertisement banners for the selected page
+  const { data: pageBanners = [] } = useQuery<AdvertisementBanner[]>({
+    queryKey: ['/api/advertisement-banners/page', selectedPage.url],
+    queryFn: async () => {
+      const response = await fetch(`/api/advertisement-banners/page${selectedPage.url}`);
+      return response.json();
+    },
+  });
+
   // Update mutation for banner settings
   const updateSettingsMutation = useMutation({
     mutationFn: async (settings: PageBannerSettings) => {
@@ -84,6 +108,27 @@ export default function AdvertisingPanelPage() {
       toast({
         title: "Error",
         description: "Failed to save banner settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update mutation for banner content
+  const updateBannerMutation = useMutation({
+    mutationFn: async ({ bannerId, updates }: { bannerId: string; updates: Partial<AdvertisementBanner> }) => {
+      return await apiRequest('PUT', `/api/advertisement-banners/${bannerId}`, updates);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Banner updated",
+        description: "Banner content has been saved automatically.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/advertisement-banners/page'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update banner content.",
         variant: "destructive",
       });
     },
@@ -372,6 +417,129 @@ export default function AdvertisingPanelPage() {
                       />
                     </div>
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Banner Content Editor */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Edit Banner Content</h3>
+                  <p className="text-sm text-gray-600">Edit the content of advertisement banners for this page. Changes are saved automatically.</p>
+                  
+                  {pageBanners && pageBanners.length > 0 ? (
+                    <div className="space-y-4">
+                      {pageBanners.map((banner) => (
+                        <div key={banner.id} className="border rounded-lg p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium">{banner.title}</h4>
+                              <p className="text-sm text-gray-500">Position: {banner.position} • Size: {banner.size}</p>
+                            </div>
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              banner.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {banner.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`title-${banner.id}`} className="text-sm font-medium">
+                                Banner Title
+                              </Label>
+                              <input
+                                id={`title-${banner.id}`}
+                                type="text"
+                                defaultValue={banner.title}
+                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                                onChange={(e) => {
+                                  const title = e.target.value;
+                                  setTimeout(() => {
+                                    updateBannerMutation.mutate({
+                                      bannerId: banner.id,
+                                      updates: { title }
+                                    });
+                                  }, 1000);
+                                }}
+                                data-testid={`input-banner-title-${banner.id}`}
+                              />
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor={`url-${banner.id}`} className="text-sm font-medium">
+                                Click URL
+                              </Label>
+                              <input
+                                id={`url-${banner.id}`}
+                                type="url"
+                                defaultValue={banner.clickUrl}
+                                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                                onChange={(e) => {
+                                  const clickUrl = e.target.value;
+                                  setTimeout(() => {
+                                    updateBannerMutation.mutate({
+                                      bannerId: banner.id,
+                                      updates: { clickUrl }
+                                    });
+                                  }, 1000);
+                                }}
+                                data-testid={`input-banner-url-${banner.id}`}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`description-${banner.id}`} className="text-sm font-medium">
+                              Description
+                            </Label>
+                            <textarea
+                              id={`description-${banner.id}`}
+                              defaultValue={banner.description}
+                              rows={3}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                              onChange={(e) => {
+                                const description = e.target.value;
+                                setTimeout(() => {
+                                  updateBannerMutation.mutate({
+                                    bannerId: banner.id,
+                                    updates: { description }
+                                  });
+                                }, 1000);
+                              }}
+                              data-testid={`textarea-banner-description-${banner.id}`}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor={`image-${banner.id}`} className="text-sm font-medium">
+                              Image URL
+                            </Label>
+                            <input
+                              id={`image-${banner.id}`}
+                              type="url"
+                              defaultValue={banner.imageUrl}
+                              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-net-green focus:border-net-green"
+                              onChange={(e) => {
+                                const imageUrl = e.target.value;
+                                setTimeout(() => {
+                                  updateBannerMutation.mutate({
+                                    bannerId: banner.id,
+                                    updates: { imageUrl }
+                                  });
+                                }, 1000);
+                              }}
+                              data-testid={`input-banner-image-${banner.id}`}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No banners found for this page.</p>
+                      <p className="text-sm">Create banners for this page to edit their content here.</p>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />

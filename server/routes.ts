@@ -375,7 +375,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/advertisement-banners", async (req, res) => {
     try {
       const position = req.query.position as string;
-      const banners = await storage.getAdvertisementBanners(position);
+      const pageUrl = req.query.pageUrl as string;
+      const banners = await storage.getAdvertisementBanners(position, pageUrl);
       res.json(banners);
     } catch (error) {
       console.error("Error fetching advertisement banners:", error);
@@ -393,6 +394,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching advertisement banner:", error);
       res.status(500).json({ error: "Failed to fetch advertisement banner" });
+    }
+  });
+
+  app.put("/api/advertisement-banners/:id", async (req, res) => {
+    try {
+      const bannerData = req.body;
+      const banner = await storage.updateAdvertisementBanner(req.params.id, bannerData);
+      if (!banner) {
+        return res.status(404).json({ error: "Advertisement banner not found" });
+      }
+      res.json(banner);
+    } catch (error) {
+      console.error("Error updating advertisement banner:", error);
+      res.status(500).json({ error: "Failed to update advertisement banner" });
+    }
+  });
+
+  app.get("/api/advertisement-banners/page/:pageUrl(*)", async (req, res) => {
+    try {
+      const pageUrl = `/${req.params.pageUrl}`;
+      const banners = await storage.getAdvertisementBannersByPage(pageUrl);
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching advertisement banners by page:", error);
+      res.status(500).json({ error: "Failed to fetch advertisement banners by page" });
     }
   });
 
