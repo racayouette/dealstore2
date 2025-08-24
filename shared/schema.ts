@@ -150,6 +150,16 @@ export const advertisementBanners = pgTable("advertisement_banners", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// Page views tracking table for analytics and impression counting
+export const pageViews = pgTable("page_views", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageName: text("page_name").notNull(), // e.g., "Videos", "Posts", "Blogs"
+  pageUrl: text("page_url").notNull(), // e.g., "/videos", "/posts", "/blogs"
+  ipAddress: text("ip_address").notNull(), // visitor's IP address
+  userAgent: text("user_agent"), // browser/device information
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const bannerSettings = pgTable("banner_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   pageName: text("page_name").notNull(),
@@ -268,6 +278,11 @@ export const insertBannerSettingsSchema = createInsertSchema(bannerSettings).omi
   updatedAt: true,
 });
 
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Directory Business Models
 export const businessCategories = pgTable("business_categories", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -359,6 +374,7 @@ export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
 export type Blog = typeof blogs.$inferSelect;
 export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
 export type BannerSettings = typeof bannerSettings.$inferSelect;
+export type PageView = typeof pageViews.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
@@ -371,6 +387,7 @@ export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 
 // Directory insert schemas
 export const insertBusinessCategorySchema = createInsertSchema(businessCategories).omit({

@@ -10,6 +10,7 @@ import {
   blogs,
   advertisementBanners,
   bannerSettings,
+  pageViews,
   businessCategories,
   businesses,
   businessHours,
@@ -27,6 +28,7 @@ import {
   type Blog,
   type AdvertisementBanner,
   type BannerSettings,
+  type PageView,
   type BusinessCategory,
   type Business,
   type BusinessHours,
@@ -44,6 +46,7 @@ import {
   type InsertBlog,
   type InsertAdvertisementBanner,
   type InsertBannerSettings,
+  type InsertPageView,
   type InsertBusinessCategory,
   type InsertBusiness,
   type InsertBusinessHours,
@@ -159,6 +162,11 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Page Views
+  createPageView(pageView: InsertPageView): Promise<PageView>;
+  getPageViews(pageName?: string, limit?: number): Promise<PageView[]>;
+  getPageViewCount(pageName: string, ipAddress?: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -942,6 +950,36 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
+  }
+
+  // Page Views
+  async createPageView(pageView: InsertPageView): Promise<PageView> {
+    const [newPageView] = await db.insert(pageViews).values(pageView).returning();
+    return newPageView;
+  }
+
+  async getPageViews(pageName?: string, limit = 100): Promise<PageView[]> {
+    let query = db.select().from(pageViews);
+    
+    if (pageName) {
+      query = query.where(eq(pageViews.pageName, pageName));
+    }
+    
+    return await query.orderBy(desc(pageViews.createdAt)).limit(limit);
+  }
+
+  async getPageViewCount(pageName: string, ipAddress?: string): Promise<number> {
+    let conditions = [eq(pageViews.pageName, pageName)];
+    
+    if (ipAddress) {
+      conditions.push(eq(pageViews.ipAddress, ipAddress));
+    }
+    
+    const [result] = await db.select({ count: sql`count(*)` })
+      .from(pageViews)
+      .where(and(...conditions));
+    
+    return Number(result.count) || 0;
   }
 }
 

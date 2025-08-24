@@ -11,10 +11,14 @@ import { Separator } from '@/components/ui/separator';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import AdvertisementBanner from '@/components/advertisement-banner';
+import { usePageTracking } from '@/hooks/use-page-tracking';
 
 import type { BusinessCategory, BusinessWithCategory, BusinessWithDetails } from '@shared/schema';
 
 export default function Directory() {
+  // Track page view for analytics
+  usePageTracking("Directory", "/directory");
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('all');
