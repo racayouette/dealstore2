@@ -9,6 +9,7 @@ import {
   youtubeVideos,
   blogs,
   advertisementBanners,
+  bannerSettings,
   businessCategories,
   businesses,
   businessHours,
@@ -25,6 +26,7 @@ import {
   type YoutubeVideo,
   type Blog,
   type AdvertisementBanner,
+  type BannerSettings,
   type BusinessCategory,
   type Business,
   type BusinessHours,
@@ -41,6 +43,7 @@ import {
   type InsertYoutubeVideo,
   type InsertBlog,
   type InsertAdvertisementBanner,
+  type InsertBannerSettings,
   type InsertBusinessCategory,
   type InsertBusiness,
   type InsertBusinessHours,
@@ -116,6 +119,13 @@ export interface IStorage {
   getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]>;
   createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner>;
   deleteAdvertisementBanner(id: string): Promise<void>;
+  
+  // Banner Settings
+  getBannerSettings(pageUrl?: string): Promise<BannerSettings[]>;
+  getBannerSettingByPage(pageUrl: string): Promise<BannerSettings | undefined>;
+  createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings>;
+  updateBannerSettings(pageUrl: string, updates: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined>;
+  upsertBannerSettings(pageUrl: string, settings: InsertBannerSettings): Promise<BannerSettings>;
   
   // Directory Business Categories
   getBusinessCategories(): Promise<BusinessCategory[]>;
@@ -556,6 +566,41 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAdvertisementBanner(id: string): Promise<void> {
     await db.delete(advertisementBanners).where(eq(advertisementBanners.id, id));
+  }
+
+  // Banner Settings
+  async getBannerSettings(pageUrl?: string): Promise<BannerSettings[]> {
+    if (pageUrl) {
+      return await db.select().from(bannerSettings).where(eq(bannerSettings.pageUrl, pageUrl));
+    }
+    return await db.select().from(bannerSettings).orderBy(asc(bannerSettings.pageName));
+  }
+
+  async getBannerSettingByPage(pageUrl: string): Promise<BannerSettings | undefined> {
+    const [setting] = await db.select().from(bannerSettings).where(eq(bannerSettings.pageUrl, pageUrl));
+    return setting || undefined;
+  }
+
+  async createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings> {
+    const [newSettings] = await db.insert(bannerSettings).values(settings).returning();
+    return newSettings;
+  }
+
+  async updateBannerSettings(pageUrl: string, updates: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined> {
+    const [updatedSettings] = await db.update(bannerSettings)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(bannerSettings.pageUrl, pageUrl))
+      .returning();
+    return updatedSettings || undefined;
+  }
+
+  async upsertBannerSettings(pageUrl: string, settings: InsertBannerSettings): Promise<BannerSettings> {
+    const existing = await this.getBannerSettingByPage(pageUrl);
+    if (existing) {
+      return await this.updateBannerSettings(pageUrl, settings) as BannerSettings;
+    } else {
+      return await this.createBannerSettings(settings);
+    }
   }
 
   // Directory Business Categories

@@ -356,6 +356,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Banner Settings API
+  app.get("/api/banner-settings", async (req, res) => {
+    try {
+      const pageUrl = req.query.pageUrl as string;
+      const settings = await storage.getBannerSettings(pageUrl);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching banner settings:", error);
+      res.status(500).json({ error: "Failed to fetch banner settings" });
+    }
+  });
+
+  app.get("/api/banner-settings/:pageUrl(*)", async (req, res) => {
+    try {
+      const pageUrl = `/${req.params.pageUrl}`;
+      const settings = await storage.getBannerSettingByPage(pageUrl);
+      if (!settings) {
+        // Return default settings if none exist
+        res.json({
+          pageUrl,
+          showHeader: true,
+          showTop: true,
+          showLeft: true,
+          showRight: true,
+          showBottom: true
+        });
+      } else {
+        res.json(settings);
+      }
+    } catch (error) {
+      console.error("Error fetching banner settings:", error);
+      res.status(500).json({ error: "Failed to fetch banner settings" });
+    }
+  });
+
+  app.post("/api/banner-settings", async (req, res) => {
+    try {
+      const settingsData = req.body;
+      const settings = await storage.upsertBannerSettings(settingsData.pageUrl, settingsData);
+      res.status(201).json(settings);
+    } catch (error) {
+      console.error("Error creating/updating banner settings:", error);
+      res.status(500).json({ error: "Failed to save banner settings" });
+    }
+  });
+
   // Directory Business Categories API
   app.get("/api/business-categories", async (req, res) => {
     try {

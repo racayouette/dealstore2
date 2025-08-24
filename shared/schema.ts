@@ -147,6 +147,19 @@ export const advertisementBanners = pgTable("advertisement_banners", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const bannerSettings = pgTable("banner_settings", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageName: text("page_name").notNull(),
+  pageUrl: text("page_url").notNull().unique(),
+  showHeader: boolean("show_header").default(true),
+  showTop: boolean("show_top").default(true),
+  showLeft: boolean("show_left").default(true),
+  showRight: boolean("show_right").default(true),
+  showBottom: boolean("show_bottom").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -246,6 +259,12 @@ export const insertAdvertisementBannerSchema = createInsertSchema(advertisementB
   updatedAt: true,
 });
 
+export const insertBannerSettingsSchema = createInsertSchema(bannerSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Directory Business Models
 export const businessCategories = pgTable("business_categories", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -336,6 +355,7 @@ export type Post = typeof posts.$inferSelect;
 export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
 export type Blog = typeof blogs.$inferSelect;
 export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
+export type BannerSettings = typeof bannerSettings.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
@@ -347,6 +367,7 @@ export type InsertPost = z.infer<typeof insertPostSchema>;
 export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
+export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
 
 // Directory insert schemas
 export const insertBusinessCategorySchema = createInsertSchema(businessCategories).omit({
