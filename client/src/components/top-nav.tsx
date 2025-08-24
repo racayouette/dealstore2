@@ -40,6 +40,9 @@ export default function TopNav() {
             <Link href="/advertising-panel" className="hover:text-gray-200 transition-colors" data-testid="nav-advertising-panel">
               Advertising Panel
             </Link>
+            <Link href="/analytics" className="hover:text-gray-200 transition-colors" data-testid="nav-analytics">
+              Analytics
+            </Link>
             <Link href="/admin/users" className="hover:text-gray-200 transition-colors" data-testid="nav-users">
               Users
             </Link>

@@ -20,6 +20,7 @@ import Terms from "@/pages/terms";
 import Search from "@/pages/search";
 import ControlPanel from "@/pages/control-panel";
 import AdminLogin from "@/pages/admin-login";
+import Analytics from "@/pages/analytics";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/advertising-panel" component={ControlPanel} />
       <Route path="/wp-admin" component={AdminLogin} />
       <Route path="/admin-login" component={AdminLogin} />
+      <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />
     </Switch>
   );

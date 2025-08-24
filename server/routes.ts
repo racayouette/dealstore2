@@ -883,6 +883,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics endpoints
+  app.get('/api/analytics/page-views', async (req, res) => {
+    try {
+      const days = req.query.days ? parseInt(req.query.days as string) : 7;
+      const analytics = await storage.getPageViewAnalytics(days);
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error getting page view analytics:', error);
+      res.status(500).json({ error: 'Failed to get analytics data' });
+    }
+  });
+
+  app.get('/api/analytics/daily-summary', async (req, res) => {
+    try {
+      const days = req.query.days ? parseInt(req.query.days as string) : 7;
+      const summary = await storage.getDailySummary(days);
+      res.json(summary);
+    } catch (error) {
+      console.error('Error getting daily summary:', error);
+      res.status(500).json({ error: 'Failed to get daily summary' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
