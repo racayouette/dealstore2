@@ -114,10 +114,12 @@ export interface IStorage {
   createBlog(blog: InsertBlog): Promise<Blog>;
   
   // Advertisement Banners
-  getAdvertisementBanners(position?: string): Promise<AdvertisementBanner[]>;
+  getAdvertisementBanners(position?: string, pageUrl?: string): Promise<AdvertisementBanner[]>;
   getAdvertisementBannerById(id: string): Promise<AdvertisementBanner | undefined>;
   getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]>;
+  getAdvertisementBannersByPage(pageUrl: string): Promise<AdvertisementBanner[]>;
   createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner>;
+  updateAdvertisementBanner(id: string, updates: Partial<InsertAdvertisementBanner>): Promise<AdvertisementBanner | undefined>;
   deleteAdvertisementBanner(id: string): Promise<void>;
   
   // Banner Settings
@@ -536,14 +538,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Advertisement Banners
-  async getAdvertisementBanners(position?: string): Promise<AdvertisementBanner[]> {
+  async getAdvertisementBanners(position?: string, pageUrl?: string): Promise<AdvertisementBanner[]> {
+    let whereConditions = [eq(advertisementBanners.isActive, true)];
+    
     if (position) {
-      return await db.select().from(advertisementBanners)
-        .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.position, position)))
-        .orderBy(asc(advertisementBanners.displayOrder));
+      whereConditions.push(eq(advertisementBanners.position, position));
     }
+    
+    if (pageUrl) {
+      whereConditions.push(eq(advertisementBanners.pageUrl, pageUrl));
+    }
+    
     return await db.select().from(advertisementBanners)
-      .where(eq(advertisementBanners.isActive, true))
+      .where(and(...whereConditions))
       .orderBy(asc(advertisementBanners.displayOrder));
   }
 
@@ -562,6 +569,20 @@ export class DatabaseStorage implements IStorage {
   async createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner> {
     const [newBanner] = await db.insert(advertisementBanners).values(banner).returning();
     return newBanner;
+  }
+
+  async getAdvertisementBannersByPage(pageUrl: string): Promise<AdvertisementBanner[]> {
+    return await db.select().from(advertisementBanners)
+      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.pageUrl, pageUrl)))
+      .orderBy(asc(advertisementBanners.displayOrder));
+  }
+
+  async updateAdvertisementBanner(id: string, updates: Partial<InsertAdvertisementBanner>): Promise<AdvertisementBanner | undefined> {
+    const [updatedBanner] = await db.update(advertisementBanners)
+      .set({ ...updates, updatedAt: sql`now()` })
+      .where(eq(advertisementBanners.id, id))
+      .returning();
+    return updatedBanner || undefined;
   }
 
   async deleteAdvertisementBanner(id: string): Promise<void> {

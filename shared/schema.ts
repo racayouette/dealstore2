@@ -135,6 +135,7 @@ export const blogs = pgTable("blogs", {
 // Advertisement banners table for storing banner ads with images and affiliate links
 export const advertisementBanners = pgTable("advertisement_banners", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageUrl: text("page_url"), // which page this banner appears on (/videos, /posts, etc.)
   position: text("position").notNull(), // header, top, left, right, bottom
   size: text("size").notNull(), // small, medium, large
   title: text("title").notNull(),
