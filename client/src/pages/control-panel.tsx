@@ -8,9 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { ProtectedAdminRoute } from "@/components/protected-admin-route";
+import { getAdminSession, clearAdminSession } from "@/lib/auth";
+import { useLocation } from "wouter";
 
 interface PageBannerSettings {
   id?: string;
@@ -42,6 +45,8 @@ const PAGES: Page[] = [
 export default function AdvertisingPanelPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const adminSession = getAdminSession();
   
   const [selectedPage, setSelectedPage] = useState<Page>(PAGES[0]);
   const [pageSettings, setPageSettings] = useState<PageBannerSettings>({
@@ -142,9 +147,19 @@ export default function AdvertisingPanelPage() {
     updateSettingsMutation.mutate(newSettings);
   };
 
+  const handleLogout = () => {
+    clearAdminSession();
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+    setLocation('/wp-admin');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TopNav />
+    <ProtectedAdminRoute>
+      <div className="min-h-screen bg-gray-50">
+        <TopNav />
       
       <div className="flex">
         {/* Left Sidebar */}
@@ -363,9 +378,10 @@ export default function AdvertisingPanelPage() {
             </Card>
           </div>
         </div>
+        </div>
+        
+        <Footer />
       </div>
-      
-      <Footer />
-    </div>
+    </ProtectedAdminRoute>
   );
 }

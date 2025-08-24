@@ -62,6 +62,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin authentication endpoints
+  app.post('/api/admin/login', async (req, res) => {
+    const { username, password } = req.body;
+    
+    // Simple demo authentication - in production this would check against a secure database
+    if (username === 'admin' && password === 'netdiscount2024') {
+      const token = `admin_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      res.json({
+        success: true,
+        token,
+        username,
+        message: 'Login successful'
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid username or password'
+      });
+    }
+  });
+
+  app.post('/api/admin/verify', async (req, res) => {
+    const { token } = req.body;
+    
+    // Simple token validation - in production this would validate against a secure session store
+    if (token && token.startsWith('admin_token_')) {
+      res.json({
+        success: true,
+        valid: true
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        valid: false,
+        message: 'Invalid token'
+      });
+    }
+  });
+
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {
