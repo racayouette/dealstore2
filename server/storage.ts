@@ -582,13 +582,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings> {
-    const [newSettings] = await db.insert(bannerSettings).values(settings).returning();
+    // Remove any timestamp fields to let database defaults handle them
+    const { createdAt, updatedAt, ...insertData } = settings as any;
+    const [newSettings] = await db.insert(bannerSettings).values(insertData).returning();
     return newSettings;
   }
 
   async updateBannerSettings(pageUrl: string, updates: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined> {
+    // Remove any timestamp fields from updates to avoid conflicts
+    const { createdAt, updatedAt, ...updateData } = updates as any;
     const [updatedSettings] = await db.update(bannerSettings)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(bannerSettings.pageUrl, pageUrl))
       .returning();
     return updatedSettings || undefined;
