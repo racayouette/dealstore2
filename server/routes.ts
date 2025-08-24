@@ -786,6 +786,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Duplicate page endpoint
+  app.post('/api/duplicate-page', async (req, res) => {
+    try {
+      const { originalPageUrl, newPage } = req.body;
+      
+      if (!originalPageUrl || !newPage?.name || !newPage?.url) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Get original page settings
+      const originalSettings = await storage.getBannerSettingByPage(originalPageUrl);
+      
+      // Create new page settings with same configuration
+      const newPageSettings = {
+        pageName: newPage.name,
+        pageUrl: newPage.url,
+        isVisible: originalSettings?.isVisible ?? true,
+        showHeader: originalSettings?.showHeader ?? true,
+        showTop: originalSettings?.showTop ?? true,
+        showLeft: originalSettings?.showLeft ?? true,
+        showRight: originalSettings?.showRight ?? true,
+        showBottom: originalSettings?.showBottom ?? true
+      };
+
+      // Save new page settings
+      await storage.createBannerSettings(newPageSettings);
+
+      // Get original page banners
+      const originalBanners = await storage.getAdvertisementBannersByPage(originalPageUrl);
+      
+      // Duplicate banners for the new page
+      for (const banner of originalBanners) {
+        await storage.createAdvertisementBanner({
+          pageUrl: newPage.url,
+          position: banner.position,
+          size: banner.size,
+          title: banner.title,
+          description: banner.description,
+          imageUrl: banner.imageUrl,
+          clickUrl: banner.clickUrl,
+          isActive: banner.isActive,
+          alwaysShow: banner.alwaysShow,
+          maxImpressions: banner.maxImpressions,
+          displayOrder: banner.displayOrder
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        name: newPage.name,
+        url: newPage.url,
+        description: newPage.description,
+        bannersCount: originalBanners.length
+      });
+    } catch (error) {
+      console.error('Error duplicating page:', error);
+      res.status(500).json({ error: 'Failed to duplicate page' });
+    }
+  });
+
+  // Create new page endpoint
+  app.post('/api/create-page', async (req, res) => {
+    try {
+      const { newPage } = req.body;
+      
+      if (!newPage?.name || !newPage?.url) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Create new page settings with default configuration
+      const newPageSettings = {
+        pageName: newPage.name,
+        pageUrl: newPage.url,
+        isVisible: true,
+        showHeader: true,
+        showTop: true,
+        showLeft: true,
+        showRight: true,
+        showBottom: true
+      };
+
+      // Save new page settings
+      await storage.createBannerSettings(newPageSettings);
+
+      res.status(201).json({
+        success: true,
+        name: newPage.name,
+        url: newPage.url,
+        description: newPage.description || '',
+        bannersCount: 0
+      });
+    } catch (error) {
+      console.error('Error creating page:', error);
+      res.status(500).json({ error: 'Failed to create page' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
