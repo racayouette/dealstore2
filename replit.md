@@ -2,7 +2,7 @@
 
 ## Overview
 
-NetDiscount is a modern web application for aggregating and displaying net deals, coupons, and discounts from various retailers. The platform allows users to browse deals by categories, search for specific products, and discover featured offers from popular stores. Built with a React frontend and Express backend, it provides a comprehensive deal discovery experience with features like deal categorization, store browsing, search functionality, and detailed deal pages.
+NetDiscount is a modern web application for aggregating and displaying net deals, coupons, and discounts from various retailers. The platform allows users to browse deals by categories, search for specific products, and discover featured offers from popular stores. Built with a React frontend and Express backend, it provides a comprehensive deal discovery experience with features like deal categorization, store browsing, search functionality, detailed deal pages, and a comprehensive advertisement banner management system through the Advertising Panel.
 
 ## User Preferences
 
@@ -32,6 +32,8 @@ The application uses a normalized database schema with the following core entiti
 - **Deals**: Core deal entities with pricing, discounts, ratings, and expiration dates
 - **Products**: Product catalog linked to deals and categories
 - **Deal-Product Relations**: Many-to-many relationship between deals and products
+- **Advertisement Banners**: Public service announcement banners with content, styling, and metadata
+- **Banner Settings**: Per-page banner visibility controls managed through the Advertising Panel
 
 ### Development Environment
 - **Development Server**: Vite dev server with HMR (Hot Module Replacement)
@@ -45,6 +47,8 @@ The backend provides RESTful endpoints for:
 - Store browsing with featured store support and alphabetical filtering
 - Deal discovery with filtering by category, store, and search functionality
 - Product catalog management
+- Advertisement banner management with database-driven visibility controls
+- Banner settings per page with centralized control through the Advertising Panel
 
 ### Error Handling and Logging
 - Centralized error handling middleware with appropriate HTTP status codes

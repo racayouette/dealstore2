@@ -21,8 +21,8 @@ export default function TopNav() {
           
           {/* Center - Navigation Links */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/control-panel" className="hover:text-gray-200 transition-colors" data-testid="nav-control-panel">
-              Control Panel
+            <Link href="/advertising-panel" className="hover:text-gray-200 transition-colors" data-testid="nav-advertising-panel">
+              Advertising Panel
             </Link>
             <Link href="/admin/users" className="hover:text-gray-200 transition-colors" data-testid="nav-users">
               Users
@@ -34,7 +34,7 @@ export default function TopNav() {
           
           {/* Right side - User Menu */}
           <div className="flex items-center space-x-3">
-            <Link href="/control-panel">
+            <Link href="/advertising-panel">
               <Button 
                 variant="ghost" 
                 size="sm" 

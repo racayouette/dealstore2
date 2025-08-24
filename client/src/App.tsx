@@ -33,7 +33,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
-      <Route path="/control-panel" component={ControlPanel} />
+      <Route path="/advertising-panel" component={ControlPanel} />
       <Route component={NotFound} />
     </Switch>
   );
