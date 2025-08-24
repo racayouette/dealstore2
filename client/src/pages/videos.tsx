@@ -110,30 +110,7 @@ export default function Videos() {
           </p>
         </div>
 
-        {/* Search and Filter Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <PlayCircle className="w-4 h-4" />
-                <span>Channels</span>
-                <span className="font-medium">{videoChannels.length}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">Sort by</span>
-              <select 
-                className="border rounded-md px-3 py-1 text-sm"
-                data-testid="select-sort"
-              >
-                <option value="followers">Most Followers</option>
-                <option value="videos">Most Videos</option>
-                <option value="recent">Recently Added</option>
-              </select>
-            </div>
-          </div>
-        </div>
+
 
         {/* Video Channels Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
