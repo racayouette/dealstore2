@@ -8,9 +8,13 @@ import { Search, ArrowUp, MessageSquare, ExternalLink, User } from "lucide-react
 import type { Post } from "@shared/schema";
 import Header from "@/components/header";
 import AdvertisementBanner from "@/components/advertisement-banner";
+import { usePageTracking } from "@/hooks/use-page-tracking";
 
 
 export default function Posts() {
+  // Track page view for analytics
+  usePageTracking("Posts", "/posts");
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
 

@@ -8,9 +8,13 @@ import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-re
 import type { Blog } from "@shared/schema";
 import Header from "@/components/header";
 import AdvertisementBanner from "@/components/advertisement-banner";
+import { usePageTracking } from "@/hooks/use-page-tracking";
 
 
 export default function Blogs() {
+  // Track page view for analytics
+  usePageTracking("Blogs", "/blogs");
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
 

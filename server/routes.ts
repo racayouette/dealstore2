@@ -686,6 +686,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Page view tracking routes
+  app.post('/api/page-views', async (req, res) => {
+    try {
+      const { pageName, pageUrl, userAgent } = req.body;
+      
+      if (!pageName || !pageUrl) {
+        return res.status(400).json({ error: 'Page name and URL are required' });
+      }
+
+      // Get client IP address (handle various proxy headers)
+      const forwarded = req.headers['x-forwarded-for'] as string;
+      const ipAddress = req.ip || 
+                       forwarded?.split(',')[0]?.trim() ||
+                       req.headers['x-real-ip'] ||
+                       req.connection?.remoteAddress ||
+                       req.socket?.remoteAddress ||
+                       'unknown';
+
+      const pageView = await storage.createPageView({
+        pageName,
+        pageUrl,
+        ipAddress: String(ipAddress),
+        userAgent: userAgent || req.headers['user-agent'] || 'unknown'
+      });
+
+      res.status(201).json(pageView);
+    } catch (error) {
+      console.error('Error tracking page view:', error);
+      res.status(500).json({ error: 'Failed to track page view' });
+    }
+  });
+
+  // Get page view analytics
+  app.get('/api/page-views', async (req, res) => {
+    try {
+      const { page_name, limit } = req.query;
+      const pageViews = await storage.getPageViews(
+        page_name as string, 
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(pageViews);
+    } catch (error) {
+      console.error('Error getting page views:', error);
+      res.status(500).json({ error: 'Failed to get page views' });
+    }
+  });
+
+  // Get page view count
+  app.get('/api/page-views/count/:pageName', async (req, res) => {
+    try {
+      const { pageName } = req.params;
+      const { ip_address } = req.query;
+      
+      const count = await storage.getPageViewCount(
+        pageName, 
+        ip_address as string
+      );
+      
+      res.json({ count });
+    } catch (error) {
+      console.error('Error getting page view count:', error);
+      res.status(500).json({ error: 'Failed to get page view count' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

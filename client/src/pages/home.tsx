@@ -12,8 +12,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import type { DealWithRelations, Store } from "@shared/schema";
+import { usePageTracking } from "@/hooks/use-page-tracking";
 
 export default function Home() {
+  // Track page view for analytics
+  usePageTracking("Home", "/");
+  
   const { toast } = useToast();
 
   // Fetch featured deals

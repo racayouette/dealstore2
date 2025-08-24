@@ -11,10 +11,12 @@ import { PlayCircle, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import type { VideoChannel } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
+import { usePageTracking } from "@/hooks/use-page-tracking";
 
 
 export default function Videos() {
-
+  // Track page view for analytics
+  usePageTracking("Videos", "/videos");
 
   const { 
     data: videoChannels = [], 
