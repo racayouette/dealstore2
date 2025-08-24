@@ -31,12 +31,7 @@ interface Page {
 }
 
 const PAGES: Page[] = [
-  { name: "Home", url: "/", icon: Home, description: "Main homepage with featured deals" },
-  { name: "Stores", url: "/stores", icon: Store, description: "Browse all stores and retailers" },
-  { name: "Category - Computers", url: "/category/computers", icon: ShoppingBag, description: "Computer deals and electronics" },
   { name: "Category - Electronics", url: "/category/electronics", icon: ShoppingBag, description: "Electronic devices and gadgets" },
-  { name: "Category - Lifestyle", url: "/category/lifestyle-home", icon: ShoppingBag, description: "Home and lifestyle products" },
-  { name: "Category - Business", url: "/category/small-business", icon: ShoppingBag, description: "Small business solutions" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
@@ -45,7 +40,7 @@ const PAGES: Page[] = [
   { name: "Search", url: "/search", icon: Search, description: "Search results page" },
 ];
 
-export default function ControlPanelPage() {
+export default function AdvertisingPanelPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -158,7 +153,7 @@ export default function ControlPanelPage() {
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-2">
               <Settings className="w-6 h-6 text-net-green" />
-              <h1 className="text-xl font-bold text-net-dark">Control Panel</h1>
+              <h1 className="text-xl font-bold text-net-dark">Advertising Panel</h1>
             </div>
             <p className="text-sm text-gray-600">Manage banner settings for each page</p>
           </div>
