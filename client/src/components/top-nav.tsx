@@ -1,6 +1,8 @@
-import { Link } from "wouter";
-import { Settings, User, LogOut } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Settings, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isAdminAuthenticated, getAdminSession, clearAdminSession } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +12,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function TopNav() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const isAdmin = isAdminAuthenticated();
+  const adminSession = getAdminSession();
+
+  const handleLogout = () => {
+    clearAdminSession();
+    toast({
+      title: "Logged Out",
+      description: "You have been logged out successfully.",
+    });
+    setLocation('/wp-admin');
+  };
+
   return (
     <nav className="bg-net-green text-white shadow-md">
       <div className="container mx-auto px-4">
@@ -34,17 +50,26 @@ export default function TopNav() {
           
           {/* Right side - User Menu */}
           <div className="flex items-center space-x-3">
-            <Link href="/advertising-panel">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-white hover:bg-net-green-dark hover:text-white"
-                data-testid="nav-settings-button"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
+            {isAdmin && (
+              <>
+                <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-net-green-dark rounded-full">
+                  <Shield className="w-4 h-4" />
+                  <span className="text-sm font-medium">{adminSession?.username}</span>
+                </div>
+                
+                <Link href="/advertising-panel">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-white hover:bg-net-green-dark hover:text-white"
+                    data-testid="nav-settings-button"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Button>
+                </Link>
+              </>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -62,15 +87,23 @@ export default function TopNav() {
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem data-testid="menu-settings">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Account Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem data-testid="menu-logout">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem data-testid="menu-settings">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Account Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-red-600" 
+                      data-testid="menu-logout"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Admin Logout
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

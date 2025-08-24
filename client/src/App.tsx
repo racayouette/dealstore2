@@ -17,6 +17,7 @@ import Auth from "@/pages/auth";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import ControlPanel from "@/pages/control-panel";
+import AdminLogin from "@/pages/admin-login";
 
 function Router() {
   return (
@@ -34,6 +35,8 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/advertising-panel" component={ControlPanel} />
+      <Route path="/wp-admin" component={AdminLogin} />
+      <Route path="/admin-login" component={AdminLogin} />
       <Route component={NotFound} />
     </Switch>
   );
