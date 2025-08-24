@@ -143,6 +143,8 @@ export const advertisementBanners = pgTable("advertisement_banners", {
   imageUrl: text("image_url").notNull(),
   clickUrl: text("click_url").notNull(),
   isActive: boolean("is_active").default(true),
+  alwaysShow: boolean("always_show").default(true), // if true, banner always shows; if false, limited by impressions
+  maxImpressions: integer("max_impressions").default(0), // max number of impressions when always_show is false (0 = unlimited)
   displayOrder: integer("display_order").default(0),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),

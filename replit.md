@@ -32,7 +32,7 @@ The application uses a normalized database schema with the following core entiti
 - **Deals**: Core deal entities with pricing, discounts, ratings, and expiration dates
 - **Products**: Product catalog linked to deals and categories
 - **Deal-Product Relations**: Many-to-many relationship between deals and products
-- **Advertisement Banners**: Public service announcement banners with content, styling, and metadata
+- **Advertisement Banners**: Public service announcement banners with content, styling, metadata, and impression controls
 - **Banner Settings**: Per-page banner visibility controls managed through the Advertising Panel
 
 ### Development Environment
@@ -47,8 +47,10 @@ The backend provides RESTful endpoints for:
 - Store browsing with featured store support and alphabetical filtering
 - Deal discovery with filtering by category, store, and search functionality
 - Product catalog management
-- Advertisement banner management with database-driven visibility controls
+- Advertisement banner management with database-driven visibility controls and impression limiting
 - Banner settings per page with centralized control through the Advertising Panel
+- Real-time banner content editing with auto-save functionality
+- Impression-based banner display controls (always show vs. limited impressions)
 
 ### Error Handling and Logging
 - Centralized error handling middleware with appropriate HTTP status codes
