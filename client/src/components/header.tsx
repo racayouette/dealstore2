@@ -57,7 +57,7 @@ export default function Header() {
                 <img 
                   src={logoImage} 
                   alt={siteSettings?.siteName || 'NetDiscount'} 
-                  className="h-12 cursor-pointer"
+                  className="h-16 cursor-pointer"
                 />
               )}
             </Link>
