@@ -428,7 +428,6 @@ interface Page {
 }
 
 const STATIC_PAGES: Page[] = [
-  { name: "SEO Panel", url: "/seo-panel", icon: Globe, description: "SEO & page management controls" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
