@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -443,7 +443,12 @@ function PageListItem({
   updateSettingsMutation,
   onDuplicate,
   onDelete,
-  onRename 
+  onRename,
+  index,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  isDragging
 }: { 
   page: Page; 
   selectedPage: Page; 
@@ -452,6 +457,11 @@ function PageListItem({
   onDuplicate: (page: Page) => void;
   onDelete: (page: Page) => void;
   onRename: (page: Page) => void;
+  index: number;
+  onDragStart: (e: React.DragEvent, index: number) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent, index: number) => void;
+  isDragging: boolean;
 }) {
   const { toast } = useToast();
   const IconComponent = page.icon;
@@ -501,13 +511,27 @@ function PageListItem({
 
   return (
     <div
-      className={`rounded-lg border ${
+      draggable
+      onDragStart={(e) => onDragStart(e, index)}
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, index)}
+      className={`rounded-lg border transition-all duration-200 ${
         selectedPage.url === page.url 
           ? 'border-net-green bg-net-green' 
           : 'border-transparent'
-      }`}
+      } ${isDragging ? 'opacity-50 scale-95' : 'opacity-100 scale-100'} cursor-move`}
     >
       <div className="flex items-center">
+        <div
+          className={`px-2 py-3 border-r cursor-grab active:cursor-grabbing ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green-dark text-white border-net-green-dark' 
+              : 'text-gray-400 hover:text-gray-600 border-gray-200'
+          }`}
+          title="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
         <button
           onClick={handleVisibilityToggle}
           className={`px-2 py-3 rounded-l-lg transition-colors border-r ${
@@ -633,7 +657,15 @@ export default function AdvertisingPanelPage() {
     };
   }) : [];
 
-  const allPages = dynamicPages.length > 0 ? dynamicPages : STATIC_PAGES;
+  const allPages = dynamicPages.length > 0 
+    ? dynamicPages.sort((a, b) => {
+        const aSettings = allSettings.find((s: any) => s.pageUrl === a.url);
+        const bSettings = allSettings.find((s: any) => s.pageUrl === b.url);
+        const aSort = aSettings?.sortOrder || 999;
+        const bSort = bSettings?.sortOrder || 999;
+        return aSort !== bSort ? aSort - bSort : a.name.localeCompare(b.name);
+      })
+    : STATIC_PAGES;
   const [pageSettings, setPageSettings] = useState<PageBannerSettings>({
     pageName: selectedPage.name,
     pageUrl: selectedPage.url,
@@ -816,6 +848,68 @@ export default function AdvertisingPanelPage() {
     });
   };
 
+  // Mutation for reordering pages
+  const reorderPagesMutation = useMutation({
+    mutationFn: async (pageUrls: string[]) => {
+      return await apiRequest('PATCH', '/api/banner-settings/reorder', { pageUrls });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
+      toast({
+        title: "Success",
+        description: "Pages reordered successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reorder pages.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Drag and Drop handlers
+  const [draggedPageIndex, setDraggedPageIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedPageIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    
+    if (draggedPageIndex === null || draggedPageIndex === dropIndex) {
+      setDraggedPageIndex(null);
+      return;
+    }
+
+    const newPages = [...allPages];
+    const draggedPage = newPages[draggedPageIndex];
+    
+    // Remove the dragged page from its original position
+    newPages.splice(draggedPageIndex, 1);
+    
+    // Insert it at the new position
+    const insertIndex = draggedPageIndex < dropIndex ? dropIndex - 1 : dropIndex;
+    newPages.splice(insertIndex, 0, draggedPage);
+    
+    // Extract the URLs in the new order
+    const newPageOrder = newPages.map(page => page.url);
+    
+    // Send the reorder request
+    reorderPagesMutation.mutate(newPageOrder);
+    
+    setDraggedPageIndex(null);
+  };
+
   // Update local state when page changes or settings are fetched
   useEffect(() => {
     if (currentSettings) {
@@ -952,8 +1046,7 @@ export default function AdvertisingPanelPage() {
                 </Button>
               </div>
               <div className="space-y-1">
-                {allPages.map((page) => {
-                  const IconComponent = page.icon;
+                {allPages.map((page, index) => {
                   return (
                     <PageListItem 
                       key={page.url} 
@@ -964,6 +1057,11 @@ export default function AdvertisingPanelPage() {
                       onDuplicate={handleDuplicatePage}
                       onDelete={handleDeletePage}
                       onRename={handleRenamePage}
+                      index={index}
+                      onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      isDragging={draggedPageIndex === index}
                     />
                   );
                 })}
