@@ -11,12 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
 import { getAdminSession, clearAdminSession } from "@/lib/auth";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface PageBannerSettings {
   id?: string;
@@ -45,6 +49,161 @@ interface AdvertisementBanner {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface SiteSettings {
+  id: string;
+  siteName: string;
+  siteDescription: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const siteSettingsSchema = z.object({
+  siteName: z.string().min(1, "Site name is required").max(100, "Site name must be 100 characters or less"),
+  siteDescription: z.string().min(1, "Site description is required").max(500, "Site description must be 500 characters or less"),
+});
+
+function SiteSettingsForm() {
+  const { toast } = useToast();
+  
+  // Fetch current site settings
+  const { data: siteSettings, isLoading } = useQuery({
+    queryKey: ['/api/site-settings'],
+    queryFn: async (): Promise<SiteSettings> => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
+  });
+
+  // Update site settings mutation
+  const updateSiteSettingsMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof siteSettingsSchema>) => {
+      const response = await fetch('/api/site-settings', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update site settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Updated",
+        description: "Site settings have been saved successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/site-settings'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update site settings",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const form = useForm<z.infer<typeof siteSettingsSchema>>({
+    resolver: zodResolver(siteSettingsSchema),
+    defaultValues: {
+      siteName: "",
+      siteDescription: "",
+    },
+  });
+
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (siteSettings) {
+      form.reset({
+        siteName: siteSettings.siteName,
+        siteDescription: siteSettings.siteDescription,
+      });
+    }
+  }, [siteSettings, form]);
+
+  const onSubmit = async (data: z.infer<typeof siteSettingsSchema>) => {
+    await updateSiteSettingsMutation.mutateAsync(data);
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Site Settings</CardTitle>
+          <CardDescription>Loading settings...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Settings className="w-5 h-5" />
+          Site Settings
+        </CardTitle>
+        <CardDescription>
+          Configure general settings for your site. Changes will be reflected across the entire application.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="siteName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Site Name</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter site name" 
+                      {...field}
+                      data-testid="input-site-name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="siteDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Site Description</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter site description" 
+                      {...field}
+                      data-testid="input-site-description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex items-center gap-3">
+              <Button 
+                type="submit" 
+                disabled={updateSiteSettingsMutation.isPending}
+                data-testid="button-save-settings"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {updateSiteSettingsMutation.isPending ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
 }
 
 interface BannerSectionProps {
@@ -428,6 +587,7 @@ interface Page {
 }
 
 const STATIC_PAGES: Page[] = [
+  { name: "Site Settings", url: "/site-settings", icon: Settings, description: "General site configuration" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
@@ -1091,6 +1251,13 @@ export default function AdvertisingPanelPage() {
               </div>
             </div>
             
+            {/* Site Settings Page */}
+            {selectedPage.url === "/site-settings" && (
+              <SiteSettingsForm />
+            )}
+            
+            {/* Advertisement Banner Settings for other pages */}
+            {selectedPage.url !== "/site-settings" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1281,9 +1448,10 @@ export default function AdvertisingPanelPage() {
                 )}
               </CardContent>
             </Card>
+            )}
           </div>
         </div>
-        </div>
+      </div>
         
         <Footer />
       </div>

@@ -515,6 +515,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get site settings
+  app.get("/api/site-settings", async (req, res) => {
+    try {
+      const settings = await storage.getSiteSettings();
+      res.status(200).json(settings);
+    } catch (error) {
+      console.error("Error fetching site settings:", error);
+      res.status(500).json({ error: "Failed to fetch site settings" });
+    }
+  });
+
+  // Update site settings
+  app.patch("/api/site-settings", async (req, res) => {
+    try {
+      const updates = req.body;
+      const updatedSettings = await storage.updateSiteSettings(updates);
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      console.error("Error updating site settings:", error);
+      res.status(500).json({ error: "Failed to update site settings" });
+    }
+  });
+
   // Get visible pages for navigation
   app.get("/api/visible-pages", async (req, res) => {
     try {
