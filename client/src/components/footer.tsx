@@ -55,12 +55,6 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <div className="space-y-2">
-              <Link href="/contact" className="block text-gray-300 hover:text-white text-sm" data-testid="footer-contact">
-                Contact Us
-              </Link>
-              <Link href="/about" className="block text-gray-300 hover:text-white text-sm" data-testid="footer-about">
-                About Us
-              </Link>
               <Link href="/privacy" className="block text-gray-300 hover:text-white text-sm" data-testid="footer-privacy">
                 Privacy Policy
               </Link>
