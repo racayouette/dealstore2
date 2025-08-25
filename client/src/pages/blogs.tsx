@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-react";
 import type { Blog } from "@shared/schema";
 import Header from "@/components/header";
@@ -18,6 +19,8 @@ export default function Blogs() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const blogsPerPage = 6;
 
 
   const { data: blogs = [], isLoading } = useQuery<Blog[]>({
@@ -114,14 +117,20 @@ export default function Blogs() {
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(groupedBlogs).map(([category, categoryBlogs]) => (
-                  <div key={category} className="space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-4">
-                      {category}
-                    </h2>
-                    
-                    <div className="grid gap-4">
-                      {categoryBlogs.map((blog) => (
+                {Object.entries(groupedBlogs).map(([category, categoryBlogs]) => {
+                  const totalCategoryBlogs = categoryBlogs.length;
+                  const totalPages = Math.ceil(totalCategoryBlogs / blogsPerPage);
+                  const startIndex = (currentPage - 1) * blogsPerPage;
+                  const paginatedBlogs = categoryBlogs.slice(startIndex, startIndex + blogsPerPage);
+                  
+                  return (
+                    <div key={category} className="space-y-4">
+                      <h2 className="text-xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-4">
+                        {category}
+                      </h2>
+                      
+                      <div className="grid gap-4">
+                        {paginatedBlogs.map((blog) => (
                         <Card key={blog.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200">
                           <div className="flex flex-col md:flex-row">
                             {/* Blog Image */}
@@ -219,10 +228,48 @@ export default function Blogs() {
                             </div>
                           </div>
                         </Card>
-                      ))}
+                        ))}
+                      </div>
+                      
+                      {/* Pagination Controls */}
+                      {totalCategoryBlogs > blogsPerPage && (
+                        <Pagination className="mt-8">
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
+                                onClick={() => {
+                                  if (currentPage > 1) {
+                                    setCurrentPage(currentPage - 1);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }
+                                }}
+                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                            
+                            <PaginationItem>
+                              <span className="text-sm text-gray-600">
+                                Page {currentPage} of {totalPages} ({totalCategoryBlogs} total blogs)
+                              </span>
+                            </PaginationItem>
+                            
+                            <PaginationItem>
+                              <PaginationNext 
+                                onClick={() => {
+                                  if (currentPage < totalPages) {
+                                    setCurrentPage(currentPage + 1);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }
+                                }}
+                                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 {blogs.length === 0 && !isLoading && (
                   <div className="text-center py-12">

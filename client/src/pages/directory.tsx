@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-{/* Removed unused Tabs and Separator imports */}
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import AdvertisementBanner from '@/components/advertisement-banner';
@@ -19,6 +19,8 @@ export default function Directory() {
   usePageTracking("Directory", "/directory");
   
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const businessesPerPage = 6;
 
 
   // Fetch businesses
@@ -228,9 +230,48 @@ export default function Directory() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {filteredBusinesses.map(renderBusinessCard)}
-        </div>
+        <>
+          <div className="space-y-4">
+            {filteredBusinesses.slice((currentPage - 1) * businessesPerPage, currentPage * businessesPerPage).map(renderBusinessCard)}
+          </div>
+          
+          {/* Pagination Controls */}
+          {filteredBusinesses.length > businessesPerPage && (
+            <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => {
+                      if (currentPage > 1) {
+                        setCurrentPage(currentPage - 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                <PaginationItem>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {Math.ceil(filteredBusinesses.length / businessesPerPage)} ({filteredBusinesses.length} total businesses)
+                  </span>
+                </PaginationItem>
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => {
+                      if (currentPage < Math.ceil(filteredBusinesses.length / businessesPerPage)) {
+                        setCurrentPage(currentPage + 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === Math.ceil(filteredBusinesses.length / businessesPerPage) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
       )}
 
       {/* Load More Button (if needed) */}

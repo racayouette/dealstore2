@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Search, Play, ExternalLink, User, Eye, Clock } from "lucide-react";
 import type { YoutubeVideo } from "@shared/schema";
 import Header from "@/components/header";
@@ -12,6 +13,8 @@ import AdvertisementBanner from "@/components/advertisement-banner";
 export default function Video2() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const videosPerPage = 6;
 
 
   const { data: videos = [], isLoading } = useQuery<YoutubeVideo[]>({
@@ -111,7 +114,7 @@ export default function Video2() {
           </div>
         ) : (
           <div className="space-y-4">
-            {videos.map((video) => (
+            {videos.slice((currentPage - 1) * videosPerPage, currentPage * videosPerPage).map((video) => (
               <div key={video.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
                 <div className="flex flex-col md:flex-row">
                   {/* Video Thumbnail */}
@@ -194,6 +197,43 @@ export default function Video2() {
                 </div>
               </div>
             ))}
+            
+            {/* Pagination Controls */}
+            {videos.length > videosPerPage && (
+              <Pagination className="mt-8">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => {
+                        if (currentPage > 1) {
+                          setCurrentPage(currentPage - 1);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  <PaginationItem>
+                    <span className="text-sm text-gray-600">
+                      Page {currentPage} of {Math.ceil(videos.length / videosPerPage)} ({videos.length} total videos)
+                    </span>
+                  </PaginationItem>
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => {
+                        if (currentPage < Math.ceil(videos.length / videosPerPage)) {
+                          setCurrentPage(currentPage + 1);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className={currentPage === Math.ceil(videos.length / videosPerPage) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
             
             {videos.length === 0 && !isLoading && (
               <div className="text-center py-12">
