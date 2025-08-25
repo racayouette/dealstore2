@@ -1227,22 +1227,6 @@ export default function AdvertisingPanelPage() {
                 </Button>
               </div>
               
-              {/* Column Headers - Two Rows */}
-              <div className="border-b border-gray-200 mb-2 pb-2">
-                <div className="grid grid-cols-8 gap-1 px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  <div className="col-span-1 text-center">Order</div>
-                  <div className="col-span-1 text-center">Visible</div>
-                  <div className="col-span-6">Page Name & Description</div>
-                </div>
-                <div className="grid grid-cols-8 gap-1 px-2 py-1 text-xs font-medium text-gray-500 uppercase tracking-wide">
-                  <div className="col-span-2"></div>
-                  <div className="col-span-2 text-center">Actions</div>
-                  <div className="col-span-1 text-center">Rename</div>
-                  <div className="col-span-1 text-center">Delete</div>
-                  <div className="col-span-1 text-center">Copy</div>
-                  <div className="col-span-1 text-center">View</div>
-                </div>
-              </div>
               
               <div className="space-y-1">
                 {allPages.map((page, index) => {
