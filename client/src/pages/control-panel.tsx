@@ -803,7 +803,7 @@ export default function AdvertisingPanelPage() {
     name: ''
   });
 
-  // Query for page visibility status
+  // Query for page visibility status - we still need this for navigation
   const { data: visiblePages } = useQuery({
     queryKey: ['/api/visible-pages'],
     queryFn: () => fetch('/api/visible-pages').then(res => res.json())
@@ -818,15 +818,15 @@ export default function AdvertisingPanelPage() {
     },
   });
 
-  // Create dynamic pages list from database
-  const dynamicPages: Page[] = visiblePages ? visiblePages.map((page: any) => {
+  // Create dynamic pages list from ALL banner settings (not just visible ones)
+  const dynamicPages: Page[] = allSettings.length > 0 ? allSettings.map((setting: any) => {
     // Find matching static page for icon, or use default
-    const staticMatch = STATIC_PAGES.find(sp => sp.url === page.pageUrl);
+    const staticMatch = STATIC_PAGES.find(sp => sp.url === setting.pageUrl);
     return {
-      name: page.pageName,
-      url: page.pageUrl,
+      name: setting.pageName,
+      url: setting.pageUrl,
       icon: staticMatch?.icon || FileText,
-      description: staticMatch?.description || page.pageName
+      description: staticMatch?.description || setting.pageName
     };
   }) : [];
 
