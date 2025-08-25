@@ -19,6 +19,7 @@ import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import Search from "@/pages/search";
 import ControlPanel from "@/pages/control-panel";
+import SEOPanel from "@/pages/seo-panel";
 import AdminLogin from "@/pages/admin-login";
 import Analytics from "@/pages/analytics";
 
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/advertising-panel" component={ControlPanel} />
+      <Route path="/seo-panel" component={SEOPanel} />
       <Route path="/wp-admin" component={AdminLogin} />
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/analytics" component={Analytics} />
