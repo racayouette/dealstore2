@@ -692,18 +692,21 @@ function PageListItem({
         >
           <GripVertical className="w-4 h-4" />
         </div>
-        <button
-          onClick={handleVisibilityToggle}
-          className={`px-2 py-3 rounded-l-lg transition-colors border-r ${
+        <div
+          className={`px-2 py-3 transition-colors border-r flex items-center justify-center ${
             selectedPage.url === page.url 
-              ? 'bg-net-green-dark hover:bg-net-green text-white border-net-green-dark' 
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-700 border-gray-200'
+              ? 'bg-net-green-dark border-net-green-dark' 
+              : 'border-gray-200'
           }`}
-          title={`${isVisible ? 'Hide' : 'Show'} ${page.name} page from navigation`}
-          data-testid={`toggle-visibility-${page.url.replace('/', '')}`}
         >
-          {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-        </button>
+          <Checkbox
+            checked={isVisible}
+            onCheckedChange={handleVisibilityToggle}
+            title={`${isVisible ? 'Hide' : 'Show'} ${page.name} page from navigation`}
+            data-testid={`toggle-visibility-${page.url.replace('/', '')}`}
+            className="border-2"
+          />
+        </div>
         <button
           onClick={() => setSelectedPage(page)}
           className={`flex-1 text-left p-3 transition-colors flex items-center gap-3 ${
@@ -1222,6 +1225,18 @@ export default function AdvertisingPanelPage() {
                   Add
                 </Button>
               </div>
+              
+              {/* Column Headers */}
+              <div className="grid grid-cols-12 gap-1 px-2 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide border-b border-gray-200 mb-2">
+                <div className="col-span-1 text-center">Order</div>
+                <div className="col-span-1 text-center">Visible</div>
+                <div className="col-span-6">Page Name</div>
+                <div className="col-span-1 text-center">Rename</div>
+                <div className="col-span-1 text-center">Delete</div>
+                <div className="col-span-1 text-center">Copy</div>
+                <div className="col-span-1 text-center">View</div>
+              </div>
+              
               <div className="space-y-1">
                 {allPages.map((page, index) => {
                   return (
