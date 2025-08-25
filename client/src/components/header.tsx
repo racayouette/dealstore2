@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import type { BannerSettings, SiteSettings } from "@shared/schema";
+import logoImage from "@/assets/logo.png";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,9 +49,17 @@ export default function Header() {
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center space-x-4">
             <Link href="/" data-testid="link-logo">
-              <h1 className="text-2xl font-bold cursor-pointer text-black">
-                {siteSettings?.siteName || 'NetDiscount'}
-              </h1>
+              {isAdminPage ? (
+                <h1 className="text-2xl font-bold cursor-pointer text-black">
+                  {siteSettings?.siteName || 'NetDiscount'}
+                </h1>
+              ) : (
+                <img 
+                  src={logoImage} 
+                  alt={siteSettings?.siteName || 'NetDiscount'} 
+                  className="h-12 cursor-pointer"
+                />
+              )}
             </Link>
           </div>
           
