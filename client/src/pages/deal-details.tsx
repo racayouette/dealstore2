@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
-import type { DealWithRelations } from "@shared/schema";
+import type { DealWithRelations, SiteSettings } from "@shared/schema";
 
 export default function DealDetails() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +24,16 @@ export default function DealDetails() {
     queryKey: ["/api/deals", id],
     queryFn: () => api.getDealById(id!),
     enabled: !!id,
+  });
+
+  // Fetch site settings for dynamic site name
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
   });
 
   const formatPrice = (price: string | null) => {
@@ -108,7 +118,7 @@ export default function DealDetails() {
       <div className="bg-gray-100 border-b">
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
-            Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            {siteSettings?.siteName || 'NetDiscount'} is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
             <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
