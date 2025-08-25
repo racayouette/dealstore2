@@ -210,56 +210,6 @@ export default function Stores() {
             </section>
           </div>
 
-          {/* Sidebar */}
-          <aside className="w-80 space-y-8">
-            {/* Store Information */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-xl font-bold text-net-dark mb-4">Find Your Favorite Stores</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Browse through our extensive collection of partner stores to find the best deals and coupons. 
-                From technology retailers to lifestyle brands, we have partnerships with the most trusted names in retail.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-net-dark mb-4">Popular Categories</h3>
-              
-              <div className="space-y-2">
-                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
-                  Computer Stores
-                </a>
-                <a href="/category/electronics" className="block text-net-green hover:underline text-sm">
-                  Electronics Stores
-                </a>
-                <a href="/category/lifestyle-home" className="block text-net-green hover:underline text-sm">
-                  Home & Lifestyle
-                </a>
-                <a href="/category/small-business" className="block text-net-green hover:underline text-sm">
-                  Business Solutions
-                </a>
-              </div>
-            </div>
-
-            {/* Store Stats */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-net-dark mb-4">Store Directory</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Stores:</span>
-                  <span className="text-sm font-medium">500+</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Featured Stores:</span>
-                  <span className="text-sm font-medium">{featuredStores.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Active Deals:</span>
-                  <span className="text-sm font-medium">1,200+</span>
-                </div>
-              </div>
-            </div>
-          </aside>
         </div>
       </main>
 
