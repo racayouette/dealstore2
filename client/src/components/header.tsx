@@ -5,16 +5,11 @@ import { Search, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import type { CategoryWithChildren, BannerSettings } from "@shared/schema";
+import type { BannerSettings } from "@shared/schema";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [, navigate] = useLocation();
-
-  const { data: categories = [] } = useQuery<CategoryWithChildren[]>({
-    queryKey: ["/api/categories"],
-    queryFn: () => api.getCategories(),
-  });
 
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
     queryKey: ["/api/visible-pages"],
@@ -91,23 +86,6 @@ export default function Header() {
         {/* Navigation Menu */}
         <nav className="border-t border-blue-400">
           <div className="flex space-x-8 py-2">
-            <Link 
-              href="/stores" 
-              className="hover:text-blue-200 font-medium"
-              data-testid="nav-stores"
-            >
-              Stores
-            </Link>
-            {categories.map((category) => (
-              <Link
-                key={category.id}
-                href={`/category/${category.slug}`}
-                className="hover:text-blue-200 font-medium"
-                data-testid={`nav-${category.slug}`}
-              >
-                {category.name}
-              </Link>
-            ))}
             {visiblePages.map((page) => (
               <Link
                 key={page.pageUrl}
