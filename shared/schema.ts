@@ -175,6 +175,15 @@ export const bannerSettings = pgTable("banner_settings", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// Site settings table for global site configuration
+export const siteSettings = pgTable("site_settings", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  siteName: text("site_name").notNull().default("NetDiscount"),
+  siteDescription: text("site_description").default("Deal Aggregation Platform"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
@@ -280,6 +289,12 @@ export const insertBannerSettingsSchema = createInsertSchema(bannerSettings).omi
   updatedAt: true,
 });
 
+export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertPageViewSchema = createInsertSchema(pageViews).omit({
   id: true,
   createdAt: true,
@@ -377,6 +392,7 @@ export type Blog = typeof blogs.$inferSelect;
 export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
 export type BannerSettings = typeof bannerSettings.$inferSelect;
 export type PageView = typeof pageViews.$inferSelect;
+export type SiteSettings = typeof siteSettings.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
@@ -390,6 +406,7 @@ export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
 
 // Directory insert schemas
 export const insertBusinessCategorySchema = createInsertSchema(businessCategories).omit({

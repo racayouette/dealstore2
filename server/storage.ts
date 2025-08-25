@@ -10,6 +10,7 @@ import {
   blogs,
   advertisementBanners,
   bannerSettings,
+  siteSettings,
   pageViews,
   businessCategories,
   businesses,
@@ -47,6 +48,8 @@ import {
   type InsertAdvertisementBanner,
   type InsertBannerSettings,
   type InsertPageView,
+  type SiteSettings,
+  type InsertSiteSettings,
   type InsertBusinessCategory,
   type InsertBusiness,
   type InsertBusinessHours,
@@ -172,6 +175,10 @@ export interface IStorage {
   // Analytics
   getPageViewAnalytics(days: number): Promise<any[]>;
   getDailySummary(days: number): Promise<any[]>;
+
+  // Site settings
+  getSiteSettings(): Promise<SiteSettings>;
+  updateSiteSettings(updates: Partial<InsertSiteSettings>): Promise<SiteSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1069,6 +1076,36 @@ export class DatabaseStorage implements IStorage {
       uniquePages: Number(row.uniquePages),
       topPage: row.topPage || 'N/A'
     }));
+  }
+
+  // Site Settings
+  async getSiteSettings(): Promise<SiteSettings> {
+    // Get first site settings record or create default if none exists
+    let [settings] = await db.select().from(siteSettings).limit(1);
+    
+    if (!settings) {
+      // Create default settings if none exist
+      [settings] = await db.insert(siteSettings).values({
+        siteName: "NetDiscount",
+        siteDescription: "Deal Aggregation Platform"
+      }).returning();
+    }
+    
+    return settings;
+  }
+
+  async updateSiteSettings(updates: Partial<InsertSiteSettings>): Promise<SiteSettings> {
+    // Get existing settings or create if none exist
+    const existingSettings = await this.getSiteSettings();
+    
+    // Update the settings
+    const [updatedSettings] = await db
+      .update(siteSettings)
+      .set({ ...updates, updatedAt: sql`now()` })
+      .where(eq(siteSettings.id, existingSettings.id))
+      .returning();
+    
+    return updatedSettings;
   }
 }
 
