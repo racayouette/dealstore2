@@ -130,7 +130,17 @@ export default function Directory() {
                   {business.phone && (
                     <div className="flex items-center gap-1">
                       <Phone className="w-4 h-4" />
-                      <span>{business.phone}</span>
+                      {window.innerWidth < 1024 ? ( // Mobile - make clickable
+                        <a 
+                          href={`tel:${business.phone}`}
+                          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                          data-testid={`link-phone-${business.id}`}
+                        >
+                          {business.phone}
+                        </a>
+                      ) : ( // Desktop - plain text
+                        <span>{business.phone}</span>
+                      )}
                     </div>
                   )}
                 </div>
