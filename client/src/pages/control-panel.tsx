@@ -830,15 +830,19 @@ export default function AdvertisingPanelPage() {
     };
   }) : [];
 
-  const allPages = dynamicPages.length > 0 
-    ? dynamicPages.sort((a, b) => {
-        const aSettings = allSettings.find((s: any) => s.pageUrl === a.url);
-        const bSettings = allSettings.find((s: any) => s.pageUrl === b.url);
-        const aSort = aSettings?.sortOrder || 999;
-        const bSort = bSettings?.sortOrder || 999;
-        return aSort !== bSort ? aSort - bSort : a.name.localeCompare(b.name);
-      })
-    : STATIC_PAGES;
+  // Combine static pages with dynamic pages, ensuring static pages are always included
+  const allPagesUnsorted: Page[] = [
+    ...STATIC_PAGES, // Always include static pages like Site Settings
+    ...dynamicPages.filter(dp => !STATIC_PAGES.some(sp => sp.url === dp.url)) // Add dynamic pages that aren't already in static
+  ];
+
+  const allPages = allPagesUnsorted.sort((a, b) => {
+    const aSettings = allSettings.find((s: any) => s.pageUrl === a.url);
+    const bSettings = allSettings.find((s: any) => s.pageUrl === b.url);
+    const aSort = aSettings?.sortOrder || 999;
+    const bSort = bSettings?.sortOrder || 999;
+    return aSort !== bSort ? aSort - bSort : a.name.localeCompare(b.name);
+  });
   
   // Auto-select first page when pages are loaded
   useEffect(() => {
