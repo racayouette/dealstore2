@@ -22,6 +22,31 @@ export default function Directory() {
   const [currentPage, setCurrentPage] = useState(1);
   const businessesPerPage = 6;
 
+  // Function to get map link based on device/platform
+  const getMapLink = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+    
+    // Check if it's an iPhone
+    if (/iphone|ipod/.test(userAgent) && !isDesktop) {
+      return `maps://maps.apple.com/?q=${encodedAddress}`;
+    }
+    
+    // Check if it's Android
+    if (/android/.test(userAgent) && !isDesktop) {
+      return `https://maps.google.com/?q=${encodedAddress}`;
+    }
+    
+    // Desktop - default to Google Maps (could add MapQuest option)
+    if (isDesktop) {
+      return `https://maps.google.com/?q=${encodedAddress}`;
+    }
+    
+    // Fallback to Google Maps
+    return `https://maps.google.com/?q=${encodedAddress}`;
+  };
+
 
   // Fetch businesses
   const { data: businesses, isLoading } = useQuery<BusinessWithCategory[]>({
@@ -91,7 +116,15 @@ export default function Directory() {
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    <span>{business.address}</span>
+                    <a 
+                      href={getMapLink(business.address)}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                      data-testid={`link-address-${business.id}`}
+                    >
+                      {business.address}
+                    </a>
                   </div>
                   
                   {business.phone && (
