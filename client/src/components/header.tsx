@@ -5,7 +5,7 @@ import { Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
-import type { BannerSettings } from "@shared/schema";
+import type { BannerSettings, SiteSettings } from "@shared/schema";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,6 +15,16 @@ export default function Header() {
     queryKey: ["/api/visible-pages"],
     queryFn: async () => {
       const response = await fetch("/api/visible-pages");
+      return response.json();
+    },
+  });
+
+  // Fetch site settings for dynamic site name
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
       return response.json();
     },
   });
@@ -38,9 +48,8 @@ export default function Header() {
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center space-x-4">
             <Link href="/" data-testid="link-logo">
-              <h1 className="text-2xl font-bold cursor-pointer">
-                <span className="text-white">net</span>
-                <span className="text-blue-200">discount</span>
+              <h1 className="text-2xl font-bold cursor-pointer text-black">
+                {siteSettings?.siteName || 'NetDiscount'}
               </h1>
             </Link>
           </div>
