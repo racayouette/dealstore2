@@ -540,7 +540,7 @@ function PageListItem({
         </button>
         <button
           onClick={() => onDuplicate(page)}
-          className={`px-3 py-3 transition-colors border-l ${
+          className={`px-4 py-3 transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
@@ -552,7 +552,7 @@ function PageListItem({
         </button>
         <button
           onClick={() => window.open(page.url, '_blank')}
-          className={`px-3 py-3 rounded-r-lg transition-colors border-l ${
+          className={`px-4 py-3 rounded-r-lg transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
@@ -807,7 +807,7 @@ export default function AdvertisingPanelPage() {
       
       <div className="flex">
         {/* Left Sidebar */}
-        <div className="w-96 bg-white border-r border-gray-200 min-h-screen">
+        <div className="w-[480px] bg-white border-r border-gray-200 min-h-screen">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-2">
               <Settings className="w-6 h-6 text-net-green" />
