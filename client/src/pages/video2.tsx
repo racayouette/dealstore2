@@ -102,26 +102,7 @@ export default function Video2() {
           </form>
         </div>
 
-        {/* Filter tabs (YouTube-style) */}
-        <div className="mb-6 border-b border-gray-200">
-          <div className="flex space-x-8 overflow-x-auto">
-            <button className="pb-2 px-1 text-sm font-medium border-b-2 border-red-600 text-red-600">
-              All
-            </button>
-            <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-              Today
-            </button>
-            <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-              This week
-            </button>
-            <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-              This month
-            </button>
-            <button className="pb-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
-              This year
-            </button>
-          </div>
-        </div>
+        {/* Removed Filter tabs */}
 
         {isLoading ? (
           <div className="text-center py-8">
