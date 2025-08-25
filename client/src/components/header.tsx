@@ -84,7 +84,7 @@ export default function Header() {
         </div>
         
         {/* Navigation Menu */}
-        <nav className="border-t border-blue-400">
+        <nav className="border-t border-green-600">
           <div className="flex space-x-8 py-2">
             {Array.isArray(visiblePages) && visiblePages.map((page) => (
               <Link
