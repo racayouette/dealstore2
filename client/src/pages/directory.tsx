@@ -6,32 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
+{/* Removed unused Tabs and Separator imports */}
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import AdvertisementBanner from '@/components/advertisement-banner';
 import { usePageTracking } from '@/hooks/use-page-tracking';
 
-import type { BusinessCategory, BusinessWithCategory, BusinessWithDetails } from '@shared/schema';
+import type { BusinessWithCategory } from '@shared/schema';
 
 export default function Directory() {
   // Track page view for analytics
   usePageTracking("Directory", "/directory");
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('all');
 
-
-  // Fetch business categories
-  const { data: categories } = useQuery<BusinessCategory[]>({
-    queryKey: ['/api/business-categories'],
-  });
 
   // Fetch businesses
   const { data: businesses, isLoading } = useQuery<BusinessWithCategory[]>({
-    queryKey: ['/api/businesses', searchQuery, selectedCategory],
+    queryKey: ['/api/businesses', searchQuery],
   });
 
   // Removed featuredBusinesses query
@@ -40,11 +32,8 @@ export default function Directory() {
     const matchesSearch = searchQuery === '' || 
       business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       business.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = selectedCategory === null || 
-      business.businessCategoryId === selectedCategory;
 
-    return matchesSearch && matchesCategory;
+    return matchesSearch;
   }) || [];
 
   const renderBusinessCard = (business: BusinessWithCategory) => (
@@ -176,46 +165,14 @@ export default function Directory() {
             variant="outline"
             onClick={() => {
               setSearchQuery('');
-              setSelectedCategory(null);
-              setActiveTab('all');
             }}
-            data-testid="button-clear-filters"
+            data-testid="button-clear-search"
           >
-            Clear Filters
+            Clear Search
           </Button>
         </div>
 
-        {/* Category Pills */}
-        {categories && categories.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(null)}
-              data-testid="button-category-all"
-            >
-              All Categories
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.id)}
-                data-testid={`button-category-${category.id}`}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-        )}
-
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="all" data-testid="tab-all">All Businesses</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Removed Category Pills and Tabs */}
       </div>
 
       {/* Removed Featured Businesses Section */}
@@ -263,8 +220,6 @@ export default function Directory() {
               variant="outline" 
               onClick={() => {
                 setSearchQuery('');
-                setSelectedCategory(null);
-                setActiveTab('all');
               }}
               data-testid="button-reset-search"
             >
