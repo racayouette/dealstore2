@@ -645,6 +645,15 @@ export default function AdvertisingPanelPage() {
     queryFn: () => fetch('/api/visible-pages').then(res => res.json())
   });
 
+  // Query for all banner settings
+  const { data: allSettings = [] } = useQuery({
+    queryKey: ['/api/banner-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/banner-settings');
+      return response.json();
+    },
+  });
+
   // Create dynamic pages list from database
   const dynamicPages: Page[] = visiblePages ? visiblePages.map((page: any) => {
     // Find matching static page for icon, or use default
