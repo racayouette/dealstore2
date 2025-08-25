@@ -160,6 +160,20 @@ export const pageViews = pgTable("page_views", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// Click-through tracking table for advertisement banner analytics
+export const clickThru = pgTable("click_thru", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageName: text("page_name").notNull(), // e.g., "Videos", "Posts", "Blogs"  
+  pageUrl: text("page_url").notNull(), // e.g., "/videos", "/posts", "/blogs"
+  advertisementId: text("advertisement_id").notNull(), // banner ID that was clicked
+  advertisementTitle: text("advertisement_title").notNull(), // banner title
+  advertisementClickUrl: text("advertisement_click_url").notNull(), // URL user was taken to
+  bannerPosition: text("banner_position").notNull(), // e.g., "header", "top", "left", "right", "bottom"
+  ipAddress: text("ip_address").notNull(), // visitor's IP address
+  userAgent: text("user_agent"), // browser/device information
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const bannerSettings = pgTable("banner_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   pageName: text("page_name").notNull(),
@@ -300,6 +314,11 @@ export const insertPageViewSchema = createInsertSchema(pageViews).omit({
   createdAt: true,
 });
 
+export const insertClickThruSchema = createInsertSchema(clickThru).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Directory Business Models
 export const businessCategories = pgTable("business_categories", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -392,6 +411,7 @@ export type Blog = typeof blogs.$inferSelect;
 export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
 export type BannerSettings = typeof bannerSettings.$inferSelect;
 export type PageView = typeof pageViews.$inferSelect;
+export type ClickThru = typeof clickThru.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
@@ -406,6 +426,7 @@ export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type InsertClickThru = z.infer<typeof insertClickThruSchema>;
 export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;
 
 // Directory insert schemas

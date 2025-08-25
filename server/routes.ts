@@ -855,6 +855,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Click-through tracking routes
+  app.post('/api/click-thru', async (req, res) => {
+    try {
+      const { 
+        pageName, 
+        pageUrl, 
+        advertisementId,
+        advertisementTitle, 
+        advertisementClickUrl,
+        bannerPosition,
+        userAgent 
+      } = req.body;
+      
+      if (!pageName || !pageUrl || !advertisementId) {
+        return res.status(400).json({ 
+          error: 'Page name, URL, and advertisement ID are required' 
+        });
+      }
+
+      // Get client IP address (handle various proxy headers)
+      const forwarded = req.headers['x-forwarded-for'] as string;
+      const ipAddress = req.ip || 
+                       forwarded?.split(',')[0]?.trim() ||
+                       req.headers['x-real-ip'] ||
+                       req.connection?.remoteAddress ||
+                       req.socket?.remoteAddress ||
+                       'unknown';
+
+      const clickThru = await storage.createClickThru({
+        pageName,
+        pageUrl,
+        advertisementId,
+        advertisementTitle: advertisementTitle || 'Unknown',
+        advertisementClickUrl: advertisementClickUrl || '#',
+        bannerPosition: bannerPosition || 'unknown',
+        ipAddress: ipAddress.toString(),
+        userAgent: userAgent || 'Unknown'
+      });
+      
+      res.status(201).json(clickThru);
+    } catch (error) {
+      console.error('Error tracking click-through:', error);
+      res.status(500).json({ error: 'Failed to track click-through' });
+    }
+  });
+
+  // Get click-through analytics  
+  app.get('/api/click-thru', async (req, res) => {
+    try {
+      const { page_name, limit } = req.query;
+      const clickThrus = await storage.getClickThrus(
+        page_name as string, 
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(clickThrus);
+    } catch (error) {
+      console.error('Error getting click-throughs:', error);
+      res.status(500).json({ error: 'Failed to get click-throughs' });
+    }
+  });
+
+  // Get click-through count for specific advertisement
+  app.get('/api/click-thru/count/:advertisementId', async (req, res) => {
+    try {
+      const { advertisementId } = req.params;
+      
+      const count = await storage.getClickThruCount(advertisementId);
+      
+      res.json({ count });
+    } catch (error) {
+      console.error('Error getting click-through count:', error);
+      res.status(500).json({ error: 'Failed to get click-through count' });
+    }
+  });
+
   // Duplicate page endpoint
   app.post('/api/duplicate-page', async (req, res) => {
     try {
@@ -961,6 +1036,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error getting page view analytics:', error);
       res.status(500).json({ error: 'Failed to get analytics data' });
+    }
+  });
+
+  app.get('/api/analytics/click-thru', async (req, res) => {
+    try {
+      const days = req.query.days ? parseInt(req.query.days as string) : 7;
+      const analytics = await storage.getClickThruAnalytics(days);
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error getting click-through analytics:', error);
+      res.status(500).json({ error: 'Failed to get click-through analytics data' });
     }
   });
 
