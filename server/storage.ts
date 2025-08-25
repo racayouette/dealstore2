@@ -607,7 +607,7 @@ export class DatabaseStorage implements IStorage {
     if (pageUrl) {
       return await db.select().from(bannerSettings).where(eq(bannerSettings.pageUrl, pageUrl));
     }
-    return await db.select().from(bannerSettings).orderBy(asc(bannerSettings.pageName));
+    return await db.select().from(bannerSettings).orderBy(asc(bannerSettings.sortOrder), asc(bannerSettings.pageName));
   }
 
   async getBannerSettingByPage(pageUrl: string): Promise<BannerSettings | undefined> {
@@ -618,7 +618,7 @@ export class DatabaseStorage implements IStorage {
   async getVisiblePages(): Promise<BannerSettings[]> {
     return await db.select().from(bannerSettings)
       .where(eq(bannerSettings.isVisible, true))
-      .orderBy(asc(bannerSettings.pageName));
+      .orderBy(asc(bannerSettings.sortOrder), asc(bannerSettings.pageName));
   }
 
   async createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings> {
@@ -653,6 +653,17 @@ export class DatabaseStorage implements IStorage {
     
     // Then delete the banner settings record
     await db.delete(bannerSettings).where(eq(bannerSettings.pageUrl, pageUrl));
+  }
+
+  // Reorder pages by updating their sort_order values
+  async reorderPages(pageUrls: string[]): Promise<void> {
+    // Update each page's sort order based on its position in the array
+    for (let i = 0; i < pageUrls.length; i++) {
+      await db
+        .update(bannerSettings)
+        .set({ sortOrder: i + 1 })
+        .where(eq(bannerSettings.pageUrl, pageUrls[i]));
+    }
   }
 
   // Directory Business Categories

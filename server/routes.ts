@@ -499,6 +499,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reorder pages in banner settings
+  app.patch("/api/banner-settings/reorder", async (req, res) => {
+    try {
+      const { pageUrls } = req.body;
+      if (!pageUrls || !Array.isArray(pageUrls)) {
+        return res.status(400).json({ error: "Page URLs array is required" });
+      }
+      
+      await storage.reorderPages(pageUrls);
+      res.status(200).json({ message: "Pages reordered successfully" });
+    } catch (error) {
+      console.error("Error reordering pages:", error);
+      res.status(500).json({ error: "Failed to reorder pages" });
+    }
+  });
+
   // Get visible pages for navigation
   app.get("/api/visible-pages", async (req, res) => {
     try {
