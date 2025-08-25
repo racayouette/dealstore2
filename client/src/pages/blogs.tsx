@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-react";
 import type { Blog } from "@shared/schema";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 
@@ -254,6 +255,8 @@ export default function Blogs() {
       <div className="container mx-auto px-4 pb-6">
         <AdvertisementBanner position="bottom" size="medium" />
       </div>
+      
+      <Footer />
     </div>
   );
 }
