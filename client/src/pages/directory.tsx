@@ -34,11 +34,7 @@ export default function Directory() {
     queryKey: ['/api/businesses', searchQuery, selectedCategory],
   });
 
-  // Fetch featured businesses
-  const { data: featuredBusinesses } = useQuery<BusinessWithCategory[]>({
-    queryKey: ['/api/businesses', 'featured'],
-    queryFn: () => fetch('/api/businesses?featured=true').then(res => res.json()),
-  });
+  // Removed featuredBusinesses query
 
   const filteredBusinesses = businesses?.filter(business => {
     const matchesSearch = searchQuery === '' || 
@@ -48,11 +44,7 @@ export default function Directory() {
     const matchesCategory = selectedCategory === null || 
       business.businessCategoryId === selectedCategory;
 
-    const matchesTab = activeTab === 'all' ||
-      (activeTab === 'open' && business.isOpenNow) ||
-      (activeTab === 'featured' && business.isFeatured);
-
-    return matchesSearch && matchesCategory && matchesTab;
+    return matchesSearch && matchesCategory;
   }) || [];
 
   const renderBusinessCard = (business: BusinessWithCategory) => (
@@ -121,18 +113,7 @@ export default function Directory() {
               </div>
 
               <div className="flex flex-col items-end gap-2">
-                {business.isOpenNow && (
-                  <div className="flex items-center gap-1 text-green-600 text-sm">
-                    <Clock className="w-4 h-4" />
-                    <span>Open now</span>
-                  </div>
-                )}
-                
-                {business.isFeatured && (
-                  <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                    Featured
-                  </Badge>
-                )}
+                {/* Removed Open now and Featured badges */}
               </div>
             </div>
           </div>
@@ -233,74 +214,17 @@ export default function Directory() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="all" data-testid="tab-all">All Businesses</TabsTrigger>
-            <TabsTrigger value="open" data-testid="tab-open">Open Now</TabsTrigger>
-            <TabsTrigger value="featured" data-testid="tab-featured">Featured</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {/* Featured Businesses Section */}
-      {activeTab === 'all' && featuredBusinesses && featuredBusinesses.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Featured Businesses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {featuredBusinesses.slice(0, 3).map((business) => (
-              <Card key={business.id} className="hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <img
-                    src={business.imageUrl || '/placeholder-business.jpg'}
-                    alt={business.name}
-                    className="w-full h-48 object-cover rounded-t-lg"
-                  />
-                  <Badge className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 border-yellow-300">
-                    Featured
-                  </Badge>
-                </div>
-                <CardContent className="p-4">
-                  <Link href={`/directory/${business.id}`}>
-                    <h3 
-                      className="font-semibold text-blue-600 hover:text-blue-800 cursor-pointer mb-2"
-                      data-testid={`link-featured-business-${business.id}`}
-                    >
-                      {business.name}
-                    </h3>
-                  </Link>
-                  
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{business.rating}</span>
-                    <span className="text-sm text-gray-500">({business.reviewCount})</span>
-                  </div>
-
-                  {business.category && (
-                    <Badge variant="secondary" className="mb-2 text-xs">
-                      {business.category.name}
-                    </Badge>
-                  )}
-
-                  <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                    {business.description}
-                  </p>
-
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <MapPin className="w-4 h-4" />
-                    <span className="truncate">{business.address}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <Separator className="mt-8" />
-        </div>
-      )}
+      {/* Removed Featured Businesses Section */}
 
       {/* Results Section */}
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
-            {activeTab === 'all' && 'All Businesses'}
-            {activeTab === 'open' && 'Open Now'}
-            {activeTab === 'featured' && 'Featured Businesses'}
+            All Businesses
           </h2>
           <span className="text-gray-500" data-testid="text-results-count">
             {filteredBusinesses.length} results
