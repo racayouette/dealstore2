@@ -378,6 +378,8 @@ export default function Directory() {
       <div className="container mx-auto px-4 pb-6">
         <AdvertisementBanner position="bottom" size="medium" />
       </div>
+      
+      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Search, ArrowUp, MessageSquare, ExternalLink, User } from "lucide-react";
 import type { Post } from "@shared/schema";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 
@@ -245,6 +246,8 @@ export default function Posts() {
       <div className="container mx-auto px-4 pb-6">
         <AdvertisementBanner position="bottom" size="medium" />
       </div>
+      
+      <Footer />
     </div>
   );
 }
