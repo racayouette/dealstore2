@@ -484,6 +484,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update page name in banner settings
+  app.patch("/api/banner-settings/rename", async (req, res) => {
+    try {
+      const { pageUrl, newPageName } = req.body;
+      if (!pageUrl || !newPageName) {
+        return res.status(400).json({ error: "Page URL and new page name are required" });
+      }
+      const updatedSettings = await storage.updateBannerSettings(pageUrl, { pageName: newPageName });
+      res.status(200).json(updatedSettings);
+    } catch (error) {
+      console.error("Error renaming page:", error);
+      res.status(500).json({ error: "Failed to rename page" });
+    }
+  });
+
   // Get visible pages for navigation
   app.get("/api/visible-pages", async (req, res) => {
     try {
