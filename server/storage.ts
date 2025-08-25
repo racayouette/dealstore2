@@ -12,6 +12,7 @@ import {
   bannerSettings,
   siteSettings,
   pageViews,
+  clickThru,
   businessCategories,
   businesses,
   businessHours,
@@ -30,6 +31,7 @@ import {
   type AdvertisementBanner,
   type BannerSettings,
   type PageView,
+  type ClickThru,
   type BusinessCategory,
   type Business,
   type BusinessHours,
@@ -48,6 +50,7 @@ import {
   type InsertAdvertisementBanner,
   type InsertBannerSettings,
   type InsertPageView,
+  type InsertClickThru,
   type SiteSettings,
   type InsertSiteSettings,
   type InsertBusinessCategory,
@@ -171,6 +174,12 @@ export interface IStorage {
   createPageView(pageView: InsertPageView): Promise<PageView>;
   getPageViews(pageName?: string, limit?: number): Promise<PageView[]>;
   getPageViewCount(pageName: string, ipAddress?: string): Promise<number>;
+  
+  // Click-through tracking
+  createClickThru(clickThru: InsertClickThru): Promise<ClickThru>;
+  getClickThrus(pageName?: string, limit?: number): Promise<ClickThru[]>;
+  getClickThruCount(advertisementId: string): Promise<number>;
+  getClickThruAnalytics(days: number): Promise<any[]>;
   
   // Analytics
   getPageViewAnalytics(days: number): Promise<any[]>;
@@ -1020,6 +1029,71 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions));
     
     return Number(result.count) || 0;
+  }
+
+  // Click-through tracking methods
+  async createClickThru(clickThruData: InsertClickThru): Promise<ClickThru> {
+    const [newClickThru] = await db.insert(clickThru).values(clickThruData).returning();
+    return newClickThru;
+  }
+
+  async getClickThrus(pageName?: string, limit = 100): Promise<ClickThru[]> {
+    if (pageName) {
+      return await db.select().from(clickThru)
+        .where(eq(clickThru.pageName, pageName))
+        .orderBy(desc(clickThru.createdAt))
+        .limit(limit);
+    }
+    
+    return await db.select().from(clickThru)
+      .orderBy(desc(clickThru.createdAt))
+      .limit(limit);
+  }
+
+  async getClickThruCount(advertisementId: string): Promise<number> {
+    const [result] = await db.select({ count: sql`count(*)` })
+      .from(clickThru)
+      .where(eq(clickThru.advertisementId, advertisementId));
+    
+    return Number(result.count) || 0;
+  }
+
+  async getClickThruAnalytics(days: number): Promise<any[]> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const result = await db.select({
+      advertisementId: clickThru.advertisementId,
+      advertisementTitle: clickThru.advertisementTitle,
+      pageName: clickThru.pageName,
+      pageUrl: clickThru.pageUrl,
+      bannerPosition: clickThru.bannerPosition,
+      date: sql`DATE(${clickThru.createdAt})`.as('date'),
+      clickCount: sql`COUNT(*)`.as('clickCount'),
+      uniqueClickers: sql`COUNT(DISTINCT ${clickThru.ipAddress})`.as('uniqueClickers')
+    })
+    .from(clickThru)
+    .where(sql`${clickThru.createdAt} >= ${cutoffDate.toISOString()}`)
+    .groupBy(
+      clickThru.advertisementId,
+      clickThru.advertisementTitle,
+      clickThru.pageName, 
+      clickThru.pageUrl,
+      clickThru.bannerPosition,
+      sql`DATE(${clickThru.createdAt})`
+    )
+    .orderBy(sql`DATE(${clickThru.createdAt}) DESC`, desc(sql`COUNT(*)`));
+
+    return result.map(row => ({
+      advertisementId: row.advertisementId,
+      advertisementTitle: row.advertisementTitle,
+      pageName: row.pageName,
+      pageUrl: row.pageUrl,
+      bannerPosition: row.bannerPosition,
+      date: row.date,
+      clickCount: Number(row.clickCount),
+      uniqueClickers: Number(row.uniqueClickers)
+    }));
   }
 
   // Analytics methods

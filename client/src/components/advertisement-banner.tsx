@@ -47,6 +47,48 @@ export function AdvertisementBanner({ position, size = 'medium', className = '' 
   // Get current page URL for banner settings lookup
   const currentPath = window.location.pathname;
 
+  // Track click-through events
+  const trackClickThru = async (banner: BannerType) => {
+    try {
+      await fetch('/api/click-thru', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pageName: getPageNameFromPath(currentPath),
+          pageUrl: currentPath,
+          advertisementId: banner.id,
+          advertisementTitle: banner.title,
+          advertisementClickUrl: banner.clickUrl,
+          bannerPosition: position,
+          userAgent: navigator.userAgent
+        })
+      });
+    } catch (error) {
+      console.error('Failed to track click-through:', error);
+      // Don't block the user's click if tracking fails
+    }
+  };
+
+  // Convert path to readable page name
+  const getPageNameFromPath = (path: string): string => {
+    if (path === '/') return 'Home';
+    if (path === '/stores') return 'Stores';
+    if (path === '/posts') return 'Posts';
+    if (path === '/blogs') return 'Blogs';
+    if (path === '/directory') return 'Directory';
+    if (path === '/videos') return 'Videos';
+    if (path === '/video2') return 'Video2';
+    if (path.startsWith('/category/')) {
+      const slug = path.replace('/category/', '');
+      return slug.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+    return path.replace('/', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown';
+  };
+
   // Check banner settings from database
   const { data: bannerSettings } = useQuery({
     queryKey: ['/api/banner-settings', currentPath],
@@ -106,7 +148,12 @@ export function AdvertisementBanner({ position, size = 'medium', className = '' 
     <Card 
       className={`${sizeClasses} ${className} bg-white border border-gray-200 flex ${isVertical ? 'flex-col' : 'flex-row'} items-center justify-center p-4 text-center transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden`}
       data-testid={`ad-banner-${position}`}
-      onClick={() => window.open(banner.clickUrl, '_blank')}
+      onClick={async () => {
+        // Track the click-through event
+        await trackClickThru(banner);
+        // Open the URL after tracking
+        window.open(banner.clickUrl, '_blank');
+      }}
     >
       <div className="w-full h-full flex flex-col items-center justify-center space-y-2">
         {banner.imageUrl && (
