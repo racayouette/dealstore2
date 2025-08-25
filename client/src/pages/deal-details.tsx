@@ -119,7 +119,6 @@ export default function DealDetails() {
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
             {siteSettings?.siteName || 'NetDiscount'} is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
-            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
       </div>
