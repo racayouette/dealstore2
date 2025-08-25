@@ -68,24 +68,49 @@ export default function Directory() {
       <CardContent className="p-6">
         <div className="flex gap-4">
           <div className="flex-shrink-0">
-            <img
-              src={business.imageUrl || '/placeholder-business.jpg'}
-              alt={business.name}
-              className="w-20 h-20 rounded-lg object-cover"
-            />
+            {business.website ? (
+              <a 
+                href={business.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                data-testid={`link-business-image-${business.id}`}
+              >
+                <img
+                  src={business.imageUrl || '/placeholder-business.jpg'}
+                  alt={business.name}
+                  className="w-20 h-20 rounded-lg object-cover hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </a>
+            ) : (
+              <img
+                src={business.imageUrl || '/placeholder-business.jpg'}
+                alt={business.name}
+                className="w-20 h-20 rounded-lg object-cover"
+              />
+            )}
           </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <Link href={`/directory/${business.id}`}>
-                  <h3 
+                {business.website ? (
+                  <a 
+                    href={business.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
                     className="text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
-                    data-testid={`link-business-${business.id}`}
+                    data-testid={`link-business-website-${business.id}`}
+                  >
+                    {business.name}
+                  </a>
+                ) : (
+                  <h3 
+                    className="text-lg font-semibold text-gray-900"
+                    data-testid={`text-business-${business.id}`}
                   >
                     {business.name}
                   </h3>
-                </Link>
+                )}
                 
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex items-center gap-1">
