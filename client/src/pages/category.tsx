@@ -137,57 +137,6 @@ export default function Category() {
             </section>
           </div>
 
-          {/* Sidebar */}
-          <aside className="w-80 space-y-8">
-            {/* Category Information */}
-            {category && (
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="text-xl font-bold text-net-dark mb-4">
-                  About {category.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  {category.description || `Find the best deals and discounts in ${category.name}.`}
-                </p>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Active Deals:</span>
-                    <span className="text-sm font-medium">{deals.length}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Links */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-net-dark mb-4">Related Categories</h3>
-              
-              <div className="space-y-2">
-                <a href="/category/computers" className="block text-net-green hover:underline text-sm">
-                  Computers
-                </a>
-                <a href="/category/electronics" className="block text-net-green hover:underline text-sm">
-                  Electronics
-                </a>
-                <a href="/category/lifestyle-home" className="block text-net-green hover:underline text-sm">
-                  Lifestyle & Home
-                </a>
-                <a href="/category/small-business" className="block text-net-green hover:underline text-sm">
-                  Small Business
-                </a>
-              </div>
-            </div>
-
-            {/* Deal Alert */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-net-dark mb-4">Deal Alerts</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Get notified when new deals are posted in {category?.name}.
-              </p>
-              <Button className="w-full">
-                Set Up Alert
-              </Button>
-            </div>
-          </aside>
         </div>
       </main>
 
