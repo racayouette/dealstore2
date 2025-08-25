@@ -469,6 +469,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete banner settings and associated banners for a page
+  app.delete("/api/banner-settings", async (req, res) => {
+    try {
+      const { pageUrl } = req.body;
+      if (!pageUrl) {
+        return res.status(400).json({ error: "Page URL is required" });
+      }
+      await storage.deleteBannerSettings(pageUrl);
+      res.status(200).json({ message: "Page deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting banner settings:", error);
+      res.status(500).json({ error: "Failed to delete page" });
+    }
+  });
+
   // Get visible pages for navigation
   app.get("/api/visible-pages", async (req, res) => {
     try {

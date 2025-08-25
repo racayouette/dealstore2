@@ -647,6 +647,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async deleteBannerSettings(pageUrl: string): Promise<void> {
+    // First delete all associated advertisement banners for this page
+    await db.delete(advertisementBanners).where(eq(advertisementBanners.pageUrl, pageUrl));
+    
+    // Then delete the banner settings record
+    await db.delete(bannerSettings).where(eq(bannerSettings.pageUrl, pageUrl));
+  }
+
   // Directory Business Categories
   async getBusinessCategories(): Promise<BusinessCategory[]> {
     return await db.select().from(businessCategories)

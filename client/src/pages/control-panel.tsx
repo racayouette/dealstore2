@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -441,13 +441,15 @@ function PageListItem({
   selectedPage, 
   setSelectedPage, 
   updateSettingsMutation,
-  onDuplicate 
+  onDuplicate,
+  onDelete 
 }: { 
   page: Page; 
   selectedPage: Page; 
   setSelectedPage: (page: Page) => void;
   updateSettingsMutation: any;
   onDuplicate: (page: Page) => void;
+  onDelete: (page: Page) => void;
 }) {
   const { toast } = useToast();
   const IconComponent = page.icon;
@@ -539,8 +541,20 @@ function PageListItem({
           </div>
         </button>
         <button
+          onClick={() => onDelete(page)}
+          className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
+            selectedPage.url === page.url 
+              ? 'bg-red-600 text-white border-net-green-dark hover:bg-red-500' 
+              : 'text-red-500 hover:bg-red-50 hover:text-red-700 border-gray-200'
+          }`}
+          title={`Delete ${page.name} page`}
+          data-testid={`delete-page-${page.url.replace('/', '')}`}
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => onDuplicate(page)}
-          className={`px-4 py-3 transition-colors border-l flex-shrink-0 ${
+          className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
@@ -552,7 +566,7 @@ function PageListItem({
         </button>
         <button
           onClick={() => window.open(page.url, '_blank')}
-          className={`px-4 py-3 rounded-r-lg transition-colors border-l flex-shrink-0 ${
+          className={`px-3 py-3 rounded-r-lg transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
@@ -698,6 +712,43 @@ export default function AdvertisingPanelPage() {
       });
     },
   });
+
+  // Mutation for deleting pages
+  const deletePageMutation = useMutation({
+    mutationFn: async (pageUrl: string) => {
+      return await apiRequest('DELETE', '/api/banner-settings', { pageUrl });
+    },
+    onSuccess: (_, deletedPageUrl) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
+      
+      // If the deleted page was selected, switch to the first available page
+      if (selectedPage.url === deletedPageUrl) {
+        const remainingPages = allPages.filter(p => p.url !== deletedPageUrl);
+        if (remainingPages.length > 0) {
+          setSelectedPage(remainingPages[0]);
+        }
+      }
+      
+      toast({
+        title: "Success",
+        description: "Page deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete page.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeletePage = (page: Page) => {
+    if (confirm(`Are you sure you want to delete "${page.name}"? This will permanently remove the page and all its banner settings.`)) {
+      deletePageMutation.mutate(page.url);
+    }
+  };
 
   // Update local state when page changes or settings are fetched
   useEffect(() => {
@@ -845,6 +896,7 @@ export default function AdvertisingPanelPage() {
                       setSelectedPage={setSelectedPage}
                       updateSettingsMutation={updateSettingsMutation}
                       onDuplicate={handleDuplicatePage}
+                      onDelete={handleDeletePage}
                     />
                   );
                 })}
