@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2 } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -442,7 +442,8 @@ function PageListItem({
   setSelectedPage, 
   updateSettingsMutation,
   onDuplicate,
-  onDelete 
+  onDelete,
+  onRename 
 }: { 
   page: Page; 
   selectedPage: Page; 
@@ -450,6 +451,7 @@ function PageListItem({
   updateSettingsMutation: any;
   onDuplicate: (page: Page) => void;
   onDelete: (page: Page) => void;
+  onRename: (page: Page) => void;
 }) {
   const { toast } = useToast();
   const IconComponent = page.icon;
@@ -541,6 +543,18 @@ function PageListItem({
           </div>
         </button>
         <button
+          onClick={() => onRename(page)}
+          className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
+              : 'text-blue-500 hover:bg-blue-50 hover:text-blue-700 border-gray-200'
+          }`}
+          title={`Rename ${page.name} page`}
+          data-testid={`rename-page-${page.url.replace('/', '')}`}
+        >
+          <Edit className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => onDelete(page)}
           className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
@@ -594,6 +608,11 @@ export default function AdvertisingPanelPage() {
     name: '',
     url: '',
     description: ''
+  });
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [pageToRename, setPageToRename] = useState<Page | null>(null);
+  const [renameForm, setRenameForm] = useState({
+    name: ''
   });
 
   // Query for page visibility status
@@ -744,10 +763,57 @@ export default function AdvertisingPanelPage() {
     },
   });
 
+  // Mutation for renaming pages
+  const renamePageMutation = useMutation({
+    mutationFn: async ({ pageUrl, newPageName }: { pageUrl: string; newPageName: string }) => {
+      return await apiRequest('PATCH', '/api/banner-settings/rename', { pageUrl, newPageName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
+      setIsRenameDialogOpen(false);
+      setPageToRename(null);
+      setRenameForm({ name: '' });
+      toast({
+        title: "Success",
+        description: "Page renamed successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to rename page.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleDeletePage = (page: Page) => {
     if (confirm(`Are you sure you want to delete "${page.name}"? This will permanently remove the page and all its banner settings.`)) {
       deletePageMutation.mutate(page.url);
     }
+  };
+
+  const handleRenamePage = (page: Page) => {
+    setPageToRename(page);
+    setRenameForm({ name: page.name });
+    setIsRenameDialogOpen(true);
+  };
+
+  const handleRenameSubmit = () => {
+    if (!pageToRename || !renameForm.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid page name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    renamePageMutation.mutate({
+      pageUrl: pageToRename.url,
+      newPageName: renameForm.name.trim()
+    });
   };
 
   // Update local state when page changes or settings are fetched
@@ -897,6 +963,7 @@ export default function AdvertisingPanelPage() {
                       updateSettingsMutation={updateSettingsMutation}
                       onDuplicate={handleDuplicatePage}
                       onDelete={handleDeletePage}
+                      onRename={handleRenamePage}
                     />
                   );
                 })}
@@ -1183,6 +1250,55 @@ export default function AdvertisingPanelPage() {
               data-testid="button-confirm-duplicate"
             >
               {duplicatePageMutation.isPending ? "Creating..." : "Create Page"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Page Dialog */}
+      <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Rename Page</DialogTitle>
+            <DialogDescription>
+              {pageToRename 
+                ? `Change the display name for "${pageToRename.name}". This will update the page name everywhere it appears.`
+                : 'Rename this page.'
+              }
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="rename-page-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="rename-page-name"
+                value={renameForm.name}
+                onChange={(e) => setRenameForm(prev => ({ ...prev, name: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter new page name"
+                data-testid="input-rename-name"
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsRenameDialogOpen(false)}
+              data-testid="button-cancel-rename"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleRenameSubmit}
+              disabled={renamePageMutation.isPending || !renameForm.name.trim()}
+              data-testid="button-confirm-rename"
+            >
+              {renamePageMutation.isPending ? "Renaming..." : "Rename Page"}
             </Button>
           </DialogFooter>
         </DialogContent>
