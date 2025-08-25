@@ -835,6 +835,14 @@ export default function AdvertisingPanelPage() {
         return aSort !== bSort ? aSort - bSort : a.name.localeCompare(b.name);
       })
     : STATIC_PAGES;
+  
+  // Auto-select first page when pages are loaded
+  useEffect(() => {
+    if (allPages.length > 0 && (!selectedPage || !allPages.find(p => p.url === selectedPage.url))) {
+      setSelectedPage(allPages[0]);
+    }
+  }, [allPages, selectedPage]);
+  
   const [pageSettings, setPageSettings] = useState<PageBannerSettings>({
     pageName: selectedPage.name,
     pageUrl: selectedPage.url,
