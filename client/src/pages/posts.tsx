@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowUp, MessageSquare, ExternalLink, User } from "lucide-react";
@@ -18,6 +19,8 @@ export default function Posts() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 6;
 
 
   const { data: posts = [], isLoading } = useQuery({
@@ -120,8 +123,9 @@ export default function Posts() {
 
         {/* Posts Grid */}
         {!isLoading && posts.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).map((post) => (
               <Card key={post.id} className="hover:shadow-md transition-shadow" data-testid={`post-card-${post.id}`}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -199,6 +203,44 @@ export default function Posts() {
               </Card>
             ))}
           </div>
+          
+          {/* Pagination Controls */}
+          {posts.length > postsPerPage && (
+            <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => {
+                      if (currentPage > 1) {
+                        setCurrentPage(currentPage - 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+                
+                <PaginationItem>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {Math.ceil(posts.length / postsPerPage)} ({posts.length} total posts)
+                  </span>
+                </PaginationItem>
+                
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => {
+                      if (currentPage < Math.ceil(posts.length / postsPerPage)) {
+                        setCurrentPage(currentPage + 1);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }}
+                    className={currentPage === Math.ceil(posts.length / postsPerPage) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+          </>
         )}
 
         {/* Empty State */}

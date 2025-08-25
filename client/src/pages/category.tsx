@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import Header from "@/components/header";
@@ -7,11 +8,14 @@ import Breadcrumb from "@/components/breadcrumb";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { api } from "@/lib/api";
 import type { Category, DealWithRelations } from "@shared/schema";
 
 export default function Category() {
   const { slug } = useParams<{ slug: string }>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const dealsPerPage = 6;
 
   // Fetch category details
   const { 
@@ -120,9 +124,46 @@ export default function Category() {
                   <h2 className="text-2xl font-bold text-net-dark mb-6">
                     Latest {category?.name} Deals
                   </h2>
-                  {deals.map((deal) => (
+                  {deals.slice((currentPage - 1) * dealsPerPage, currentPage * dealsPerPage).map((deal) => (
                     <DealCard key={deal.id} deal={deal} />
                   ))}
+                  
+                  {/* Pagination Controls */}
+                  {deals.length > dealsPerPage && (
+                    <Pagination className="mt-8">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious 
+                            onClick={() => {
+                              if (currentPage > 1) {
+                                setCurrentPage(currentPage - 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }
+                            }}
+                            className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                        
+                        <PaginationItem>
+                          <span className="text-sm text-gray-600">
+                            Page {currentPage} of {Math.ceil(deals.length / dealsPerPage)} ({deals.length} total deals)
+                          </span>
+                        </PaginationItem>
+                        
+                        <PaginationItem>
+                          <PaginationNext 
+                            onClick={() => {
+                              if (currentPage < Math.ceil(deals.length / dealsPerPage)) {
+                                setCurrentPage(currentPage + 1);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }
+                            }}
+                            className={currentPage === Math.ceil(deals.length / dealsPerPage) ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-12">
