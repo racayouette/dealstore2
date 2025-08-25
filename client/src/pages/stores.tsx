@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import type { Store } from "@shared/schema";
+import type { Store, SiteSettings } from "@shared/schema";
 
 export default function Stores() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -34,6 +34,16 @@ export default function Stores() {
     enabled: !!selectedLetter,
   });
 
+  // Fetch site settings for dynamic site name
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
+  });
+
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const numbers = '0-9';
   const allLetters = [...alphabet, numbers];
@@ -54,7 +64,7 @@ export default function Stores() {
       <div className="bg-gray-100 border-b">
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
-            Techbargains.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            {siteSettings?.siteName || 'NetDiscount'} is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
             <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
