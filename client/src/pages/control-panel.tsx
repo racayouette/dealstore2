@@ -696,8 +696,8 @@ function PageListItem({
           onClick={handleVisibilityToggle}
           className={`px-2 py-3 rounded-l-lg transition-colors border-r ${
             selectedPage.url === page.url 
-              ? `${isVisible ? 'bg-net-green-dark hover:bg-net-green' : 'bg-red-600 hover:bg-red-500'} text-white border-net-green-dark` 
-              : `${isVisible ? 'text-green-600 hover:bg-green-50' : 'text-red-600 hover:bg-red-50'} hover:text-gray-700 border-gray-200`
+              ? 'bg-net-green-dark hover:bg-net-green text-white border-net-green-dark' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-700 border-gray-200'
           }`}
           title={`${isVisible ? 'Hide' : 'Show'} ${page.name} page from navigation`}
           data-testid={`toggle-visibility-${page.url.replace('/', '')}`}
