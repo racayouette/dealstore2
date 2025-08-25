@@ -924,7 +924,7 @@ export default function AdvertisingPanelPage() {
       
       <div className="flex">
         {/* Left Sidebar */}
-        <div className="w-[480px] bg-white border-r border-gray-200 min-h-screen">
+        <div className="w-[560px] bg-white border-r border-gray-200 min-h-screen">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center gap-3 mb-2">
               <Settings className="w-6 h-6 text-net-green" />
