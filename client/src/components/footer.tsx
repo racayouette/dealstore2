@@ -1,13 +1,24 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { SiteSettings } from "@shared/schema";
 
 export default function Footer() {
+  // Fetch site settings for dynamic site name
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
+  });
   return (
     <footer className="bg-net-dark text-white mt-16">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-bold mb-4">NetDiscount</h3>
+            <h3 className="text-lg font-bold mb-4">{siteSettings?.siteName || 'NetDiscount'}</h3>
             <p className="text-gray-300 text-sm mb-4">
               Your destination for the best net deals, coupons, and discounts from top retailers.
             </p>
@@ -70,7 +81,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="text-gray-300 text-sm">
-            © {new Date().getFullYear()} NetDiscount. All rights reserved.
+            © {new Date().getFullYear()} {siteSettings?.siteName || 'NetDiscount'}. All rights reserved.
           </p>
         </div>
       </div>
