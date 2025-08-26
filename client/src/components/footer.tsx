@@ -2,8 +2,19 @@ import { Link } from "wouter";
 
 export default function Footer() {
   return (
-    <footer className="bg-net-dark text-white mt-16">
-      <div className="container mx-auto px-4 py-12">
+    <>
+      {/* Affiliate Disclosure */}
+      <div className="bg-white py-4 mt-16 border-t border-gray-200">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-sm text-gray-600">
+            NetDiscount22 is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+          </p>
+        </div>
+      </div>
+      
+      {/* Main Footer */}
+      <footer className="bg-net-dark text-white">
+        <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
@@ -74,6 +85,7 @@ export default function Footer() {
           </p>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   );
 }
