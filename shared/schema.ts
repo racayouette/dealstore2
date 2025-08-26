@@ -194,6 +194,7 @@ export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   siteName: text("site_name").notNull().default("NetDiscount"),
   siteDescription: text("site_description").default("Deal Aggregation Platform"),
+  affiliateDisclosure: text("affiliate_disclosure").default("NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission."),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });

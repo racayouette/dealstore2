@@ -14,6 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { DealWithRelations, Store } from "@shared/schema";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 
+interface SiteSettings {
+  id: string;
+  siteName: string;
+  siteDescription: string;
+  affiliateDisclosure: string;
+}
+
 export default function Home() {
   // Track page view for analytics
   usePageTracking("Home", "/");
@@ -38,6 +45,11 @@ export default function Home() {
   } = useQuery<Store[]>({
     queryKey: ["/api/stores/featured"],
     queryFn: () => api.getFeaturedStores(),
+  });
+
+  // Fetch site settings
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
   });
 
   // Auto-seed database on first load if no data
@@ -72,7 +84,7 @@ export default function Home() {
       <div className="bg-gray-100 border-b">
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
-            Netdiscount.com is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
             <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
           </p>
         </div>
