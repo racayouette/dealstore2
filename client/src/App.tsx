@@ -22,6 +22,7 @@ import ControlPanel from "@/pages/control-panel";
 import SEOPanel from "@/pages/seo-panel";
 import AdminLogin from "@/pages/admin-login";
 import Analytics from "@/pages/analytics";
+import AdminUsers from "@/pages/admin-users";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/wp-admin" component={AdminLogin} />
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/admin/users" component={AdminUsers} />
       <Route component={NotFound} />
     </Switch>
   );
