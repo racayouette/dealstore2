@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical, Save } from "lucide-react";
+import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical, Save, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -63,6 +63,14 @@ interface SiteSettings {
 const siteSettingsSchema = z.object({
   siteName: z.string().min(1, "Site name is required").max(100, "Site name must be 100 characters or less"),
   siteDescription: z.string().min(1, "Site description is required").max(500, "Site description must be 500 characters or less"),
+});
+
+const newsletterPopupSettingsSchema = z.object({
+  isEnabled: z.boolean(),
+  popupType: z.enum(["dark", "light"]),
+  showDelay: z.number().min(0, "Show delay must be 0 or greater"),
+  showOnPages: z.array(z.string()),
+  frequency: z.enum(["once_per_session", "daily", "always"]),
 });
 
 function SiteSettingsForm() {
@@ -580,6 +588,310 @@ function BannerSection({ position, positionName, banners, isVisible, updateBanne
   );
 }
 
+function NewsletterPopupSettingsForm() {
+  const { toast } = useToast();
+  
+  // Fetch current newsletter popup settings
+  const { data: popupSettings, isLoading } = useQuery({
+    queryKey: ['/api/newsletter/popup-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/newsletter/popup-settings');
+      if (!response.ok) throw new Error('Failed to fetch popup settings');
+      return response.json();
+    },
+  });
+
+  // Fetch all pages for selection
+  const { data: allPages = [] } = useQuery({
+    queryKey: ['/api/visible-pages'],
+    queryFn: async () => {
+      const response = await fetch('/api/visible-pages');
+      return response.json();
+    },
+  });
+
+  // Update newsletter popup settings mutation
+  const updatePopupSettingsMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof newsletterPopupSettingsSchema>) => {
+      const response = await fetch('/api/newsletter/popup-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update popup settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Settings Updated",
+        description: "Newsletter popup settings have been saved successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/newsletter/popup-settings'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update popup settings",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const form = useForm<z.infer<typeof newsletterPopupSettingsSchema>>({
+    resolver: zodResolver(newsletterPopupSettingsSchema),
+    defaultValues: {
+      isEnabled: false,
+      popupType: "dark",
+      showDelay: 5000,
+      showOnPages: [],
+      frequency: "once_per_session",
+    },
+  });
+
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (popupSettings) {
+      form.reset({
+        isEnabled: popupSettings.isEnabled || false,
+        popupType: popupSettings.popupType || "dark",
+        showDelay: popupSettings.showDelay || 5000,
+        showOnPages: popupSettings.showOnPages || [],
+        frequency: popupSettings.frequency || "once_per_session",
+      });
+    }
+  }, [popupSettings, form]);
+
+  const onSubmit = async (data: z.infer<typeof newsletterPopupSettingsSchema>) => {
+    await updatePopupSettingsMutation.mutateAsync(data);
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Newsletter Popup Settings</CardTitle>
+          <CardDescription>Loading settings...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Mail className="w-5 h-5" />
+          Newsletter Popup Settings
+        </CardTitle>
+        <CardDescription>
+          Configure the newsletter subscription popup that appears on your site. Choose between two design styles and control when and where it appears.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            
+            {/* Enable/Disable Popup */}
+            <FormField
+              control={form.control}
+              name="isEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Enable Newsletter Popup
+                    </FormLabel>
+                    <div className="text-sm text-gray-600">
+                      Show newsletter subscription popup to visitors
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      data-testid="switch-enable-popup"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Popup Design Type */}
+            <FormField
+              control={form.control}
+              name="popupType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Popup Design</FormLabel>
+                  <FormControl>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div 
+                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                          field.value === 'dark' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => field.onChange('dark')}
+                        data-testid="option-dark-theme"
+                      >
+                        <div className="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-4 rounded text-center text-sm">
+                          <div className="font-bold mb-2">Daily Deal Alerts</div>
+                          <div className="text-xs mb-2">Take 50 to 90% off Top Brands</div>
+                          <div className="bg-white text-black rounded px-2 py-1 mb-2 text-xs">Email address</div>
+                          <div className="bg-red-600 rounded px-2 py-1 text-xs">Submit</div>
+                        </div>
+                        <div className="text-center mt-2 font-medium">Dark Theme</div>
+                      </div>
+                      
+                      <div 
+                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                          field.value === 'light' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => field.onChange('light')}
+                        data-testid="option-light-theme"
+                      >
+                        <div className="bg-white border text-gray-800 p-4 rounded text-center text-sm">
+                          <div className="font-bold mb-2">Unlock Expertly Chosen Deals</div>
+                          <div className="border rounded-full px-2 py-1 mb-2 text-xs">Email address</div>
+                          <div className="bg-teal-700 text-white rounded-full px-2 py-1 text-xs mb-2">Subscribe - It's Free</div>
+                          <div className="text-xs text-gray-500">or</div>
+                          <div className="text-xs">Social login buttons</div>
+                        </div>
+                        <div className="text-center mt-2 font-medium">Light Theme</div>
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Show Delay */}
+            <FormField
+              control={form.control}
+              name="showDelay"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Show Delay (milliseconds)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      data-testid="input-show-delay"
+                    />
+                  </FormControl>
+                  <div className="text-sm text-gray-600">
+                    How long to wait before showing the popup (in milliseconds). 5000 = 5 seconds.
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Frequency */}
+            <FormField
+              control={form.control}
+              name="frequency"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display Frequency</FormLabel>
+                  <FormControl>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer text-center transition-all ${
+                          field.value === 'once_per_session' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => field.onChange('once_per_session')}
+                        data-testid="option-once-per-session"
+                      >
+                        <div className="font-medium">Once Per Session</div>
+                        <div className="text-sm text-gray-600">Show only once per browser session</div>
+                      </div>
+                      
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer text-center transition-all ${
+                          field.value === 'daily' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => field.onChange('daily')}
+                        data-testid="option-daily"
+                      >
+                        <div className="font-medium">Daily</div>
+                        <div className="text-sm text-gray-600">Show once per day</div>
+                      </div>
+                      
+                      <div 
+                        className={`border-2 rounded-lg p-3 cursor-pointer text-center transition-all ${
+                          field.value === 'always' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => field.onChange('always')}
+                        data-testid="option-always"
+                      >
+                        <div className="font-medium">Always</div>
+                        <div className="text-sm text-gray-600">Show on every page load</div>
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Show on Pages */}
+            <FormField
+              control={form.control}
+              name="showOnPages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Show on Pages</FormLabel>
+                  <div className="text-sm text-gray-600 mb-3">
+                    Select specific pages where the popup should appear. Leave empty to show on all pages.
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {allPages.map((page: any) => (
+                      <div key={page.pageUrl} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`page-${page.pageUrl}`}
+                          checked={field.value.includes(page.pageUrl)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              field.onChange([...field.value, page.pageUrl]);
+                            } else {
+                              field.onChange(field.value.filter((url: string) => url !== page.pageUrl));
+                            }
+                          }}
+                          className="rounded border-gray-300"
+                          data-testid={`checkbox-page-${page.pageUrl.replace('/', '')}`}
+                        />
+                        <Label htmlFor={`page-${page.pageUrl}`} className="text-sm">
+                          {page.pageName} ({page.pageUrl})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button 
+              type="submit" 
+              disabled={updatePopupSettingsMutation.isPending}
+              className="w-full bg-net-green hover:bg-net-green-dark"
+              data-testid="button-save-settings"
+            >
+              {updatePopupSettingsMutation.isPending ? "Saving..." : "Save Settings"}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+
 interface Page {
   name: string;
   url: string;
@@ -589,6 +901,7 @@ interface Page {
 
 const STATIC_PAGES: Page[] = [
   { name: "Site Settings", url: "/site-settings", icon: Settings, description: "General site configuration" },
+  { name: "Newsletter Popup", url: "/newsletter-popup", icon: Mail, description: "Newsletter popup configuration" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
@@ -1273,9 +1586,14 @@ export default function AdvertisingPanelPage() {
             {selectedPage.url === "/site-settings" && (
               <SiteSettingsForm />
             )}
+
+            {/* Newsletter Popup Settings Page */}
+            {selectedPage.url === "/newsletter-popup" && (
+              <NewsletterPopupSettingsForm />
+            )}
             
             {/* Advertisement Banner Settings for other pages */}
-            {selectedPage.url !== "/site-settings" && (
+            {selectedPage.url !== "/site-settings" && selectedPage.url !== "/newsletter-popup" && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

@@ -23,6 +23,8 @@ import SEOPanel from "@/pages/seo-panel";
 import AdminLogin from "@/pages/admin-login";
 import Analytics from "@/pages/analytics";
 import AdminUsers from "@/pages/admin-users";
+import NewsletterPopup from "@/components/newsletter-popup";
+import { useNewsletterPopup } from "@/hooks/use-newsletter-popup";
 
 function Router() {
   return (
@@ -51,12 +53,25 @@ function Router() {
   );
 }
 
+function MainLayout() {
+  const { showPopup, closePopup, settings } = useNewsletterPopup();
+  
+  return (
+    <>
+      <Router />
+      {showPopup && settings?.isEnabled && (
+        <NewsletterPopup onClose={closePopup} />
+      )}
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <MainLayout />
       </TooltipProvider>
     </QueryClientProvider>
   );
