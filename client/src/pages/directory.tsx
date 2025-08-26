@@ -65,8 +65,8 @@ export default function Directory() {
 
   const renderBusinessCard = (business: BusinessWithCategory) => (
     <Card key={business.id} className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex gap-4">
+      <CardContent className="p-4 md:p-6">
+        <div className="flex gap-3 md:gap-4">
           <div className="flex-shrink-0">
             {business.website ? (
               <a 
@@ -78,14 +78,14 @@ export default function Directory() {
                 <img
                   src={business.imageUrl || '/placeholder-business.jpg'}
                   alt={business.name}
-                  className="w-20 h-20 rounded-lg object-cover hover:opacity-80 transition-opacity cursor-pointer"
+                  className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover hover:opacity-80 transition-opacity cursor-pointer"
                 />
               </a>
             ) : (
               <img
                 src={business.imageUrl || '/placeholder-business.jpg'}
                 alt={business.name}
-                className="w-20 h-20 rounded-lg object-cover"
+                className="w-16 h-16 md:w-20 md:h-20 rounded-lg object-cover"
               />
             )}
           </div>
@@ -98,25 +98,25 @@ export default function Directory() {
                     href={business.website} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
+                    className="text-base md:text-lg font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
                     data-testid={`link-business-website-${business.id}`}
                   >
                     {business.name}
                   </a>
                 ) : (
                   <h3 
-                    className="text-lg font-semibold text-gray-900"
+                    className="text-base md:text-lg font-semibold text-gray-900"
                     data-testid={`text-business-${business.id}`}
                   >
                     {business.name}
                   </h3>
                 )}
                 
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{business.rating}</span>
-                    <span className="text-sm text-gray-500">({business.reviewCount} reviews)</span>
+                    <Star className="w-3 h-3 md:w-4 md:h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs md:text-sm font-medium">{business.rating}</span>
+                    <span className="text-xs md:text-sm text-gray-500">({business.reviewCount} reviews)</span>
                   </div>
                   
                   {business.priceRange && (
@@ -138,14 +138,14 @@ export default function Directory() {
                   </p>
                 )}
 
-                <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs md:text-sm text-gray-500">
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                     <a 
                       href={getMapLink(business.address)}
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer break-words"
                       data-testid={`link-address-${business.id}`}
                     >
                       {business.address}
@@ -154,7 +154,7 @@ export default function Directory() {
                   
                   {business.phone && (
                     <div className="flex items-center gap-1">
-                      <Phone className="w-4 h-4" />
+                      <Phone className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
                       {window.innerWidth < 1024 ? ( // Mobile - make clickable
                         <a 
                           href={`tel:${business.phone}`}
@@ -208,31 +208,33 @@ export default function Directory() {
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <div className="text-center mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
           Business Directory
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
           Discover local businesses, read reviews, and find exactly what you're looking for in your area.
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 md:w-5 md:h-5" />
             <Input
               placeholder="Search businesses, services, or categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm md:text-base"
               data-testid="input-search"
             />
           </div>
           
           <Button
             variant="outline"
+            size="sm"
+            className="md:size-default"
             onClick={() => {
               setSearchQuery('');
             }}
@@ -248,12 +250,12 @@ export default function Directory() {
       {/* Removed Featured Businesses Section */}
 
       {/* Results Section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">
+      <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">
             All Businesses
           </h2>
-          <span className="text-gray-500" data-testid="text-results-count">
+          <span className="text-sm md:text-base text-gray-500" data-testid="text-results-count">
             {filteredBusinesses.length} results
           </span>
         </div>
@@ -299,7 +301,7 @@ export default function Directory() {
         </Card>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {filteredBusinesses.slice((currentPage - 1) * businessesPerPage, currentPage * businessesPerPage).map(renderBusinessCard)}
           </div>
           

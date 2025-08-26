@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Search, User } from "lucide-react";
+import { Search, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
@@ -10,6 +10,7 @@ import logoImage from "@/assets/logo.png";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location, navigate] = useLocation();
 
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
@@ -50,14 +51,14 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <Link href="/" data-testid="link-logo">
               {isAdminPage ? (
-                <h1 className="text-2xl font-bold cursor-pointer text-black">
+                <h1 className="text-xl md:text-2xl font-bold cursor-pointer text-black">
                   {siteSettings?.siteName || 'NetDiscount'}
                 </h1>
               ) : (
                 <img 
                   src={logoImage} 
                   alt={siteSettings?.siteName || 'NetDiscount'} 
-                  className="h-16 cursor-pointer"
+                  className="h-10 md:h-16 cursor-pointer"
                 />
               )}
             </Link>
@@ -65,8 +66,8 @@ export default function Header() {
           
           {/* Search bar - only show on admin pages */}
           {isAdminPage && (
-            <div className="flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="relative">
+            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+              <form onSubmit={handleSearch} className="relative w-full">
                 <Input
                   type="text"
                   placeholder="Search deals, stores & more"
@@ -90,28 +91,40 @@ export default function Header() {
           {/* Spacer for non-admin pages */}
           {!isAdminPage && <div className="flex-1"></div>}
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-white hover:text-blue-200"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              data-testid="button-mobile-menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </Button>
+            
             <Link href="/auth">
               <Button 
                 variant="ghost" 
+                size="sm"
                 className="hover:text-blue-200 text-white"
                 data-testid="button-login"
               >
                 <User className="w-4 h-4" />
-                <span className="ml-1">Login</span>
+                <span className="ml-1 hidden sm:inline">Login</span>
               </Button>
             </Link>
           </div>
         </div>
         
-        {/* Navigation Menu */}
-        <nav className="border-t border-green-600">
-          <div className="flex space-x-8 py-2">
+        {/* Desktop Navigation Menu */}
+        <nav className="hidden md:block border-t border-green-600">
+          <div className="flex space-x-6 lg:space-x-8 py-2 overflow-x-auto">
             {Array.isArray(visiblePages) && visiblePages.map((page) => (
               <Link
                 key={page.pageUrl}
                 href={page.pageUrl}
-                className="hover:text-blue-200 font-medium"
+                className="hover:text-blue-200 font-medium whitespace-nowrap text-sm lg:text-base"
                 data-testid={`nav-${page.pageUrl.replace('/', '')}`}
               >
                 {page.pageName}
@@ -119,6 +132,49 @@ export default function Header() {
             ))}
           </div>
         </nav>
+        
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden border-t border-green-600 bg-net-green">
+            <div className="flex flex-col space-y-1 py-2">
+              {Array.isArray(visiblePages) && visiblePages.map((page) => (
+                <Link
+                  key={page.pageUrl}
+                  href={page.pageUrl}
+                  className="hover:text-blue-200 font-medium px-4 py-2 text-sm"
+                  data-testid={`nav-mobile-${page.pageUrl.replace('/', '')}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {page.pageName}
+                </Link>
+              ))}
+              
+              {/* Mobile search for admin pages */}
+              {isAdminPage && (
+                <div className="px-4 py-2">
+                  <form onSubmit={handleSearch} className="relative">
+                    <Input
+                      type="text"
+                      placeholder="Search deals, stores & more"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full px-4 py-2 pr-12 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      data-testid="input-search-mobile"
+                    />
+                    <Button 
+                      type="submit"
+                      size="sm"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                      data-testid="button-search-mobile"
+                    >
+                      <Search className="w-4 h-4" />
+                    </Button>
+                  </form>
+                </div>
+              )}
+            </div>
+          </nav>
+        )}
       </div>
     </header>
   );

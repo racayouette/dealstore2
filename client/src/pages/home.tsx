@@ -78,10 +78,10 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4 md:py-6">
         <Breadcrumb items={breadcrumbItems} />
         
-        <h1 className="text-3xl font-bold text-net-dark mb-6">Featured Net Deals</h1>
+        <h1 className="text-xl md:text-3xl font-bold text-net-dark mb-4 md:mb-6">Featured Net Deals</h1>
 
         {/* Error States */}
         {dealsError && (
