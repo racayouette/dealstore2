@@ -82,13 +82,13 @@ export default function Category() {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4 md:py-6">
         <Breadcrumb items={breadcrumbItems} />
         
         {categoryLoading ? (
-          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-6 md:h-8 w-48 md:w-64 mb-4 md:mb-6" />
         ) : (
-          <h1 className="text-3xl font-bold text-net-dark mb-6" data-testid={`title-category-${slug}`}>
+          <h1 className="text-xl md:text-3xl font-bold text-net-dark mb-4 md:mb-6" data-testid={`title-category-${slug}`}>
             {category?.name} Deals
           </h1>
         )}

@@ -87,10 +87,10 @@ export default function DealCard({ deal, featured = false }: DealCardProps) {
         </div>
       </div>
       
-      <div className="p-6">
-        <div className="flex gap-6">
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
           {/* Deal Image */}
-          <div className="w-32 h-24 flex-shrink-0">
+          <div className="w-full sm:w-32 h-32 sm:h-24 flex-shrink-0">
             <img 
               src={deal.imageUrl || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200'} 
               alt={deal.title} 
@@ -102,7 +102,7 @@ export default function DealCard({ deal, featured = false }: DealCardProps) {
           <div className="flex-1">
             {/* Deal Title */}
             <Link href={`/deal/${deal.id}`}>
-              <h3 className="text-xl font-semibold text-net-dark mb-3 hover:text-net-green cursor-pointer" data-testid={`title-deal-${deal.id}`}>
+              <h3 className="text-lg md:text-xl font-semibold text-net-dark mb-3 hover:text-net-green cursor-pointer" data-testid={`title-deal-${deal.id}`}>
                 {deal.title}
               </h3>
             </Link>
