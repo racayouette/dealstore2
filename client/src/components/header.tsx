@@ -44,7 +44,19 @@ export default function Header() {
                       location?.startsWith("/admin");
 
   return (
-    <header className="bg-net-green text-white">
+    <>
+      {/* Affiliate Disclosure - Only show on non-admin pages */}
+      {!isAdminPage && (
+        <div className="bg-yellow-50 border-b border-yellow-200 py-2">
+          <div className="container mx-auto px-4">
+            <p className="text-center text-sm text-gray-700">
+              NetDiscount22 is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            </p>
+          </div>
+        </div>
+      )}
+      
+      <header className="bg-net-green text-white">
       <div className="container mx-auto px-4">
         {/* Top bar with logo and search */}
         <div className="flex items-center justify-between py-3">
@@ -176,6 +188,7 @@ export default function Header() {
           </nav>
         )}
       </div>
-    </header>
+      </header>
+    </>
   );
 }
