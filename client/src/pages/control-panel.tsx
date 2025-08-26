@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -56,6 +57,7 @@ interface SiteSettings {
   id: string;
   siteName: string;
   siteDescription: string;
+  affiliateDisclosure: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +65,7 @@ interface SiteSettings {
 const siteSettingsSchema = z.object({
   siteName: z.string().min(1, "Site name is required").max(100, "Site name must be 100 characters or less"),
   siteDescription: z.string().min(1, "Site description is required").max(500, "Site description must be 500 characters or less"),
+  affiliateDisclosure: z.string().min(1, "Affiliate disclosure is required").max(500, "Affiliate disclosure must be 500 characters or less"),
 });
 
 const newsletterPopupSettingsSchema = z.object({
@@ -120,6 +123,7 @@ function SiteSettingsForm() {
     defaultValues: {
       siteName: "",
       siteDescription: "",
+      affiliateDisclosure: "",
     },
   });
 
@@ -129,6 +133,7 @@ function SiteSettingsForm() {
       form.reset({
         siteName: siteSettings.siteName,
         siteDescription: siteSettings.siteDescription,
+        affiliateDisclosure: siteSettings.affiliateDisclosure,
       });
     }
   }, [siteSettings, form]);
@@ -193,6 +198,28 @@ function SiteSettingsForm() {
                       data-testid="input-site-description"
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="affiliateDisclosure"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Affiliate Disclosure</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter the affiliate disclosure message that appears at the top of pages"
+                      className="resize-none"
+                      {...field}
+                      data-testid="textarea-affiliate-disclosure"
+                    />
+                  </FormControl>
+                  <div className="text-sm text-gray-600">
+                    This message will appear at the top of your site pages to inform visitors about affiliate commissions.
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

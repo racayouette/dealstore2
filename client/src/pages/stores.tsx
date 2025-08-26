@@ -64,7 +64,7 @@ export default function Stores() {
       <div className="bg-gray-100 border-b">
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-gray-600">
-            {siteSettings?.siteName || 'NetDiscount'} is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+            {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
           </p>
         </div>
       </div>

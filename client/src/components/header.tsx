@@ -50,7 +50,7 @@ export default function Header() {
         <div className="bg-yellow-50 border-b border-yellow-200 py-2">
           <div className="container mx-auto px-4">
             <p className="text-center text-sm text-gray-700">
-              NetDiscount22 is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.
+              {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
             </p>
           </div>
         </div>
