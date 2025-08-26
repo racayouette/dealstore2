@@ -19,6 +19,8 @@ import {
   businessReviews,
   businessPhotos,
   users,
+  newsletterSubscribers,
+  newsletterPopupSettings,
   type Category, 
   type Store, 
   type Deal, 
@@ -38,6 +40,8 @@ import {
   type BusinessReview,
   type BusinessPhoto,
   type User,
+  type NewsletterSubscriber,
+  type NewsletterPopupSettings,
   type InsertCategory, 
   type InsertStore, 
   type InsertDeal, 
@@ -59,6 +63,8 @@ import {
   type InsertBusinessReview,
   type InsertBusinessPhoto,
   type InsertUser,
+  type InsertNewsletterSubscriber,
+  type InsertNewsletterPopupSettings,
   type DealWithRelations,
   type CategoryWithChildren,
   type BusinessWithDetails,
@@ -171,6 +177,15 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   getUsersWithPagination(page: number, limit: number): Promise<{ users: User[], total: number }>;
+  
+  // Newsletter Subscribers
+  createNewsletterSubscriber(subscriber: InsertNewsletterSubscriber): Promise<NewsletterSubscriber>;
+  getNewsletterSubscriberByEmail(email: string): Promise<NewsletterSubscriber | undefined>;
+  getAllNewsletterSubscribers(): Promise<NewsletterSubscriber[]>;
+  
+  // Newsletter Popup Settings
+  getNewsletterPopupSettings(): Promise<NewsletterPopupSettings | undefined>;
+  updateNewsletterPopupSettings(settings: InsertNewsletterPopupSettings): Promise<NewsletterPopupSettings>;
   
   // Page Views
   createPageView(pageView: InsertPageView): Promise<PageView>;
@@ -1016,6 +1031,44 @@ export class DatabaseStorage implements IStorage {
       users: usersResult,
       total: totalResult[0]?.count || 0
     };
+  }
+
+  // Newsletter Subscribers
+  async createNewsletterSubscriber(subscriber: InsertNewsletterSubscriber): Promise<NewsletterSubscriber> {
+    const [newSubscriber] = await db.insert(newsletterSubscribers).values(subscriber).returning();
+    return newSubscriber;
+  }
+
+  async getNewsletterSubscriberByEmail(email: string): Promise<NewsletterSubscriber | undefined> {
+    const [subscriber] = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.email, email));
+    return subscriber || undefined;
+  }
+
+  async getAllNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
+    return await db.select().from(newsletterSubscribers).orderBy(desc(newsletterSubscribers.createdAt));
+  }
+
+  // Newsletter Popup Settings
+  async getNewsletterPopupSettings(): Promise<NewsletterPopupSettings | undefined> {
+    const [settings] = await db.select().from(newsletterPopupSettings).limit(1);
+    return settings || undefined;
+  }
+
+  async updateNewsletterPopupSettings(settings: InsertNewsletterPopupSettings): Promise<NewsletterPopupSettings> {
+    // Check if settings already exist
+    const existing = await this.getNewsletterPopupSettings();
+    
+    if (existing) {
+      const [updated] = await db
+        .update(newsletterPopupSettings)
+        .set({ ...settings, updatedAt: new Date() })
+        .where(eq(newsletterPopupSettings.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(newsletterPopupSettings).values(settings).returning();
+      return created;
+    }
   }
 
   // Page Views

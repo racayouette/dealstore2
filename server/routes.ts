@@ -139,6 +139,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Newsletter subscription routes
+  app.post("/api/newsletter/subscribe", async (req, res) => {
+    try {
+      const { email, signupMethod = 'email' } = req.body;
+      
+      if (!email) {
+        return res.status(400).send("Email is required");
+      }
+
+      // Check if email already exists
+      const existingSubscriber = await storage.getNewsletterSubscriberByEmail(email);
+      if (existingSubscriber) {
+        return res.status(200).json({ message: "Already subscribed", subscriber: existingSubscriber });
+      }
+
+      // Create new subscriber
+      const subscriber = await storage.createNewsletterSubscriber({
+        email,
+        signupMethod,
+        isActive: true
+      });
+
+      res.status(201).json({ message: "Successfully subscribed", subscriber });
+    } catch (error) {
+      console.error("Error subscribing to newsletter:", error);
+      res.status(500).send("Subscription failed");
+    }
+  });
+
+  // Newsletter popup settings routes
+  app.get("/api/newsletter/popup-settings", async (req, res) => {
+    try {
+      const settings = await storage.getNewsletterPopupSettings();
+      res.json(settings || {
+        isEnabled: false,
+        popupType: "dark",
+        showDelay: 5000,
+        showOnPages: [],
+        frequency: "once_per_session"
+      });
+    } catch (error) {
+      console.error("Error fetching newsletter popup settings:", error);
+      res.status(500).send("Failed to fetch popup settings");
+    }
+  });
+
+  app.post("/api/newsletter/popup-settings", async (req, res) => {
+    try {
+      const settings = await storage.updateNewsletterPopupSettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating newsletter popup settings:", error);
+      res.status(500).send("Failed to update popup settings");
+    }
+  });
+
+  // Get all newsletter subscribers for admin
+  app.get("/api/admin/newsletter/subscribers", async (req, res) => {
+    try {
+      const subscribers = await storage.getAllNewsletterSubscribers();
+      res.json(subscribers);
+    } catch (error) {
+      console.error("Error fetching newsletter subscribers:", error);
+      res.status(500).send("Failed to fetch subscribers");
+    }
+  });
+
   app.post('/api/admin/verify', async (req, res) => {
     const { token } = req.body;
     

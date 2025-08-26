@@ -398,6 +398,26 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  signupMethod: varchar("signup_method", { length: 50 }).notNull(), // 'email', 'facebook', 'google', 'apple'
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+export const newsletterPopupSettings = pgTable("newsletter_popup_settings", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  isEnabled: boolean("is_enabled").default(false),
+  popupType: varchar("popup_type", { length: 20 }).notNull().default("dark"), // 'dark' or 'light'
+  showDelay: integer("show_delay").default(5000), // milliseconds
+  showOnPages: text("show_on_pages").array().default([]), // array of page URLs
+  frequency: varchar("frequency", { length: 20 }).default("once_per_session"), // 'once_per_session', 'daily', 'always'
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Types
 export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
@@ -461,6 +481,18 @@ export const insertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+export const insertNewsletterSubscriberSchema = createInsertSchema(newsletterSubscribers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNewsletterPopupSettingsSchema = createInsertSchema(newsletterPopupSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Directory types
 export type BusinessCategory = typeof businessCategories.$inferSelect;
 export type Business = typeof businesses.$inferSelect;
@@ -468,6 +500,8 @@ export type BusinessHours = typeof businessHours.$inferSelect;
 export type BusinessReview = typeof businessReviews.$inferSelect;
 export type BusinessPhoto = typeof businessPhotos.$inferSelect;
 export type User = typeof users.$inferSelect;
+export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type NewsletterPopupSettings = typeof newsletterPopupSettings.$inferSelect;
 
 export type InsertBusinessCategory = z.infer<typeof insertBusinessCategorySchema>;
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
@@ -475,6 +509,8 @@ export type InsertBusinessHours = z.infer<typeof insertBusinessHoursSchema>;
 export type InsertBusinessReview = z.infer<typeof insertBusinessReviewSchema>;
 export type InsertBusinessPhoto = z.infer<typeof insertBusinessPhotoSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscriberSchema>;
+export type InsertNewsletterPopupSettings = z.infer<typeof insertNewsletterPopupSettingsSchema>;
 
 // Extended types for API responses
 export type DealWithRelations = Deal & {
