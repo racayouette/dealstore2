@@ -85,6 +85,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin user management routes
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const result = await storage.getUsersWithPagination(page, limit);
+      
+      // Remove passwords from response
+      const safeUsers = result.users.map(user => {
+        const { password, ...safeUser } = user;
+        return safeUser;
+      });
+      
+      res.json({
+        users: safeUsers,
+        total: result.total,
+        page,
+        limit,
+        totalPages: Math.ceil(result.total / limit)
+      });
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).send("Failed to fetch users");
+    }
+  });
+
+  // Export users as CSV
+  app.get("/api/admin/users/export", async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      
+      // Create CSV header
+      const csvHeader = "ID,Username,Email,Created At,Updated At\n";
+      
+      // Create CSV rows
+      const csvRows = allUsers.map(user => {
+        const createdAt = user.createdAt ? new Date(user.createdAt).toISOString() : '';
+        const updatedAt = user.updatedAt ? new Date(user.updatedAt).toISOString() : '';
+        return `"${user.id}","${user.username}","${user.email}","${createdAt}","${updatedAt}"`;
+      }).join('\n');
+      
+      const csvContent = csvHeader + csvRows;
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=users-export.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      res.status(500).send("Failed to export users");
+    }
+  });
+
   app.post('/api/admin/verify', async (req, res) => {
     const { token } = req.body;
     
@@ -2037,6 +2091,77 @@ async function seedAdvertisementBanners() {
     isActive: true,
     displayOrder: 2,
   });
+  // Create sample users for demonstration
+  const sampleUsers = [
+    {
+      username: "johndoe",
+      email: "john.doe@example.com",
+      password: "password123"
+    },
+    {
+      username: "sarahsmith",
+      email: "sarah.smith@example.com", 
+      password: "password123"
+    },
+    {
+      username: "mikechen",
+      email: "mike.chen@gmail.com",
+      password: "password123"
+    },
+    {
+      username: "emilyjohnson",
+      email: "emily.johnson@yahoo.com",
+      password: "password123"
+    },
+    {
+      username: "davidbrown",
+      email: "david.brown@outlook.com",
+      password: "password123"
+    },
+    {
+      username: "jessicawilson",
+      email: "jessica.wilson@example.com",
+      password: "password123"
+    },
+    {
+      username: "robertdavis",
+      email: "robert.davis@gmail.com",
+      password: "password123"
+    },
+    {
+      username: "amandamoore",
+      email: "amanda.moore@example.com",
+      password: "password123"
+    },
+    {
+      username: "christaylor",
+      email: "chris.taylor@yahoo.com",
+      password: "password123"
+    },
+    {
+      username: "lauramiller",
+      email: "laura.miller@gmail.com",
+      password: "password123"
+    },
+    {
+      username: "jamesanderson",
+      email: "james.anderson@example.com",
+      password: "password123"
+    },
+    {
+      username: "rachelthomas",
+      email: "rachel.thomas@outlook.com",
+      password: "password123"
+    }
+  ];
+
+  for (const userData of sampleUsers) {
+    // Check if user already exists to avoid duplicates
+    const existingUser = await storage.getUserByUsername(userData.username);
+    if (!existingUser) {
+      await storage.createUser(userData);
+    }
+  }
 }
 
 // Seed directory businesses with Yelp-style business data

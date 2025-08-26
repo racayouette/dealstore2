@@ -169,6 +169,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  getUsersWithPagination(page: number, limit: number): Promise<{ users: User[], total: number }>;
   
   // Page Views
   createPageView(pageView: InsertPageView): Promise<PageView>;
@@ -996,6 +998,24 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async getUsersWithPagination(page: number, limit: number): Promise<{ users: User[], total: number }> {
+    const offset = (page - 1) * limit;
+    
+    const [usersResult, totalResult] = await Promise.all([
+      db.select().from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(users)
+    ]);
+    
+    return {
+      users: usersResult,
+      total: totalResult[0]?.count || 0
+    };
   }
 
   // Page Views
