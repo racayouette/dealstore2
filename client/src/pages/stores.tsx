@@ -123,7 +123,7 @@ export default function Stores() {
                 {isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
-                      <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-40 flex flex-col justify-center">
+                      <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-48 flex flex-col justify-center">
                         <Skeleton className="w-20 h-12 mx-auto mb-3" />
                         <Skeleton className="h-4 w-24 mx-auto mb-2" />
                         <Skeleton className="h-3 w-32 mx-auto" />
@@ -194,7 +194,7 @@ export default function Stores() {
                   {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                       {[1, 2, 3, 4, 5, 6].map(i => (
-                        <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-40 flex flex-col justify-center">
+                        <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-48 flex flex-col justify-center">
                           <Skeleton className="w-20 h-12 mx-auto mb-3" />
                           <Skeleton className="h-4 w-24 mx-auto mb-2" />
                           <Skeleton className="h-3 w-32 mx-auto" />
