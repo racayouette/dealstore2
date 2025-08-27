@@ -1653,20 +1653,6 @@ export default function AdvertisingPanelPage() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold text-gray-900">Custom Pages</h2>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setPageToDuplicate(null);
-                      setDuplicateForm({ name: '', url: '', description: '' });
-                      setDuplicateErrors({ name: '', url: '', general: '' });
-                      setIsDuplicateDialogOpen(true);
-                    }}
-                    className="flex items-center gap-1 bg-net-green hover:bg-net-green-dark"
-                    data-testid="button-add-new-page"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add
-                  </Button>
                 </div>
                 <div className="space-y-1">
                   {customPages.length > 0 ? (
