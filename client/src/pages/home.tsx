@@ -78,15 +78,38 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      {/* Affiliate Disclosure */}
-      <div className="bg-gray-100 border-b">
-        <div className="container mx-auto px-4 py-2">
-          <p className="text-sm text-gray-600">
-            {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
-            <a href="#" className="text-net-green hover:underline ml-1">Learn More</a>
-          </p>
+      {/* Header with blue banner matching Store33 style but with navigation tabs */}
+      <div className="bg-white border-b">
+        <div className="bg-gray-100 py-1">
+          <div className="container mx-auto px-4">
+            <p className="text-center text-sm text-gray-600">
+              {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-blue-600 text-white">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <h1 className="text-2xl font-bold" data-testid="title-home">
+                  {siteSettings?.siteName || 'NETDISCOUNT'} <span className="text-blue-200">DEALS</span>
+                </h1>
+                <nav className="hidden md:flex items-center space-x-6">
+                  <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
+                  <a href="/stores" className="hover:text-blue-200 transition-colors">Stores</a>
+                  <a href="/category/electronics" className="hover:text-blue-200 transition-colors">Categories</a>
+                  <a href="/search" className="hover:text-blue-200 transition-colors">Search</a>
+                  <a href="/store33" className="hover:text-blue-200 transition-colors">Today's Deals</a>
+                </nav>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
+                  Log in or Sign Up
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
