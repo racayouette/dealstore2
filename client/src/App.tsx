@@ -43,7 +43,7 @@ function Router() {
   const staticRoutes = [
     '/', '/stores', '/store33', '/store44', '/videos', '/video2', 
     '/posts', '/blogs', '/directory', '/search', '/auth', '/privacy', 
-    '/terms', '/advertising-panel', '/seo-panel', '/wp-admin', 
+    '/terms', '/advertising-panel', '/control-panel', '/seo-panel', '/wp-admin', 
     '/admin-login', '/analytics', '/admin/users'
   ];
 
@@ -72,6 +72,7 @@ function Router() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
       <Route path="/advertising-panel" component={ControlPanel} />
+      <Route path="/control-panel" component={ControlPanel} />
       <Route path="/seo-panel" component={SEOPanel} />
       <Route path="/wp-admin" component={AdminLogin} />
       <Route path="/admin-login" component={AdminLogin} />
