@@ -204,21 +204,9 @@ export default function DynamicPage() {
     return filtered;
   }, [featuredDeals, selectedCategories, selectedStores, priceRange, freeShippingOnly, minDiscount]);
 
-  // If page is not found in banner settings, show 404
+  // If page is not found in banner settings, show 404 after loading completes
   if (!pageLoading && (pageError || !pageSettings)) {
     return <NotFound />;
-  }
-
-  // If still loading page settings, show loading
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading page...</p>
-        </div>
-      </div>
-    );
   }
 
   return (
