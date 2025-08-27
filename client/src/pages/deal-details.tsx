@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
-import { ExternalLink, Star, Clock, Tag, Store } from "lucide-react";
+import { useParams } from "wouter";
+import { ExternalLink, Heart, Copy, Clock } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Breadcrumb from "@/components/breadcrumb";
@@ -8,12 +8,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
-import type { DealWithRelations, SiteSettings } from "@shared/schema";
+import type { DealWithRelations } from "@shared/schema";
+import { usePageTracking } from "@/hooks/use-page-tracking";
+
+interface SiteSettings {
+  id: string;
+  siteName: string;
+  siteDescription: string;
+  affiliateDisclosure: string;
+}
 
 export default function DealDetails() {
+  usePageTracking("Deal Details", "/deal/:id");
+  
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
 
   // Fetch deal details
   const { 
@@ -26,67 +37,53 @@ export default function DealDetails() {
     enabled: !!id,
   });
 
-  // Fetch site settings for dynamic site name
+  // Fetch site settings
   const { data: siteSettings } = useQuery<SiteSettings>({
     queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
+  });
+
+  // Fetch related deals
+  const { data: relatedDeals = [] } = useQuery<DealWithRelations[]>({
+    queryKey: ["/api/deals/related", deal?.category?.slug],
+    queryFn: () => api.getDealsByCategory(deal?.category?.slug!, 8),
+    enabled: !!deal?.category?.slug,
   });
 
   const formatPrice = (price: string | null) => {
     if (!price) return null;
-    return `$${parseFloat(price).toFixed(2)}`;
+    const numPrice = parseFloat(price);
+    return `$${numPrice.toFixed(2)}`;
   };
 
-  const formatRating = (rating: string | null) => {
-    if (!rating) return 0;
-    return parseFloat(rating);
+  const calculateSavings = (originalPrice: string | null, salePrice: string | null) => {
+    if (!originalPrice || !salePrice) return 0;
+    const original = parseFloat(originalPrice);
+    const sale = parseFloat(salePrice);
+    if (original <= sale) return 0;
+    return Math.round(((original - sale) / original) * 100);
   };
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <div key="half" className="relative">
-          <Star className="w-5 h-5 text-gray-300" />
-          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400 absolute top-0 left-0 overflow-hidden" 
-                style={{ clipPath: 'inset(0 50% 0 0)' }} />
-        </div>
-      );
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <Star key={`empty-${i}`} className="w-5 h-5 text-gray-300" />
-      );
-    }
-
-    return stars;
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copied!",
+      description: "Coupon code copied to clipboard",
+    });
   };
 
-  const calculateDiscount = () => {
-    if (deal?.discountPercent) {
-      return deal.discountPercent;
-    }
-    if (deal?.originalPrice && deal?.salePrice) {
-      const original = parseFloat(deal.originalPrice);
-      const sale = parseFloat(deal.salePrice);
-      return Math.round(((original - sale) / original) * 100);
-    }
-    return 0;
+  const formatRelativeTime = (date: string | null) => {
+    if (!date) return "recently";
+    const now = new Date();
+    const postDate = new Date(date);
+    const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours === 1) return "1 hour ago";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return "1 day ago";
+    return `${diffInDays} days ago`;
   };
 
   const breadcrumbItems = deal ? [
@@ -126,276 +123,214 @@ export default function DealDetails() {
       <main className="container mx-auto px-4 py-6">
         {!isLoading && deal && <Breadcrumb items={breadcrumbItems} />}
         
-        <div className="flex gap-8">
-          {/* Main Content */}
-          <div className="flex-1">
-            {isLoading ? (
-              <div className="space-y-6">
-                <Skeleton className="h-8 w-3/4" />
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                  <div className="flex gap-6">
-                    <Skeleton className="w-64 h-48 rounded-lg" />
-                    <div className="flex-1 space-y-4">
-                      <Skeleton className="h-6 w-1/2" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-12 w-32" />
-                    </div>
-                  </div>
-                </div>
+        {isLoading ? (
+          <div className="space-y-6">
+            <Skeleton className="h-8 w-3/4" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Skeleton className="w-full h-96 rounded-lg" />
+              <div className="space-y-4">
+                <Skeleton className="h-6 w-full" />
+                <Skeleton className="h-8 w-1/2" />
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-32 w-full" />
               </div>
-            ) : deal ? (
-              <>
-                {/* Deal Header */}
-                <div className="bg-white rounded-lg shadow-sm border mb-6 overflow-hidden">
-                  {/* Store Badge Header */}
-                  <div className="bg-gray-100 px-6 py-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Store className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm text-gray-600">
-                          {deal.authorName && `Posted by ${deal.authorName} • `}
-                          Available at
-                        </span>
-                      </div>
-                      <Badge 
-                        variant="secondary" 
-                        className="bg-blue-600 text-white"
-                        data-testid={`badge-store-${deal.store.slug}`}
-                      >
-                        {deal.store.name}
+            </div>
+          </div>
+        ) : deal ? (
+          <>
+            {/* Main Deal Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+              {/* Product Image */}
+              <div className="relative">
+                <img 
+                  src={deal.imageUrl || ''} 
+                  alt={deal.title}
+                  className="w-full h-auto rounded-lg shadow-sm"
+                  data-testid="img-deal-main"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white shadow-sm"
+                  data-testid="button-favorite-deal"
+                >
+                  <Heart className="w-5 h-5" />
+                </Button>
+                {deal.isFeatured && (
+                  <Badge className="absolute top-4 left-4 bg-blue-600 text-white">
+                    Exclusive
+                  </Badge>
+                )}
+              </div>
+
+              {/* Product Details */}
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4" data-testid="title-deal">
+                    {deal.title}
+                  </h1>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-baseline space-x-3">
+                      <span className="text-3xl font-bold text-black" data-testid="price-sale">
+                        {formatPrice(deal.salePrice)}
+                      </span>
+                      {deal.originalPrice && deal.originalPrice !== deal.salePrice && (
+                        <>
+                          <span className="text-lg text-gray-500 line-through" data-testid="price-original">
+                            {formatPrice(deal.originalPrice)}
+                          </span>
+                          <span className="text-lg font-semibold text-green-600">
+                            Save {calculateSavings(deal.originalPrice, deal.salePrice)}%
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      <span className="text-blue-600 font-medium">{deal.store.name}</span>
+                      <Heart className="w-4 h-4 text-gray-400" />
+                    </div>
+
+                    {deal.freeShipping && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        Free Shipping
                       </Badge>
-                    </div>
-                  </div>
-
-                  <div className="p-6">
-                    <div className="flex gap-8">
-                      {/* Deal Image */}
-                      <div className="w-64 h-48 flex-shrink-0">
-                        <img 
-                          src={deal.imageUrl || 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400'} 
-                          alt={deal.title} 
-                          className="w-full h-full object-cover rounded-lg border"
-                          data-testid={`img-deal-${deal.id}`}
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        {/* Deal Title */}
-                        <h1 className="text-2xl font-bold text-net-dark mb-4" data-testid={`title-deal-${deal.id}`}>
-                          {deal.title}
-                        </h1>
-                        
-                        {/* Rating */}
-                        {deal.rating && (
-                          <div className="flex items-center space-x-2 mb-4" data-testid={`rating-deal-${deal.id}`}>
-                            <div className="flex">
-                              {renderStars(formatRating(deal.rating))}
-                            </div>
-                            <span className="text-lg font-medium">
-                              {deal.rating}
-                            </span>
-                            <span className="text-gray-600">
-                              ({deal.reviewCount?.toLocaleString() || 0} reviews)
-                            </span>
-                          </div>
-                        )}
-                        
-                        {/* Pricing */}
-                        <div className="mb-6">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <span className="text-3xl font-bold text-red-600" data-testid={`price-sale-${deal.id}`}>
-                              {formatPrice(deal.salePrice)}
-                            </span>
-                            {deal.originalPrice && (
-                              <span className="text-xl text-gray-500 line-through" data-testid={`price-original-${deal.id}`}>
-                                {formatPrice(deal.originalPrice)}
-                              </span>
-                            )}
-                            {calculateDiscount() > 0 && (
-                              <Badge variant="destructive" className="text-sm">
-                                {calculateDiscount()}% OFF
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-green-600 font-medium">
-                            + Free shipping available
-                          </p>
-                        </div>
-
-                        {/* Coupon Code */}
-                        {deal.couponCode && (
-                          <Card className="mb-6 border-green-200 bg-green-50">
-                            <CardContent className="p-4">
-                              <div className="flex items-center space-x-2">
-                                <Tag className="w-4 h-4 text-green-600" />
-                                <span className="font-medium text-green-800">Coupon Code:</span>
-                                <code className="bg-white px-2 py-1 rounded border font-mono text-sm">
-                                  {deal.couponCode}
-                                </code>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        )}
-                        
-                        {/* Action Buttons */}
-                        <div className="flex space-x-3">
-                          <Button 
-                            size="lg"
-                            className="bg-net-green hover:bg-net-green-dark text-white px-8"
-                            asChild
-                            data-testid={`button-get-deal-${deal.id}`}
-                          >
-                            <a href={deal.dealUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-5 h-5 mr-2" />
-                              Get This Deal
-                            </a>
-                          </Button>
-                          
-                          {deal.couponCode && (
-                            <Button 
-                              variant="outline"
-                              size="lg"
-                              onClick={() => navigator.clipboard.writeText(deal.couponCode!)}
-                              data-testid={`button-copy-code-${deal.id}`}
-                            >
-                              Copy Code
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Expiration Warning */}
-                        {deal.expiresAt && (
-                          <div className="mt-4 flex items-center space-x-2 text-orange-600">
-                            <Clock className="w-4 h-4" />
-                            <span className="text-sm">
-                              Expires: {new Date(deal.expiresAt).toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Deal Description */}
-                {deal.description && (
-                  <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle>Deal Description</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="prose max-w-none" data-testid={`description-deal-${deal.id}`}>
-                        <p className="text-gray-700 leading-relaxed">
-                          {deal.description}
-                        </p>
+                {/* Get This Deal Button */}
+                <Button 
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 text-lg font-semibold"
+                  onClick={() => window.open(deal.dealUrl, '_blank')}
+                  data-testid="button-get-deal"
+                >
+                  Get This Deal
+                </Button>
+
+                {/* Coupon Code Section */}
+                {deal.couponCode && (
+                  <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg border">
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-blue-900">Coupon Code:</span>
+                      <div className="text-lg font-bold text-blue-600 font-mono">
+                        {deal.couponCode}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <Button 
+                      variant="default"
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={() => copyToClipboard(deal.couponCode!)}
+                      data-testid="button-copy-coupon"
+                    >
+                      Copy Coupon
+                    </Button>
+                  </div>
                 )}
 
-                {/* Store Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>About {deal.store.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-start space-x-4">
-                      <img 
-                        src={deal.store.logoUrl || 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=60'} 
-                        alt={`${deal.store.name} logo`} 
-                        className="w-16 h-10 object-contain border rounded"
-                      />
-                      <div className="flex-1">
-                        <p className="text-gray-700 mb-3">
-                          {deal.store.description || `Shop the latest deals and offers from ${deal.store.name}.`}
-                        </p>
-                        <Button variant="outline" asChild>
-                          <Link href={`/stores/${deal.store.slug}`}>
-                            View All {deal.store.name} Deals
-                          </Link>
+                {/* Editor Insights */}
+                {deal.editorInsights && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900">Editor Insights</h3>
+                    <div className="text-gray-700 leading-relaxed" data-testid="text-editor-insights">
+                      {deal.editorInsights}
+                    </div>
+                  </div>
+                )}
+
+                {/* How to Get It */}
+                {deal.howToGetIt && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-gray-900">How to Get It</h3>
+                    <div className="text-gray-700 leading-relaxed" data-testid="text-how-to-get-it">
+                      {deal.howToGetIt}
+                    </div>
+                  </div>
+                )}
+
+                {/* Posted By */}
+                <div className="flex items-center space-x-2 text-sm text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  <span data-testid="text-posted-by">
+                    Posted by {deal.authorName || 'Staff'} {formatRelativeTime(deal.createdAt ? deal.createdAt.toString() : null)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* More Deals Like This Section */}
+            {relatedDeals.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6" data-testid="title-more-deals">
+                  More Deals Like This
+                </h2>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                  {relatedDeals.slice(0, 6).map((relatedDeal, index) => (
+                    <div key={relatedDeal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                      <div className="relative">
+                        <img 
+                          src={relatedDeal.imageUrl || ''} 
+                          alt={relatedDeal.title}
+                          className="w-full h-32 object-cover"
+                          data-testid={`img-related-deal-${index}`}
+                        />
+                        
+                        {relatedDeal.isFeatured && (
+                          <Badge className="absolute top-1 left-1 bg-blue-600 text-white text-xs">
+                            Exclusive
+                          </Badge>
+                        )}
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-1 right-1 p-1 bg-white/80 hover:bg-white"
+                          data-testid={`button-favorite-related-${relatedDeal.id}`}
+                        >
+                          <Heart className="w-3 h-3" />
                         </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : null}
-          </div>
-
-          {/* Sidebar */}
-          <aside className="w-80 space-y-6">
-            {deal && (
-              <>
-                {/* Quick Deal Info */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Deal Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Store:</span>
-                      <span className="text-sm font-medium">{deal.store.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Category:</span>
-                      <Link href={`/category/${deal.category.slug}`} className="text-sm font-medium text-net-green hover:underline">
-                        {deal.category.name}
-                      </Link>
-                    </div>
-                    {deal.rating && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Rating:</span>
-                        <span className="text-sm font-medium">{deal.rating}/5</span>
+                      
+                      <div className="p-3">
+                        <h3 className="font-medium text-xs text-gray-900 mb-2 line-clamp-2" data-testid={`title-related-deal-${index}`}>
+                          {relatedDeal.title}
+                        </h3>
+                        
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-1">
+                            {relatedDeal.salePrice && (
+                              <span className="text-sm font-bold text-red-600">
+                                {formatPrice(relatedDeal.salePrice)}
+                              </span>
+                            )}
+                            {relatedDeal.originalPrice && relatedDeal.originalPrice !== relatedDeal.salePrice && (
+                              <span className="text-xs text-gray-500 line-through">
+                                {formatPrice(relatedDeal.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="text-xs text-gray-500">
+                            {relatedDeal.store?.name}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                    {calculateDiscount() > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Discount:</span>
-                        <span className="text-sm font-medium text-green-600">{calculateDiscount()}%</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Related Links */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Related</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Link href={`/category/${deal.category.slug}`} className="block text-net-green hover:underline text-sm">
-                      More {deal.category.name} Deals
-                    </Link>
-                    <Link href={`/stores/${deal.store.slug}`} className="block text-net-green hover:underline text-sm">
-                      More {deal.store.name} Deals
-                    </Link>
-                    <Link href="/deals" className="block text-net-green hover:underline text-sm">
-                      All Active Deals
-                    </Link>
-                  </CardContent>
-                </Card>
-
-                {/* Share Deal */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Share This Deal</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => navigator.clipboard.writeText(window.location.href)}
-                    >
-                      Copy Link
-                    </Button>
-                  </CardContent>
-                </Card>
-              </>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
-          </aside>
-        </div>
+          </>
+        ) : (
+          <Alert>
+            <AlertDescription>
+              Deal not found.
+            </AlertDescription>
+          </Alert>
+        )}
       </main>
 
       <Footer />

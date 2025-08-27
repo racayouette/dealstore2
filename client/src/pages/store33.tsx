@@ -115,7 +115,7 @@ export default function Store33() {
                 ))
               ) : (
                 featuredDeals.slice(0, 5).map((deal, index) => (
-                  <div key={deal.id} className="flex-none w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                  <a href={`/deal/${deal.id}`} key={deal.id} className="flex-none w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
                     <div className="relative">
                       <img 
                         src={deal.imageUrl || ''} 
@@ -149,7 +149,7 @@ export default function Store33() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </a>
                 ))
               )}
             </div>
@@ -224,7 +224,7 @@ export default function Store33() {
                 const isExclusive = index % 3 === 0; // Make every 3rd deal "exclusive" for demo
                 
                 return (
-                  <div key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                  <a href={`/deal/${deal.id}`} key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
                     <div className="relative">
                       <img 
                         src={deal.imageUrl || ''} 
@@ -279,7 +279,7 @@ export default function Store33() {
                         {deal.store?.name}
                       </div>
                     </div>
-                  </div>
+                  </a>
                 );
               })
             )}
