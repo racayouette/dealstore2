@@ -113,35 +113,6 @@ export default function Stores() {
         
         <h1 className="text-3xl font-bold text-net-dark mb-6">All Stores</h1>
 
-        {/* Featured Ad Banner */}
-        <div className="mb-8 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-1">
-          <div className="bg-white rounded-lg p-6 flex items-center space-x-6 shadow-sm">
-            <img 
-              src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
-              alt="ULTRALOQ Bolt Fingerprint Smart Lock" 
-              className="w-32 h-24 object-cover rounded-lg"
-            />
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg text-net-dark mb-2">
-                ULTRALOQ Bolt Fingerprint Smart Lock, Works with Apple HomeKit
-              </h3>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="flex text-yellow-400">
-                  {[1, 2, 3, 4].map(i => (
-                    <span key={i} className="text-yellow-400">★</span>
-                  ))}
-                  <span className="text-gray-300">☆</span>
-                </div>
-                <span className="text-sm text-gray-600">3,583</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-red-600">$159.99</span>
-                <span className="text-lg text-gray-500 line-through">$199.99</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="flex gap-8">
           {/* Main Content */}
           <div className="flex-1">
