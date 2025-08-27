@@ -101,7 +101,7 @@ export default function Store55() {
                 </div>
               )}
               {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
-                <div className="text-sm text-gray-500 line-through">
+                <div className="text-sm text-gray-500">
                   was {formatPrice(deal.originalPrice)}
                 </div>
               )}
