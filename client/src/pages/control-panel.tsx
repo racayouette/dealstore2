@@ -1167,7 +1167,7 @@ export default function AdvertisingPanelPage() {
       name: setting.pageName,
       url: setting.pageUrl,
       icon: staticMatch?.icon || FileText,
-      description: staticMatch?.description || setting.pageName
+      description: setting.description || staticMatch?.description || setting.pageName
     };
   }) : [];
 
