@@ -219,11 +219,6 @@ export default function DealDetails() {
                 <div className="absolute top-4 right-4">
                   <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white shadow-sm" size={20} />
                 </div>
-                {deal.isFeatured && (
-                  <Badge className="absolute top-4 left-4 bg-blue-600 text-white">
-                    Exclusive
-                  </Badge>
-                )}
               </div>
 
               {/* Product Details */}
@@ -341,11 +336,6 @@ export default function DealDetails() {
                           data-testid={`img-related-deal-${index}`}
                         />
                         
-                        {relatedDeal.isFeatured && (
-                          <Badge className="absolute top-1 left-1 bg-blue-600 text-white text-xs">
-                            Exclusive
-                          </Badge>
-                        )}
                         
                         <div className="absolute top-1 right-1">
                           <HeartButton dealId={relatedDeal.id} className="bg-white/80 hover:bg-white" size={12} />
