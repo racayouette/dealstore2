@@ -225,7 +225,13 @@ export default function Videos() {
           ) : (
             videoChannels.map((channel) => (
               <Card key={channel.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
-                <div className="aspect-video relative overflow-hidden bg-gray-100">
+                <a 
+                  href={channel.channelUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="aspect-video relative overflow-hidden bg-gray-100 block cursor-pointer"
+                  data-testid={`thumbnail-channel-${channel.id}`}
+                >
                   <img
                     src={channel.thumbnailUrl}
                     alt={channel.title}
@@ -235,7 +241,7 @@ export default function Videos() {
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
                     <PlayCircle className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                   </div>
-                </div>
+                </a>
                 
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg font-semibold line-clamp-2 group-hover:text-net-green transition-colors">
