@@ -168,7 +168,13 @@ export default function Video2() {
                 <div className="flex flex-col md:flex-row">
                   {/* Video Thumbnail */}
                   <div className="md:w-80 md:flex-shrink-0">
-                    <div className="relative">
+                    <a 
+                      href={video.videoUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="relative block cursor-pointer"
+                      data-testid={`thumbnail-video-${video.id}`}
+                    >
                       <img
                         src={video.thumbnailUrl}
                         alt={video.title}
@@ -181,7 +187,7 @@ export default function Video2() {
                       <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded">
                         {video.duration}
                       </div>
-                    </div>
+                    </a>
                   </div>
                   
                   {/* Video Info */}
