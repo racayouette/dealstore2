@@ -924,12 +924,16 @@ interface Page {
 const STATIC_PAGES: Page[] = [
   { name: "Site Settings", url: "/site-settings", icon: Settings, description: "General site configuration" },
   { name: "Newsletter Popup", url: "/newsletter-popup", icon: Mail, description: "Newsletter popup configuration" },
+  { name: "Search", url: "/search", icon: Search, description: "Search results page" },
+];
+
+// Pages that should appear in Custom Pages section but need fallback icons
+const CUSTOM_PAGE_DEFAULTS: Page[] = [
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
   { name: "Blogs", url: "/blogs", icon: FileText, description: "Blog articles and content" },
   { name: "Directory", url: "/directory", icon: Users, description: "Business directory" },
-  { name: "Search", url: "/search", icon: Search, description: "Search results page" },
 ];
 
 function PageListItem({ 
@@ -1165,13 +1169,14 @@ export default function AdvertisingPanelPage() {
 
   // Create dynamic pages list from ALL banner settings (not just visible ones)
   const dynamicPages: Page[] = allSettings.length > 0 ? allSettings.map((setting: any) => {
-    // Find matching static page for icon, or use default
+    // Find matching static page for icon, or check custom page defaults, or use default
     const staticMatch = STATIC_PAGES.find(sp => sp.url === setting.pageUrl);
+    const customMatch = CUSTOM_PAGE_DEFAULTS.find(cp => cp.url === setting.pageUrl);
     return {
       name: setting.pageName,
       url: setting.pageUrl,
-      icon: staticMatch?.icon || FileText,
-      description: setting.description || staticMatch?.description || setting.pageName
+      icon: staticMatch?.icon || customMatch?.icon || FileText,
+      description: setting.description || staticMatch?.description || customMatch?.description || setting.pageName
     };
   }) : [];
 
