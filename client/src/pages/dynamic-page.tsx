@@ -312,8 +312,8 @@ export default function DynamicPage() {
               {/* Stores Filter */}
               <div className="mb-6">
                 <h4 className="font-medium text-gray-900 mb-3">Stores</h4>
-                <div className="space-y-2 max-h-32 overflow-y-auto">
-                  {uniqueStores.slice(0, 6).map((store) => (
+                <div className="space-y-2">
+                  {uniqueStores.map((store) => (
                     <div key={store} className="flex items-center space-x-2">
                       <Checkbox
                         id={`store-${store}`}
