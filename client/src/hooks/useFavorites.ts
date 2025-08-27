@@ -11,13 +11,23 @@ function getUserId(): string {
   return userId;
 }
 
-export function useFavorites() {
+// Helper function to get current page URL
+function getCurrentPageUrl(): string {
+  return window.location.pathname;
+}
+
+export function useFavorites(pageUrl?: string) {
   const userId = getUserId();
+  const currentPageUrl = pageUrl || getCurrentPageUrl();
   
   return useQuery({
-    queryKey: [`/api/favorites/${userId}`],
+    queryKey: [`/api/favorites/${userId}`, currentPageUrl],
     queryFn: async () => {
-      const response = await fetch(`/api/favorites/${userId}`);
+      const url = new URL(`/api/favorites/${userId}`, window.location.origin);
+      if (currentPageUrl) {
+        url.searchParams.set('pageUrl', currentPageUrl);
+      }
+      const response = await fetch(url.toString());
       if (!response.ok) throw new Error('Failed to fetch favorites');
       return response.json();
     },
@@ -29,12 +39,14 @@ export function useToggleFavorite() {
   const userId = getUserId();
   
   return useMutation({
-    mutationFn: async ({ dealId, isFavorite }: { dealId: string, isFavorite: boolean }) => {
+    mutationFn: async ({ dealId, isFavorite, pageUrl }: { dealId: string, isFavorite: boolean, pageUrl?: string }) => {
+      const currentPageUrl = pageUrl || getCurrentPageUrl();
+      
       if (isFavorite) {
         // Remove from favorites
         const response = await fetch('/api/favorites', {
           method: 'DELETE',
-          body: JSON.stringify({ userId, dealId }),
+          body: JSON.stringify({ userId, dealId, pageUrl: currentPageUrl }),
           headers: { 'Content-Type': 'application/json' }
         });
         if (!response.ok) throw new Error('Failed to remove favorite');
@@ -42,27 +54,33 @@ export function useToggleFavorite() {
         // Add to favorites
         const response = await fetch('/api/favorites', {
           method: 'POST',
-          body: JSON.stringify({ userId, dealId }),
+          body: JSON.stringify({ userId, dealId, pageUrl: currentPageUrl }),
           headers: { 'Content-Type': 'application/json' }
         });
         if (!response.ok) throw new Error('Failed to add favorite');
       }
     },
-    onSuccess: (_, { dealId }) => {
+    onSuccess: (_, { dealId, pageUrl }) => {
+      const currentPageUrl = pageUrl || getCurrentPageUrl();
       // Invalidate both the general favorites list and the specific deal's favorite status
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${dealId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`, currentPageUrl] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${dealId}`, currentPageUrl] });
     }
   });
 }
 
-export function useIsFavorite(dealId: string) {
+export function useIsFavorite(dealId: string, pageUrl?: string) {
   const userId = getUserId();
+  const currentPageUrl = pageUrl || getCurrentPageUrl();
   
   return useQuery({
-    queryKey: [`/api/favorites/${userId}/${dealId}`],
+    queryKey: [`/api/favorites/${userId}/${dealId}`, currentPageUrl],
     queryFn: async () => {
-      const response = await fetch(`/api/favorites/${userId}/${dealId}`);
+      const url = new URL(`/api/favorites/${userId}/${dealId}`, window.location.origin);
+      if (currentPageUrl) {
+        url.searchParams.set('pageUrl', currentPageUrl);
+      }
+      const response = await fetch(url.toString());
       if (!response.ok) throw new Error('Failed to check favorite status');
       return response.json();
     },
