@@ -59,18 +59,6 @@ export default function TopNav() {
                   <Shield className="w-4 h-4" />
                   <span className="text-sm font-medium">{adminSession?.username}</span>
                 </div>
-                
-                <Link href="/advertising-panel">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-white hover:bg-net-green-dark hover:text-white"
-                    data-testid="nav-settings-button"
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
-                  </Button>
-                </Link>
               </>
             )}
             
