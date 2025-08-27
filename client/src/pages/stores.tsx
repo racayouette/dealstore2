@@ -110,8 +110,6 @@ export default function Stores() {
 
       <main className="container mx-auto px-4 py-6">
         <Breadcrumb items={breadcrumbItems} />
-        
-        <h1 className="text-3xl font-bold text-net-dark mb-6">All Stores</h1>
 
         <div className="flex gap-8">
           {/* Main Content */}
@@ -119,7 +117,6 @@ export default function Stores() {
             {/* Popular Stores Section */}
             {!selectedLetter && (
               <section className="mb-12">
-                <h2 className="text-2xl font-bold text-net-dark mb-6">Popular Stores</h2>
                 
                 {error && (
                   <Alert className="mb-6">
