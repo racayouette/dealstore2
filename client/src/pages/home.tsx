@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import type { DealWithRelations, Store } from "@shared/schema";
+import type { DealWithRelations, Store, BannerSettings } from "@shared/schema";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 
 interface SiteSettings {
@@ -50,6 +50,15 @@ export default function Home() {
   // Fetch site settings
   const { data: siteSettings } = useQuery<SiteSettings>({
     queryKey: ['/api/site-settings'],
+  });
+
+  // Fetch visible pages for navigation
+  const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
+    queryKey: ["/api/visible-pages"],
+    queryFn: async () => {
+      const response = await fetch("/api/visible-pages");
+      return response.json();
+    },
   });
 
   // Auto-seed database on first load if no data
@@ -97,10 +106,15 @@ export default function Home() {
                 </h1>
                 <nav className="hidden md:flex items-center space-x-6">
                   <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
-                  <a href="/stores" className="hover:text-blue-200 transition-colors">Stores</a>
-                  <a href="/category/electronics" className="hover:text-blue-200 transition-colors">Categories</a>
-                  <a href="/search" className="hover:text-blue-200 transition-colors">Search</a>
-                  <a href="/store33" className="hover:text-blue-200 transition-colors">Today's Deals</a>
+                  {Array.isArray(visiblePages) && visiblePages.slice(0, 5).map((page) => (
+                    <a
+                      key={page.pageUrl}
+                      href={page.pageUrl}
+                      className="hover:text-blue-200 transition-colors"
+                    >
+                      {page.pageName}
+                    </a>
+                  ))}
                 </nav>
               </div>
               <div className="flex items-center space-x-4">

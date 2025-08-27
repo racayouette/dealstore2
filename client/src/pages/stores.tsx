@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import type { Store, SiteSettings } from "@shared/schema";
+import type { Store, SiteSettings, BannerSettings } from "@shared/schema";
 
 export default function Stores() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -44,6 +44,15 @@ export default function Stores() {
     },
   });
 
+  // Fetch visible pages for navigation
+  const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
+    queryKey: ["/api/visible-pages"],
+    queryFn: async () => {
+      const response = await fetch("/api/visible-pages");
+      return response.json();
+    },
+  });
+
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const numbers = '0-9';
   const allLetters = [...alphabet, numbers];
@@ -75,6 +84,18 @@ export default function Stores() {
                 <h1 className="text-2xl font-bold" data-testid="title-stores">
                   {siteSettings?.siteName || 'NETDISCOUNT'} <span className="text-blue-200">STORES</span>
                 </h1>
+                <nav className="hidden md:flex items-center space-x-6">
+                  <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
+                  {Array.isArray(visiblePages) && visiblePages.slice(0, 4).map((page) => (
+                    <a
+                      key={page.pageUrl}
+                      href={page.pageUrl}
+                      className="hover:text-blue-200 transition-colors"
+                    >
+                      {page.pageName}
+                    </a>
+                  ))}
+                </nav>
               </div>
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
