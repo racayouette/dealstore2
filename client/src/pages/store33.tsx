@@ -31,6 +31,10 @@ export default function Store33() {
   const [freeShippingOnly, setFreeShippingOnly] = useState(false);
   const [featuredOnly, setFeaturedOnly] = useState(false);
   const [minDiscount, setMinDiscount] = useState(0);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   // Fetch featured deals
   const { 
@@ -129,6 +133,21 @@ export default function Store33() {
     return filtered;
   }, [allDeals, selectedCategories, selectedStores, priceRange, freeShippingOnly, featuredOnly, minDiscount]);
 
+  // Paginated deals (apply pagination to filtered results)
+  const paginatedDeals = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredDeals.slice(startIndex, endIndex);
+  }, [filteredDeals, currentPage, itemsPerPage]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredDeals.length / itemsPerPage);
+
+  // Reset to first page when filters change
+  const resetPagination = () => {
+    setCurrentPage(1);
+  };
+
   const filteredFeaturedDeals = useMemo(() => {
     let filtered = [...featuredDeals];
     
@@ -224,6 +243,7 @@ export default function Store33() {
                           } else {
                             setSelectedCategories(selectedCategories.filter(c => c !== category));
                           }
+                          resetPagination();
                         }}
                       />
                       <label htmlFor={`category-${category}`} className="text-sm text-gray-700 cursor-pointer">
@@ -249,6 +269,7 @@ export default function Store33() {
                           } else {
                             setSelectedStores(selectedStores.filter(s => s !== store));
                           }
+                          resetPagination();
                         }}
                       />
                       <label htmlFor={`store-${store}`} className="text-sm text-gray-700 cursor-pointer">
@@ -265,7 +286,10 @@ export default function Store33() {
                 <div className="px-2">
                   <Slider
                     value={priceRange}
-                    onValueChange={setPriceRange}
+                    onValueChange={(value) => {
+                      setPriceRange(value);
+                      resetPagination();
+                    }}
                     max={1000}
                     min={0}
                     step={10}
@@ -284,7 +308,10 @@ export default function Store33() {
                 <div className="px-2">
                   <Slider
                     value={[minDiscount]}
-                    onValueChange={(value) => setMinDiscount(value[0])}
+                    onValueChange={(value) => {
+                      setMinDiscount(value[0]);
+                      resetPagination();
+                    }}
                     max={80}
                     min={0}
                     step={5}
@@ -302,7 +329,10 @@ export default function Store33() {
                   <Checkbox
                     id="free-shipping"
                     checked={freeShippingOnly}
-                    onCheckedChange={(checked) => setFreeShippingOnly(checked === true)}
+                    onCheckedChange={(checked) => {
+                      setFreeShippingOnly(checked === true);
+                      resetPagination();
+                    }}
                   />
                   <label htmlFor="free-shipping" className="text-sm text-gray-700 cursor-pointer">
                     Free Shipping
@@ -313,7 +343,10 @@ export default function Store33() {
                   <Checkbox
                     id="featured-only"
                     checked={featuredOnly}
-                    onCheckedChange={(checked) => setFeaturedOnly(checked === true)}
+                    onCheckedChange={(checked) => {
+                      setFeaturedOnly(checked === true);
+                      resetPagination();
+                    }}
                   />
                   <label htmlFor="featured-only" className="text-sm text-gray-700 cursor-pointer">
                     Featured Deals Only
@@ -332,6 +365,7 @@ export default function Store33() {
                   setFreeShippingOnly(false);
                   setFeaturedOnly(false);
                   setMinDiscount(0);
+                  resetPagination();
                 }}
               >
                 Clear All Filters
@@ -390,24 +424,6 @@ export default function Store33() {
                 ))
               )}
             </div>
-            
-            {/* Navigation arrows */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 bg-white shadow-lg"
-              data-testid="button-featured-prev"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 bg-white shadow-lg"
-              data-testid="button-featured-next"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
           </div>
         </section>
 
@@ -431,7 +447,7 @@ export default function Store33() {
                 </div>
               ))
             ) : (
-              filteredDeals.map((deal, index) => {
+              paginatedDeals.map((deal, index) => {
                 const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
                 const isExclusive = index % 3 === 0; // Make every 3rd deal "exclusive" for demo
                 
@@ -490,6 +506,70 @@ export default function Store33() {
                 );
               })
             )}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 mt-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                data-testid="button-prev-page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+              
+              <div className="flex space-x-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  // Show first page, last page, current page, and pages around current page
+                  const showPage = page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2;
+                  const showEllipsis = (page === 2 && currentPage > 4) || (page === totalPages - 1 && currentPage < totalPages - 3);
+                  
+                  if (showEllipsis) {
+                    return <span key={page} className="px-2 text-gray-500">...</span>;
+                  }
+                  
+                  if (!showPage) {
+                    return null;
+                  }
+                  
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      data-testid={`button-page-${page}`}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage === totalPages}
+                data-testid="button-next-page"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* Show results count */}
+          <div className="text-center text-sm text-gray-600 mt-4">
+            Showing {paginatedDeals.length} of {filteredDeals.length} deals
+            {(selectedCategories.length > 0 || selectedStores.length > 0 || freeShippingOnly || featuredOnly || minDiscount > 0 || priceRange[0] > 0 || priceRange[1] < 1000) && 
+              ` (filtered from ${allDeals.length} total deals)`
+            }
           </div>
         </section>
             </div>
