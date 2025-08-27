@@ -658,14 +658,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update page name in banner settings
+  // Update page name and description in banner settings
   app.patch("/api/banner-settings/rename", async (req, res) => {
     try {
-      const { pageUrl, newPageName } = req.body;
+      const { pageUrl, newPageName, newDescription } = req.body;
       if (!pageUrl || !newPageName) {
         return res.status(400).json({ error: "Page URL and new page name are required" });
       }
-      const updatedSettings = await storage.updateBannerSettings(pageUrl, { pageName: newPageName });
+      
+      const updateData: any = { pageName: newPageName };
+      if (newDescription !== undefined) {
+        updateData.description = newDescription;
+      }
+      
+      const updatedSettings = await storage.updateBannerSettings(pageUrl, updateData);
       res.status(200).json(updatedSettings);
     } catch (error) {
       console.error("Error renaming page:", error);
