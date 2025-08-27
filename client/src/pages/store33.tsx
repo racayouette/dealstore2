@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, User } from "lucide-react";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
@@ -55,6 +54,21 @@ export default function Store33() {
   // Fetch site settings
   const { data: siteSettings } = useQuery<SiteSettings>({
     queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
+  });
+
+  // Fetch visible pages for navigation
+  const { data: visiblePages } = useQuery({
+    queryKey: ['/api/visible-pages'],
+    queryFn: async () => {
+      const response = await fetch('/api/visible-pages');
+      if (!response.ok) throw new Error('Failed to fetch visible pages');
+      return response.json();
+    },
   });
 
   const formatPrice = (price: number | string | null) => {
@@ -204,16 +218,21 @@ export default function Store33() {
                   {siteSettings?.siteName || 'NETDISCOUNT'} <span className="text-blue-200">DEALS</span>
                 </h1>
                 <nav className="hidden md:flex items-center space-x-6">
-                  <a href="#" className="hover:text-blue-200 transition-colors">Categories</a>
-                  <a href="#" className="hover:text-blue-200 transition-colors">Stores</a>
-                  <a href="#" className="hover:text-blue-200 transition-colors">Coupons</a>
-                  <a href="#" className="hover:text-blue-200 transition-colors">Shopping Guide</a>
-                  <a href="#" className="hover:text-blue-200 transition-colors">Today's Deals</a>
+                  <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
+                  {Array.isArray(visiblePages) && visiblePages.map((page) => (
+                    <a
+                      key={page.pageUrl}
+                      href={page.pageUrl}
+                      className="hover:text-blue-200 transition-colors"
+                    >
+                      {page.pageName}
+                    </a>
+                  ))}
                 </nav>
               </div>
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  Log in or Sign Up
+                  <User className="w-5 h-5" />
                 </Button>
               </div>
             </div>
