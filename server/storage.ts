@@ -212,10 +212,10 @@ export interface IStorage {
   updateSiteSettings(updates: Partial<InsertSiteSettings>): Promise<SiteSettings>;
   
   // User favorites
-  getUserFavorites(userId: string): Promise<string[]>; // Returns array of deal IDs
-  addUserFavorite(userId: string, dealId: string): Promise<void>;
-  removeUserFavorite(userId: string, dealId: string): Promise<void>;
-  isUserFavorite(userId: string, dealId: string): Promise<boolean>;
+  getUserFavorites(userId: string, pageUrl?: string): Promise<string[]>; // Returns array of deal IDs
+  addUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<void>;
+  removeUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<void>;
+  isUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1285,37 +1285,51 @@ export class DatabaseStorage implements IStorage {
   }
 
   // User favorites
-  async getUserFavorites(userId: string): Promise<string[]> {
+  async getUserFavorites(userId: string, pageUrl?: string): Promise<string[]> {
+    let whereConditions = [eq(userFavorites.userId, userId)];
+    
+    if (pageUrl) {
+      whereConditions.push(eq(userFavorites.pageUrl, pageUrl));
+    }
+    
     const favorites = await db
       .select({ dealId: userFavorites.dealId })
       .from(userFavorites)
-      .where(eq(userFavorites.userId, userId));
+      .where(and(...whereConditions));
     
     return favorites.map(f => f.dealId);
   }
 
-  async addUserFavorite(userId: string, dealId: string): Promise<void> {
+  async addUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<void> {
     try {
-      await db.insert(userFavorites).values({ userId, dealId });
+      await db.insert(userFavorites).values({ userId, dealId, pageUrl });
     } catch (error) {
-      // Handle unique constraint violation silently (user already favorited this deal)
-      if (error instanceof Error && !error.message.includes('unique_user_deal')) {
+      // Handle unique constraint violation silently (user already favorited this deal on this page)
+      if (error instanceof Error && !error.message.includes('unique_user_deal_page')) {
         throw error;
       }
     }
   }
 
-  async removeUserFavorite(userId: string, dealId: string): Promise<void> {
+  async removeUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<void> {
     await db
       .delete(userFavorites)
-      .where(and(eq(userFavorites.userId, userId), eq(userFavorites.dealId, dealId)));
+      .where(and(
+        eq(userFavorites.userId, userId), 
+        eq(userFavorites.dealId, dealId),
+        eq(userFavorites.pageUrl, pageUrl)
+      ));
   }
 
-  async isUserFavorite(userId: string, dealId: string): Promise<boolean> {
+  async isUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<boolean> {
     const [favorite] = await db
       .select()
       .from(userFavorites)
-      .where(and(eq(userFavorites.userId, userId), eq(userFavorites.dealId, dealId)))
+      .where(and(
+        eq(userFavorites.userId, userId), 
+        eq(userFavorites.dealId, dealId),
+        eq(userFavorites.pageUrl, pageUrl)
+      ))
       .limit(1);
     
     return !!favorite;

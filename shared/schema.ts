@@ -198,10 +198,11 @@ export const userFavorites = pgTable("user_favorites", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: text("user_id").notNull(), // For now, using session ID or IP as user identifier
   dealId: uuid("deal_id").notNull(),
+  pageUrl: text("page_url").notNull().default("/"), // Track which page the favorite was made on
   createdAt: timestamp("created_at").default(sql`now()`),
 }, (table) => {
   return {
-    uniqueUserDeal: sql`UNIQUE(${table.userId}, ${table.dealId})`,
+    uniqueUserDealPage: sql`UNIQUE(${table.userId}, ${table.dealId}, ${table.pageUrl})`,
   };
 });
 

@@ -373,7 +373,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/favorites/:userId", async (req, res) => {
     try {
       const { userId } = req.params;
-      const favorites = await storage.getUserFavorites(userId);
+      const pageUrl = req.query.pageUrl as string;
+      const favorites = await storage.getUserFavorites(userId, pageUrl);
       res.json(favorites);
     } catch (error) {
       console.error("Error fetching user favorites:", error);
@@ -383,12 +384,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/favorites", async (req, res) => {
     try {
-      const { userId, dealId } = req.body;
-      if (!userId || !dealId) {
-        return res.status(400).json({ error: "userId and dealId are required" });
+      const { userId, dealId, pageUrl } = req.body;
+      if (!userId || !dealId || !pageUrl) {
+        return res.status(400).json({ error: "userId, dealId, and pageUrl are required" });
       }
       
-      await storage.addUserFavorite(userId, dealId);
+      await storage.addUserFavorite(userId, dealId, pageUrl);
       res.json({ success: true });
     } catch (error) {
       console.error("Error adding favorite:", error);
@@ -398,12 +399,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/favorites", async (req, res) => {
     try {
-      const { userId, dealId } = req.body;
-      if (!userId || !dealId) {
-        return res.status(400).json({ error: "userId and dealId are required" });
+      const { userId, dealId, pageUrl } = req.body;
+      if (!userId || !dealId || !pageUrl) {
+        return res.status(400).json({ error: "userId, dealId, and pageUrl are required" });
       }
       
-      await storage.removeUserFavorite(userId, dealId);
+      await storage.removeUserFavorite(userId, dealId, pageUrl);
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing favorite:", error);
@@ -414,7 +415,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/favorites/:userId/:dealId", async (req, res) => {
     try {
       const { userId, dealId } = req.params;
-      const isFavorite = await storage.isUserFavorite(userId, dealId);
+      const pageUrl = req.query.pageUrl as string;
+      if (!pageUrl) {
+        return res.status(400).json({ error: "pageUrl query parameter is required" });
+      }
+      const isFavorite = await storage.isUserFavorite(userId, dealId, pageUrl);
       res.json({ isFavorite });
     } catch (error) {
       console.error("Error checking favorite status:", error);
