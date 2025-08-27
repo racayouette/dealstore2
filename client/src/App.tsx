@@ -25,6 +25,7 @@ import SEOPanel from "@/pages/seo-panel";
 import AdminLogin from "@/pages/admin-login";
 import Analytics from "@/pages/analytics";
 import AdminUsers from "@/pages/admin-users";
+import DynamicPage from "@/pages/dynamic-page";
 import NewsletterPopup from "@/components/newsletter-popup";
 import { useNewsletterPopup } from "@/hooks/use-newsletter-popup";
 
@@ -52,7 +53,8 @@ function Router() {
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/admin/users" component={AdminUsers} />
-      <Route component={NotFound} />
+      {/* Dynamic page handler for duplicated pages - catches any unmatched routes */}
+      <Route component={DynamicPage} />
     </Switch>
   );
 }
