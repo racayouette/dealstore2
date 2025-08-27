@@ -121,7 +121,7 @@ export default function Stores() {
                 )}
 
                 {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
                       <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center">
                         <Skeleton className="w-20 h-12 mx-auto mb-4" />
@@ -130,7 +130,7 @@ export default function Stores() {
                     ))}
                   </div>
                 ) : currentStores.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {currentStores.map((store) => (
                       <StoreCard key={store.id} store={store} />
                     ))}
@@ -191,7 +191,7 @@ export default function Stores() {
                   )}
 
                   {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {[1, 2, 3, 4, 5, 6].map(i => (
                         <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center">
                           <Skeleton className="w-20 h-12 mx-auto mb-4" />
@@ -200,7 +200,7 @@ export default function Stores() {
                       ))}
                     </div>
                   ) : currentStores.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {currentStores.map((store) => (
                         <StoreCard key={store.id} store={store} />
                       ))}
