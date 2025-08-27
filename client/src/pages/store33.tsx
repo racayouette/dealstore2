@@ -5,9 +5,10 @@ import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Filter, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
+import { HeartButton } from "@/components/HeartButton";
 
 interface SiteSettings {
   id: string;
@@ -123,14 +124,9 @@ export default function Store33() {
                         className="w-full h-40 object-cover"
                         data-testid={`img-featured-deal-${index}`}
                       />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white"
-                        data-testid={`button-favorite-${deal.id}`}
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
+                      <div className="absolute top-2 right-2">
+                        <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+                      </div>
                     </div>
                     <div className="p-4">
                       <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-featured-deal-${index}`}>
@@ -239,14 +235,9 @@ export default function Store33() {
                         </Badge>
                       )}
                       
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white"
-                        data-testid={`button-favorite-all-${deal.id}`}
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
+                      <div className="absolute top-2 right-2">
+                        <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+                      </div>
                     </div>
                     
                     <div className="p-4">

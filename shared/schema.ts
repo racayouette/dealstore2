@@ -192,6 +192,18 @@ export const bannerSettings = pgTable("banner_settings", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// User favorites table
+export const userFavorites = pgTable("user_favorites", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: text("user_id").notNull(), // For now, using session ID or IP as user identifier
+  dealId: uuid("deal_id").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+}, (table) => {
+  return {
+    uniqueUserDeal: sql`UNIQUE(${table.userId}, ${table.dealId})`,
+  };
+});
+
 // Site settings table for global site configuration
 export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -311,6 +323,11 @@ export const insertSiteSettingsSchema = createInsertSchema(siteSettings).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertUserFavoriteSchema = createInsertSchema(userFavorites).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertPageViewSchema = createInsertSchema(pageViews).omit({
