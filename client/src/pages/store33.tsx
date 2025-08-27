@@ -215,7 +215,7 @@ export default function Store33() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-8">
                 <h1 className="text-2xl font-bold" data-testid="title-store33">
-                  {siteSettings?.siteName || 'NETDISCOUNT'} <span className="text-blue-200">DEALS</span>
+                  {siteSettings?.siteName} <span className="text-blue-200">DEALS</span>
                 </h1>
                 <nav className="hidden md:flex items-center space-x-6">
                   <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
