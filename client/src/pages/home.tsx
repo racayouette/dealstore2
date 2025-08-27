@@ -1,7 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { queryClient } from "@/lib/queryClient";
-import Header from "@/components/header";
 import Footer from "@/components/footer";
 import DealCard from "@/components/deal-card";
 import StoreCard from "@/components/store-card";
@@ -51,6 +50,11 @@ export default function Home() {
   // Fetch site settings
   const { data: siteSettings } = useQuery<SiteSettings>({
     queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
   });
 
   // Fetch visible pages for navigation

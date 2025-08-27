@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
@@ -31,6 +31,21 @@ export default function Store44() {
   // Fetch site settings
   const { data: siteSettings } = useQuery<SiteSettings>({
     queryKey: ['/api/site-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/site-settings');
+      if (!response.ok) throw new Error('Failed to fetch site settings');
+      return response.json();
+    },
+  });
+
+  // Fetch visible pages for navigation
+  const { data: visiblePages } = useQuery({
+    queryKey: ['/api/visible-pages'],
+    queryFn: async () => {
+      const response = await fetch('/api/visible-pages');
+      if (!response.ok) throw new Error('Failed to fetch visible pages');
+      return response.json();
+    },
   });
 
   const formatPrice = (price: number | string | null) => {
@@ -233,7 +248,44 @@ export default function Store44() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Affiliate Disclosure */}
+      <div className="bg-gray-100 py-1">
+        <div className="container mx-auto px-4">
+          <p className="text-center text-sm text-gray-600">
+            {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
+          </p>
+        </div>
+      </div>
+      
+      {/* Header */}
+      <div className="bg-blue-600 text-white">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-2xl font-bold" data-testid="title-store44">
+                {siteSettings?.siteName || 'NETDISCOUNT'}
+              </h1>
+              <nav className="hidden md:flex items-center space-x-6">
+                <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
+                {Array.isArray(visiblePages) && visiblePages.map((page) => (
+                  <a
+                    key={page.pageUrl}
+                    href={page.pageUrl}
+                    className="hover:text-blue-200 transition-colors"
+                  >
+                    {page.pageName}
+                  </a>
+                ))}
+              </nav>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
+                <User className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
