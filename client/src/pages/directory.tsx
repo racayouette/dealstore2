@@ -214,6 +214,7 @@ export default function Directory() {
                 {siteSettings?.siteName}
               </h1>
               <nav className="hidden md:flex items-center space-x-6">
+                <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
                 {Array.isArray(visiblePages) && visiblePages.map((page) => (
                   <a
                     key={page.pageUrl}
