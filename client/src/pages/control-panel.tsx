@@ -924,11 +924,11 @@ interface Page {
 const STATIC_PAGES: Page[] = [
   { name: "Site Settings", url: "/site-settings", icon: Settings, description: "General site configuration" },
   { name: "Newsletter Popup", url: "/newsletter-popup", icon: Mail, description: "Newsletter popup configuration" },
-  { name: "Search", url: "/search", icon: Search, description: "Search results page" },
 ];
 
 // Pages that should appear in Custom Pages section but need fallback icons
 const CUSTOM_PAGE_DEFAULTS: Page[] = [
+  { name: "Search", url: "/search", icon: Search, description: "Search results page" },
   { name: "Videos", url: "/videos", icon: Video, description: "Video channel content" },
   { name: "Video2", url: "/video2", icon: Video, description: "YouTube-style videos" },
   { name: "Posts", url: "/posts", icon: FileText, description: "Reddit-style posts" },
