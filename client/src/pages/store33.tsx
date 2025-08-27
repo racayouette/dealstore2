@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { ChevronLeft, ChevronRight, Filter, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
@@ -23,7 +23,6 @@ export default function Store33() {
   // Track page view for analytics
   usePageTracking("Store33", "/store33");
   
-  const [sortBy, setSortBy] = useState("popularity");
   
   // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -414,33 +413,8 @@ export default function Store33() {
 
         {/* All Deals Section */}
         <section>
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900" data-testid="title-all-deals">All Deals</h2>
-            
-            <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center space-x-2"
-                data-testid="button-filter"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filter</span>
-              </Button>
-              
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                data-testid="select-sort"
-              >
-                <option value="popularity">Sort: Popularity</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="discount">Highest Discount</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </div>
           </div>
 
           {/* Deals Grid */}
