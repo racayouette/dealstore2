@@ -61,20 +61,24 @@ export default function Directory() {
     },
   });
 
-  // Fetch businesses
+  // Fetch businesses with search
   const { data: businesses, isLoading } = useQuery<BusinessWithCategory[]>({
     queryKey: ['/api/businesses', searchQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+      params.append('limit', '100'); // Increase limit to get more results for search
+      
+      const response = await fetch(`/api/businesses?${params.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch businesses');
+      return response.json();
+    },
   });
 
-  // Removed featuredBusinesses query
-
-  const filteredBusinesses = businesses?.filter(business => {
-    const matchesSearch = searchQuery === '' || 
-      business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      business.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    return matchesSearch;
-  }) || [];
+  // Use the businesses directly since server handles the search
+  const filteredBusinesses = businesses || [];
 
   const renderBusinessCard = (business: BusinessWithCategory) => (
     <Card key={business.id} className="hover:shadow-lg transition-shadow">
