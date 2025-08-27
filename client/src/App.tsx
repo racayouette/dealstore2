@@ -1,6 +1,6 @@
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { VisibleRoute } from "@/components/visible-route";
@@ -30,6 +30,30 @@ import NewsletterPopup from "@/components/newsletter-popup";
 import { useNewsletterPopup } from "@/hooks/use-newsletter-popup";
 
 function Router() {
+  // Get all banner settings to create dynamic routes
+  const { data: bannerSettings = [] } = useQuery({
+    queryKey: ['/api/banner-settings'],
+    queryFn: async () => {
+      const response = await fetch('/api/banner-settings');
+      return response.json();
+    },
+  });
+
+  // Define static routes that should not be handled by dynamic pages
+  const staticRoutes = [
+    '/', '/stores', '/store33', '/store44', '/videos', '/video2', 
+    '/posts', '/blogs', '/directory', '/search', '/auth', '/privacy', 
+    '/terms', '/advertising-panel', '/seo-panel', '/wp-admin', 
+    '/admin-login', '/analytics', '/admin/users'
+  ];
+
+  // Find dynamic pages that aren't static routes
+  const dynamicPages = bannerSettings.filter((setting: any) => 
+    !staticRoutes.includes(setting.pageUrl) && 
+    !setting.pageUrl.startsWith('/category/') && 
+    !setting.pageUrl.startsWith('/deal/')
+  );
+
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -53,8 +77,17 @@ function Router() {
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/admin/users" component={AdminUsers} />
-      {/* Dynamic page handler for duplicated pages - catches any unmatched routes */}
-      <Route component={DynamicPage} />
+      
+      {/* Dynamic routes for duplicated pages */}
+      {dynamicPages.map((setting: any) => (
+        <Route 
+          key={setting.pageUrl} 
+          path={setting.pageUrl} 
+          component={DynamicPage} 
+        />
+      ))}
+      
+      <Route component={NotFound} />
     </Switch>
   );
 }
