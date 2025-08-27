@@ -48,9 +48,10 @@ export function useToggleFavorite() {
         if (!response.ok) throw new Error('Failed to add favorite');
       }
     },
-    onSuccess: () => {
-      // Invalidate favorites query to refetch
+    onSuccess: (_, { dealId }) => {
+      // Invalidate both the general favorites list and the specific deal's favorite status
       queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${dealId}`] });
     }
   });
 }
