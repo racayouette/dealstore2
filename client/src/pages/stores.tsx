@@ -7,6 +7,7 @@ import Breadcrumb from "@/components/breadcrumb";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
 import { api } from "@/lib/api";
 import type { Store, SiteSettings, BannerSettings } from "@shared/schema";
 
@@ -99,7 +100,7 @@ export default function Stores() {
               </div>
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  Log in or Sign Up
+                  <User className="w-5 h-5" />
                 </Button>
               </div>
             </div>
