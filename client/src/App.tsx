@@ -10,6 +10,7 @@ import Stores from "@/pages/stores";
 import Category from "@/pages/category";
 import DealDetails from "@/pages/deal-details";
 import Store33 from "@/pages/store33";
+import Store44 from "@/pages/store44";
 import Videos from "@/pages/videos";
 import Video2 from "@/pages/video2";
 import Posts from "@/pages/posts";
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/category/:slug" component={Category} />
       <Route path="/deal/:id" component={DealDetails} />
       <Route path="/store33" component={Store33} />
+      <Route path="/store44" component={Store44} />
       <VisibleRoute path="/videos" component={Videos} />
       <VisibleRoute path="/video2" component={Video2} />
       <VisibleRoute path="/posts" component={Posts} />
