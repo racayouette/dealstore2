@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -1137,6 +1138,11 @@ export default function AdvertisingPanelPage() {
     url: '',
     description: ''
   });
+  const [duplicateErrors, setDuplicateErrors] = useState({
+    name: '',
+    url: '',
+    general: ''
+  });
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [pageToRename, setPageToRename] = useState<Page | null>(null);
   const [renameForm, setRenameForm] = useState({
@@ -1259,12 +1265,25 @@ export default function AdvertisingPanelPage() {
         description: `Page "${data.name}" has been ${pageToDuplicate ? 'duplicated' : 'created'} successfully.`,
       });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: `Failed to ${pageToDuplicate ? 'duplicate' : 'create'} page.`,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      const errorMessage = error.message || `Failed to ${pageToDuplicate ? 'duplicate' : 'create'} page.`;
+      
+      // Reset errors first
+      setDuplicateErrors({ name: '', url: '', general: '' });
+      
+      // Check for specific duplicate errors
+      if (errorMessage.includes('URL already exists')) {
+        setDuplicateErrors(prev => ({ ...prev, url: 'A page with this URL already exists' }));
+      } else if (errorMessage.includes('name already exists')) {
+        setDuplicateErrors(prev => ({ ...prev, name: 'A page with this name already exists' }));
+      } else {
+        setDuplicateErrors(prev => ({ ...prev, general: errorMessage }));
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -1510,6 +1529,7 @@ export default function AdvertisingPanelPage() {
       url: `${page.url}-copy`,
       description: `Copy of ${page.description}`
     });
+    setDuplicateErrors({ name: '', url: '', general: '' });
     setIsDuplicateDialogOpen(true);
   };
 
@@ -1561,6 +1581,7 @@ export default function AdvertisingPanelPage() {
                   onClick={() => {
                     setPageToDuplicate(null);
                     setDuplicateForm({ name: '', url: '', description: '' });
+                    setDuplicateErrors({ name: '', url: '', general: '' });
                     setIsDuplicateDialogOpen(true);
                   }}
                   className="flex items-center gap-1 bg-net-green hover:bg-net-green-dark"
@@ -1832,31 +1853,56 @@ export default function AdvertisingPanelPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {duplicateErrors.general && (
+              <Alert variant="destructive">
+                <AlertDescription>{duplicateErrors.general}</AlertDescription>
+              </Alert>
+            )}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="page-name" className="text-right">
                 Name
               </Label>
-              <Input
-                id="page-name"
-                value={duplicateForm.name}
-                onChange={(e) => setDuplicateForm(prev => ({ ...prev, name: e.target.value }))}
-                className="col-span-3"
-                placeholder="Enter page name"
-                data-testid="input-duplicate-name"
-              />
+              <div className="col-span-3">
+                <Input
+                  id="page-name"
+                  value={duplicateForm.name}
+                  onChange={(e) => {
+                    setDuplicateForm(prev => ({ ...prev, name: e.target.value }));
+                    if (duplicateErrors.name) {
+                      setDuplicateErrors(prev => ({ ...prev, name: '' }));
+                    }
+                  }}
+                  placeholder="Enter page name"
+                  data-testid="input-duplicate-name"
+                  className={duplicateErrors.name ? "border-red-500" : ""}
+                />
+                {duplicateErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{duplicateErrors.name}</p>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="page-url" className="text-right">
                 URL
               </Label>
-              <Input
-                id="page-url"
-                value={duplicateForm.url}
-                onChange={(e) => setDuplicateForm(prev => ({ ...prev, url: e.target.value }))}
-                className="col-span-3"
-                placeholder="/page-url"
-                data-testid="input-duplicate-url"
-              />
+              <div className="col-span-3">
+                <Input
+                  id="page-url"
+                  value={duplicateForm.url}
+                  onChange={(e) => {
+                    setDuplicateForm(prev => ({ ...prev, url: e.target.value }));
+                    if (duplicateErrors.url) {
+                      setDuplicateErrors(prev => ({ ...prev, url: '' }));
+                    }
+                  }}
+                  placeholder="/page-url"
+                  data-testid="input-duplicate-url"
+                  className={duplicateErrors.url ? "border-red-500" : ""}
+                />
+                {duplicateErrors.url && (
+                  <p className="text-sm text-red-500 mt-1">{duplicateErrors.url}</p>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="page-description" className="text-right">

@@ -1113,6 +1113,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
+      // Check for duplicate URL
+      const existingPageByUrl = await storage.getBannerSettingByPage(newPage.url);
+      if (existingPageByUrl) {
+        return res.status(400).json({ error: 'A page with this URL already exists' });
+      }
+
+      // Check for duplicate name
+      const allSettings = await storage.getBannerSettings();
+      const existingPageByName = allSettings.find((setting: any) => 
+        setting.pageName.toLowerCase() === newPage.name.toLowerCase()
+      );
+      if (existingPageByName) {
+        return res.status(400).json({ error: 'A page with this name already exists' });
+      }
+
       // Get original page settings
       const originalSettings = await storage.getBannerSettingByPage(originalPageUrl);
       
@@ -1171,6 +1186,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!newPage?.name || !newPage?.url) {
         return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Check for duplicate URL
+      const existingPageByUrl = await storage.getBannerSettingByPage(newPage.url);
+      if (existingPageByUrl) {
+        return res.status(400).json({ error: 'A page with this URL already exists' });
+      }
+
+      // Check for duplicate name
+      const allSettings = await storage.getBannerSettings();
+      const existingPageByName = allSettings.find((setting: any) => 
+        setting.pageName.toLowerCase() === newPage.name.toLowerCase()
+      );
+      if (existingPageByName) {
+        return res.status(400).json({ error: 'A page with this name already exists' });
       }
 
       // Create new page settings with default configuration
