@@ -178,22 +178,22 @@ export default function Blogs() {
                         {category}
                       </h2>
                       
-                      <div className="grid gap-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {paginatedBlogs.map((blog) => (
                         <Card key={blog.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200">
-                          <div className="flex flex-col md:flex-row">
+                          <div className="flex flex-col">
                             {/* Blog Image */}
-                            <div className="md:w-72 md:flex-shrink-0">
+                            <div className="w-full">
                               <img
                                 src={blog.imageUrl}
                                 alt={blog.title}
-                                className="w-full h-48 md:h-full object-cover rounded-t-lg md:rounded-l-lg md:rounded-t-none"
+                                className="w-full h-40 object-cover rounded-t-lg"
                                 data-testid={`img-blog-${blog.id}`}
                               />
                             </div>
                             
                             {/* Blog Content */}
-                            <div className="flex-1 p-6">
+                            <div className="flex-1 p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1">
                                   <a 
@@ -203,7 +203,7 @@ export default function Blogs() {
                                     className="group"
                                     data-testid={`link-blog-${blog.id}`}
                                   >
-                                    <h3 className="text-xl font-semibold text-blue-600 group-hover:text-blue-800 line-clamp-2 mb-2">
+                                    <h3 className="text-lg font-semibold text-blue-600 group-hover:text-blue-800 line-clamp-2 mb-2">
                                       {blog.title}
                                     </h3>
                                   </a>
@@ -235,7 +235,7 @@ export default function Blogs() {
                                 </Button>
                               </div>
                               
-                              <p className="text-gray-700 text-sm mb-3 line-clamp-3">
+                              <p className="text-gray-700 text-sm mb-2 line-clamp-2">
                                 {blog.excerpt}
                               </p>
                               
