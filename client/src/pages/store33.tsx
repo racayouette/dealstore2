@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { ChevronLeft, ChevronRight, Filter, ChevronDown } from "lucide-react";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
@@ -22,6 +24,14 @@ export default function Store33() {
   usePageTracking("Store33", "/store33");
   
   const [sortBy, setSortBy] = useState("popularity");
+  
+  // Filter states
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedStores, setSelectedStores] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [freeShippingOnly, setFreeShippingOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [minDiscount, setMinDiscount] = useState(0);
 
   // Fetch featured deals
   const { 
@@ -62,6 +72,100 @@ export default function Store33() {
     return Math.round(((numOriginal - numSale) / numOriginal) * 100);
   };
 
+  // Extract unique categories and stores from deals
+  const uniqueCategories = useMemo(() => {
+    const categories = new Set<string>();
+    [...featuredDeals, ...allDeals].forEach(deal => {
+      if (deal.category?.name) categories.add(deal.category.name);
+    });
+    return Array.from(categories).sort();
+  }, [featuredDeals, allDeals]);
+
+  const uniqueStores = useMemo(() => {
+    const stores = new Set<string>();
+    [...featuredDeals, ...allDeals].forEach(deal => {
+      if (deal.store?.name) stores.add(deal.store.name);
+    });
+    return Array.from(stores).sort();
+  }, [featuredDeals, allDeals]);
+
+  // Filter deals based on selected filters
+  const filteredDeals = useMemo(() => {
+    let filtered = [...allDeals];
+    
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(deal => 
+        deal.category?.name && selectedCategories.includes(deal.category.name)
+      );
+    }
+    
+    if (selectedStores.length > 0) {
+      filtered = filtered.filter(deal => 
+        deal.store?.name && selectedStores.includes(deal.store.name)
+      );
+    }
+    
+    if (freeShippingOnly) {
+      filtered = filtered.filter(deal => deal.freeShipping);
+    }
+    
+    if (featuredOnly) {
+      filtered = filtered.filter(deal => deal.isFeatured);
+    }
+    
+    // Price filter
+    filtered = filtered.filter(deal => {
+      const price = parseFloat(deal.salePrice);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+    
+    // Discount filter
+    if (minDiscount > 0) {
+      filtered = filtered.filter(deal => {
+        const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
+        return discount >= minDiscount;
+      });
+    }
+    
+    return filtered;
+  }, [allDeals, selectedCategories, selectedStores, priceRange, freeShippingOnly, featuredOnly, minDiscount]);
+
+  const filteredFeaturedDeals = useMemo(() => {
+    let filtered = [...featuredDeals];
+    
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(deal => 
+        deal.category?.name && selectedCategories.includes(deal.category.name)
+      );
+    }
+    
+    if (selectedStores.length > 0) {
+      filtered = filtered.filter(deal => 
+        deal.store?.name && selectedStores.includes(deal.store.name)
+      );
+    }
+    
+    if (freeShippingOnly) {
+      filtered = filtered.filter(deal => deal.freeShipping);
+    }
+    
+    // Price filter
+    filtered = filtered.filter(deal => {
+      const price = parseFloat(deal.salePrice);
+      return price >= priceRange[0] && price <= priceRange[1];
+    });
+    
+    // Discount filter
+    if (minDiscount > 0) {
+      filtered = filtered.filter(deal => {
+        const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
+        return discount >= minDiscount;
+      });
+    }
+    
+    return filtered;
+  }, [featuredDeals, selectedCategories, selectedStores, priceRange, freeShippingOnly, minDiscount]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with Store33/Brad's Deals styling */}
@@ -100,6 +204,144 @@ export default function Store33() {
       </div>
 
       <main className="container mx-auto px-4 py-6">
+        <div className="flex gap-8">
+          {/* Left Filter Panel */}
+          <div className="w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+              
+              {/* Categories Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3">Categories</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {uniqueCategories.map((category) => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category}`}
+                        checked={selectedCategories.includes(category)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedCategories([...selectedCategories, category]);
+                          } else {
+                            setSelectedCategories(selectedCategories.filter(c => c !== category));
+                          }
+                        }}
+                      />
+                      <label htmlFor={`category-${category}`} className="text-sm text-gray-700 cursor-pointer">
+                        {category}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stores Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3">Stores</h4>
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {uniqueStores.slice(0, 6).map((store) => (
+                    <div key={store} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`store-${store}`}
+                        checked={selectedStores.includes(store)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedStores([...selectedStores, store]);
+                          } else {
+                            setSelectedStores(selectedStores.filter(s => s !== store));
+                          }
+                        }}
+                      />
+                      <label htmlFor={`store-${store}`} className="text-sm text-gray-700 cursor-pointer">
+                        {store}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3">Price Range</h4>
+                <div className="px-2">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    max={1000}
+                    min={0}
+                    step={10}
+                    className="mb-2"
+                  />
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>${priceRange[0]}</span>
+                    <span>${priceRange[1]}+</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Discount Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-900 mb-3">Min Discount</h4>
+                <div className="px-2">
+                  <Slider
+                    value={[minDiscount]}
+                    onValueChange={(value) => setMinDiscount(value[0])}
+                    max={80}
+                    min={0}
+                    step={5}
+                    className="mb-2"
+                  />
+                  <div className="text-sm text-gray-600 text-center">
+                    {minDiscount}%+
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Filters */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="free-shipping"
+                    checked={freeShippingOnly}
+                    onCheckedChange={(checked) => setFreeShippingOnly(checked === true)}
+                  />
+                  <label htmlFor="free-shipping" className="text-sm text-gray-700 cursor-pointer">
+                    Free Shipping
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="featured-only"
+                    checked={featuredOnly}
+                    onCheckedChange={(checked) => setFeaturedOnly(checked === true)}
+                  />
+                  <label htmlFor="featured-only" className="text-sm text-gray-700 cursor-pointer">
+                    Featured Deals Only
+                  </label>
+                </div>
+              </div>
+
+              {/* Clear Filters */}
+              <Button
+                variant="outline"
+                className="w-full mt-6"
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setSelectedStores([]);
+                  setPriceRange([0, 1000]);
+                  setFreeShippingOnly(false);
+                  setFeaturedOnly(false);
+                  setMinDiscount(0);
+                }}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1">
         {/* Featured Section */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6" data-testid="title-featured">Featured</h2>
@@ -115,7 +357,7 @@ export default function Store33() {
                   </div>
                 ))
               ) : (
-                featuredDeals.slice(0, 5).map((deal, index) => (
+                filteredFeaturedDeals.slice(0, 5).map((deal, index) => (
                   <a href={`/deal/${deal.id}`} key={deal.id} className="flex-none w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
                     <div className="relative">
                       <img 
@@ -215,7 +457,7 @@ export default function Store33() {
                 </div>
               ))
             ) : (
-              allDeals.map((deal, index) => {
+              filteredDeals.map((deal, index) => {
                 const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
                 const isExclusive = index % 3 === 0; // Make every 3rd deal "exclusive" for demo
                 
@@ -276,6 +518,8 @@ export default function Store33() {
             )}
           </div>
         </section>
+            </div>
+          </div>
       </main>
 
       <Footer />
