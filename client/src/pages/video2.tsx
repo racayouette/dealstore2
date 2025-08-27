@@ -162,12 +162,12 @@ export default function Video2() {
             <p className="mt-4 text-gray-600">Loading videos...</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {videos.slice((currentPage - 1) * videosPerPage, currentPage * videosPerPage).map((video) => (
               <div key={video.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="flex flex-col md:flex-row">
+                <div className="flex flex-col">
                   {/* Video Thumbnail */}
-                  <div className="md:w-80 md:flex-shrink-0">
+                  <div className="w-full">
                     <a 
                       href={video.videoUrl} 
                       target="_blank" 
@@ -178,11 +178,11 @@ export default function Video2() {
                       <img
                         src={video.thumbnailUrl}
                         alt={video.title}
-                        className="w-full h-48 md:h-56 object-cover"
+                        className="w-full h-40 object-cover"
                         data-testid={`img-video-${video.id}`}
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center group">
-                        <Play className="w-16 h-16 text-white opacity-0 group-hover:opacity-90 transition-opacity" />
+                        <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-90 transition-opacity" />
                       </div>
                       <div className="absolute bottom-2 right-2 bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded">
                         {video.duration}
