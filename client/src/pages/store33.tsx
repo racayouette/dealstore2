@@ -1,0 +1,293 @@
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight, Filter, Heart } from "lucide-react";
+import { usePageTracking } from "@/hooks/use-page-tracking";
+import type { DealWithRelations } from "@shared/schema";
+
+interface SiteSettings {
+  id: string;
+  siteName: string;
+  siteDescription: string;
+  affiliateDisclosure: string;
+}
+
+export default function Store33() {
+  // Track page view for analytics
+  usePageTracking("Store33", "/store33");
+  
+  const [sortBy, setSortBy] = useState("popularity");
+
+  // Fetch featured deals
+  const { 
+    data: featuredDeals = [], 
+    isLoading: dealsLoading 
+  } = useQuery<DealWithRelations[]>({
+    queryKey: ["/api/deals/featured"],
+  });
+
+  // Fetch all deals
+  const { 
+    data: allDeals = [], 
+    isLoading: allDealsLoading 
+  } = useQuery<DealWithRelations[]>({
+    queryKey: ["/api/deals"],
+  });
+
+  // Fetch site settings
+  const { data: siteSettings } = useQuery<SiteSettings>({
+    queryKey: ['/api/site-settings'],
+  });
+
+  const formatPrice = (price: number | string | null) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (!numPrice || numPrice <= 0) return '';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(numPrice);
+  };
+
+  const calculateDiscount = (originalPrice: number | string | null, salePrice: number | string | null) => {
+    const numOriginal = typeof originalPrice === 'string' ? parseFloat(originalPrice) : originalPrice;
+    const numSale = typeof salePrice === 'string' ? parseFloat(salePrice) : salePrice;
+    if (!numOriginal || !numSale || numOriginal <= numSale) return 0;
+    return Math.round(((numOriginal - numSale) / numOriginal) * 100);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with Store33/Brad's Deals styling */}
+      <div className="bg-white border-b">
+        <div className="bg-gray-100 py-1">
+          <div className="container mx-auto px-4">
+            <p className="text-center text-sm text-gray-600">
+              {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-blue-600 text-white">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-8">
+                <h1 className="text-2xl font-bold" data-testid="title-store33">
+                  {siteSettings?.siteName || 'NETDISCOUNT'} <span className="text-blue-200">DEALS</span>
+                </h1>
+                <nav className="hidden md:flex items-center space-x-6">
+                  <a href="#" className="hover:text-blue-200 transition-colors">Categories</a>
+                  <a href="#" className="hover:text-blue-200 transition-colors">Stores</a>
+                  <a href="#" className="hover:text-blue-200 transition-colors">Coupons</a>
+                  <a href="#" className="hover:text-blue-200 transition-colors">Shopping Guide</a>
+                  <a href="#" className="hover:text-blue-200 transition-colors">Today's Deals</a>
+                </nav>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
+                  Log in or Sign Up
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="container mx-auto px-4 py-6">
+        {/* Featured Section */}
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6" data-testid="title-featured">Featured</h2>
+          
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              {dealsLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex-none w-64">
+                    <Skeleton className="w-full h-48 rounded-lg mb-3" />
+                    <Skeleton className="h-4 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))
+              ) : (
+                featuredDeals.slice(0, 5).map((deal, index) => (
+                  <div key={deal.id} className="flex-none w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                    <div className="relative">
+                      <img 
+                        src={deal.imageUrl || ''} 
+                        alt={deal.title}
+                        className="w-full h-40 object-cover"
+                        data-testid={`img-featured-deal-${index}`}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white"
+                        data-testid={`button-favorite-${deal.id}`}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-featured-deal-${index}`}>
+                        {deal.title}
+                      </h3>
+                      <div className="flex items-center space-x-2">
+                        {deal.salePrice && (
+                          <span className="text-lg font-bold text-red-600">
+                            {formatPrice(deal.salePrice)}
+                          </span>
+                        )}
+                        {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
+                          <span className="text-sm text-gray-500 line-through">
+                            {formatPrice(deal.originalPrice)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            {/* Navigation arrows */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 bg-white shadow-lg"
+              data-testid="button-featured-prev"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 bg-white shadow-lg"
+              data-testid="button-featured-next"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </section>
+
+        {/* All Deals Section */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900" data-testid="title-all-deals">All Deals</h2>
+            
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center space-x-2"
+                data-testid="button-filter"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filter</span>
+              </Button>
+              
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                data-testid="select-sort"
+              >
+                <option value="popularity">Sort: Popularity</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="discount">Highest Discount</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Deals Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {allDealsLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                  <Skeleton className="w-full h-48" />
+                  <div className="p-4 space-y-3">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-6 w-1/2" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              allDeals.map((deal, index) => {
+                const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
+                const isExclusive = index % 3 === 0; // Make every 3rd deal "exclusive" for demo
+                
+                return (
+                  <div key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                    <div className="relative">
+                      <img 
+                        src={deal.imageUrl || ''} 
+                        alt={deal.title}
+                        className="w-full h-48 object-cover"
+                        data-testid={`img-deal-${index}`}
+                      />
+                      
+                      {isExclusive && (
+                        <Badge className="absolute top-2 left-2 bg-blue-600 text-white">
+                          Exclusive
+                        </Badge>
+                      )}
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white"
+                        data-testid={`button-favorite-all-${deal.id}`}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="p-4">
+                      <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-deal-${index}`}>
+                        {deal.title}
+                      </h3>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          {deal.salePrice && (
+                            <span className="text-lg font-bold text-red-600">
+                              {formatPrice(deal.salePrice)}
+                            </span>
+                          )}
+                          {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
+                            <span className="text-sm text-gray-500 line-through">
+                              {formatPrice(deal.originalPrice)}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {discount > 0 && (
+                          <Badge variant="secondary" className="text-green-700 bg-green-100">
+                            {discount}% off
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="mt-2 text-xs text-gray-500">
+                        {deal.store?.name}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
