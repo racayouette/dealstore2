@@ -8,7 +8,7 @@ interface StoreCardProps {
 export default function StoreCard({ store }: StoreCardProps) {
   return (
     <Link href={`/stores/${store.slug}`}>
-      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border p-6 text-center cursor-pointer group h-40 flex flex-col justify-center" data-testid={`card-store-${store.slug}`}>
+      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border p-6 text-center cursor-pointer group h-48 flex flex-col justify-center" data-testid={`card-store-${store.slug}`}>
         <img 
           src={store.logoUrl || 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=100'} 
           alt={`${store.name} logo`} 
@@ -19,7 +19,7 @@ export default function StoreCard({ store }: StoreCardProps) {
           {store.name}
         </h3>
         {store.description && (
-          <p className="text-xs text-gray-600 line-clamp-2 overflow-hidden" data-testid={`text-store-description-${store.slug}`}>
+          <p className="text-sm text-gray-600 line-clamp-2 overflow-hidden leading-relaxed" data-testid={`text-store-description-${store.slug}`}>
             {store.description}
           </p>
         )}
