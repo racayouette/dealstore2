@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, Users, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { PlayCircle, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { api } from "@/lib/api";
 import type { VideoChannel } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
@@ -259,12 +259,6 @@ export default function Videos() {
                       <PlayCircle className="w-4 h-4" />
                       <span data-testid={`text-videos-${channel.id}`}>
                         {channel.videoCount} videos
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span data-testid={`text-followers-${channel.id}`}>
-                        {channel.followerCount} followers
                       </span>
                     </div>
                   </div>
