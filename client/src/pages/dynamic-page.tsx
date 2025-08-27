@@ -491,7 +491,6 @@ export default function DynamicPage() {
             ) : (
               paginatedDeals.map((deal, index) => {
                 const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
-                const isExclusive = index % 3 === 0; // Make every 3rd deal "exclusive" for demo
                 
                 return (
                   <a href={`/deal/${deal.id}`} key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
@@ -503,11 +502,6 @@ export default function DynamicPage() {
                         data-testid={`img-deal-${index}`}
                       />
                       
-                      {isExclusive && (
-                        <Badge className="absolute top-2 left-2 bg-blue-600 text-white">
-                          Exclusive
-                        </Badge>
-                      )}
                       
                       <div className="absolute top-2 right-2">
                         <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
