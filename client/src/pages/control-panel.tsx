@@ -1011,6 +1011,43 @@ function PageListItem({
     }
   };
 
+  // Simplified layout for permanent system pages
+  if (isPermanent) {
+    return (
+      <div
+        className={`rounded-lg border transition-all duration-200 ${
+          selectedPage.url === page.url 
+            ? 'border-net-green bg-net-green' 
+            : 'border-transparent'
+        }`}
+      >
+        <button
+          onClick={() => setSelectedPage(page)}
+          className={`w-full text-left p-3 transition-colors flex items-center gap-3 rounded-lg ${
+            selectedPage.url === page.url 
+              ? 'bg-net-green text-white' 
+              : 'hover:bg-gray-100 text-gray-700'
+          }`}
+          data-testid={`page-${page.url.replace('/', '')}`}
+        >
+          <IconComponent className="w-4 h-4 flex-shrink-0" />
+          <div className="min-w-0">
+            <div className="font-medium truncate">
+              {page.name}
+              {!isVisible && <span className="ml-2 text-xs opacity-75">(Hidden)</span>}
+            </div>
+            <div className={`text-xs truncate ${
+              selectedPage.url === page.url ? 'text-green-100' : 'text-gray-500'
+            }`}>
+              {page.description}
+            </div>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  // Full layout for custom pages
   return (
     <div
       draggable
@@ -1083,20 +1120,18 @@ function PageListItem({
         >
           <Edit className="w-4 h-4" />
         </button>
-        {!isPermanent && (
-          <button
-            onClick={() => onDelete(page)}
-            className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
-              selectedPage.url === page.url 
-                ? 'bg-red-600 text-white border-net-green-dark hover:bg-red-500' 
-                : 'text-red-500 hover:bg-red-50 hover:text-red-700 border-gray-200'
-            }`}
-            title={`Delete ${page.name} page`}
-            data-testid={`delete-page-${page.url.replace('/', '')}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
+        <button
+          onClick={() => onDelete(page)}
+          className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
+            selectedPage.url === page.url 
+              ? 'bg-red-600 text-white border-net-green-dark hover:bg-red-500' 
+              : 'text-red-500 hover:bg-red-50 hover:text-red-700 border-gray-200'
+          }`}
+          title={`Delete ${page.name} page`}
+          data-testid={`delete-page-${page.url.replace('/', '')}`}
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
         <button
           onClick={() => onDuplicate(page)}
           className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
@@ -1111,7 +1146,7 @@ function PageListItem({
         </button>
         <button
           onClick={() => window.open(page.url, '_blank')}
-          className={`px-3 py-3 ${isPermanent ? 'rounded-r-lg' : ''} transition-colors border-l flex-shrink-0 ${
+          className={`px-3 py-3 rounded-r-lg transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
