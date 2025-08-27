@@ -76,8 +76,6 @@ export default function Store55() {
 
   const ProductCard = ({ deal, index, section }: { deal: DealWithRelations, index: number, section: string }) => {
     const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
-    const isExclusive = index % 3 === 0; // Make every 3rd item exclusive
-    const isSale = discount > 0;
 
     return (
       <a href={`/deal/${deal.id}`} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
@@ -89,42 +87,28 @@ export default function Store55() {
             data-testid={`img-${section}-deal-${index}`}
           />
           
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col space-y-1">
-            {isExclusive && (
-              <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1">
-                Exclusive
-              </Badge>
-            )}
-            {isSale && (
-              <Badge variant="destructive" className="text-xs px-2 py-1">
-                Sale
-              </Badge>
-            )}
-          </div>
-          
           <div className="absolute top-2 right-2">
             <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
           </div>
         </div>
         
         <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex-1">
               {deal.salePrice && (
-                <span className="text-lg font-bold text-black">
+                <div className="text-lg font-bold text-black mb-1">
                   {formatPrice(deal.salePrice)}
-                </span>
+                </div>
               )}
               {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
-                <span className="text-sm text-gray-500 line-through">
-                  {formatPrice(deal.originalPrice)}
-                </span>
+                <div className="text-sm text-gray-500 line-through">
+                  was {formatPrice(deal.originalPrice)}
+                </div>
               )}
             </div>
             
             {discount > 0 && (
-              <span className="text-sm text-green-600 font-medium">
+              <span className="text-sm text-green-600 font-medium ml-2">
                 Save {discount}%
               </span>
             )}
