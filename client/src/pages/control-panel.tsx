@@ -1140,7 +1140,8 @@ export default function AdvertisingPanelPage() {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [pageToRename, setPageToRename] = useState<Page | null>(null);
   const [renameForm, setRenameForm] = useState({
-    name: ''
+    name: '',
+    description: ''
   });
 
   // Query for page visibility status - we still need this for navigation
@@ -1335,15 +1336,15 @@ export default function AdvertisingPanelPage() {
 
   // Mutation for renaming pages
   const renamePageMutation = useMutation({
-    mutationFn: async ({ pageUrl, newPageName }: { pageUrl: string; newPageName: string }) => {
-      return await apiRequest('PATCH', '/api/banner-settings/rename', { pageUrl, newPageName });
+    mutationFn: async ({ pageUrl, newPageName, newDescription }: { pageUrl: string; newPageName: string; newDescription?: string }) => {
+      return await apiRequest('PATCH', '/api/banner-settings/rename', { pageUrl, newPageName, newDescription });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/visible-pages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/banner-settings'] });
       setIsRenameDialogOpen(false);
       setPageToRename(null);
-      setRenameForm({ name: '' });
+      setRenameForm({ name: '', description: '' });
       toast({
         title: "Success",
         description: "Page renamed successfully.",
@@ -1366,7 +1367,7 @@ export default function AdvertisingPanelPage() {
 
   const handleRenamePage = (page: Page) => {
     setPageToRename(page);
-    setRenameForm({ name: page.name });
+    setRenameForm({ name: page.name, description: page.description });
     setIsRenameDialogOpen(true);
   };
 
@@ -1382,7 +1383,8 @@ export default function AdvertisingPanelPage() {
 
     renamePageMutation.mutate({
       pageUrl: pageToRename.url,
-      newPageName: renameForm.name.trim()
+      newPageName: renameForm.name.trim(),
+      newDescription: renameForm.description.trim()
     });
   };
 
@@ -1958,6 +1960,19 @@ export default function AdvertisingPanelPage() {
                 placeholder="Enter new page name"
                 data-testid="input-rename-name"
                 autoFocus
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="rename-page-description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="rename-page-description"
+                value={renameForm.description}
+                onChange={(e) => setRenameForm(prev => ({ ...prev, description: e.target.value }))}
+                className="col-span-3"
+                placeholder="Enter page description (optional)"
+                data-testid="input-rename-description"
               />
             </div>
           </div>
