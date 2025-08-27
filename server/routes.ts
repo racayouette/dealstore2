@@ -369,6 +369,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User favorites endpoints
+  app.get("/api/favorites/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const favorites = await storage.getUserFavorites(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching user favorites:", error);
+      res.status(500).json({ error: "Failed to fetch favorites" });
+    }
+  });
+
+  app.post("/api/favorites", async (req, res) => {
+    try {
+      const { userId, dealId } = req.body;
+      if (!userId || !dealId) {
+        return res.status(400).json({ error: "userId and dealId are required" });
+      }
+      
+      await storage.addUserFavorite(userId, dealId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error adding favorite:", error);
+      res.status(500).json({ error: "Failed to add favorite" });
+    }
+  });
+
+  app.delete("/api/favorites", async (req, res) => {
+    try {
+      const { userId, dealId } = req.body;
+      if (!userId || !dealId) {
+        return res.status(400).json({ error: "userId and dealId are required" });
+      }
+      
+      await storage.removeUserFavorite(userId, dealId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing favorite:", error);
+      res.status(500).json({ error: "Failed to remove favorite" });
+    }
+  });
+
+  app.get("/api/favorites/:userId/:dealId", async (req, res) => {
+    try {
+      const { userId, dealId } = req.params;
+      const isFavorite = await storage.isUserFavorite(userId, dealId);
+      res.json({ isFavorite });
+    } catch (error) {
+      console.error("Error checking favorite status:", error);
+      res.status(500).json({ error: "Failed to check favorite status" });
+    }
+  });
+
   // Video Channels
   app.get("/api/video-channels", async (req, res) => {
     try {

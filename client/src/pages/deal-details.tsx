@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
-import { ExternalLink, Heart, Copy, Clock } from "lucide-react";
+import { ExternalLink, Copy, Clock } from "lucide-react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Breadcrumb from "@/components/breadcrumb";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import type { DealWithRelations } from "@shared/schema";
 import { usePageTracking } from "@/hooks/use-page-tracking";
+import { HeartButton } from "@/components/HeartButton";
 
 interface SiteSettings {
   id: string;
@@ -148,14 +149,9 @@ export default function DealDetails() {
                   className="w-full h-auto rounded-lg shadow-sm"
                   data-testid="img-deal-main"
                 />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white shadow-sm"
-                  data-testid="button-favorite-deal"
-                >
-                  <Heart className="w-5 h-5" />
-                </Button>
+                <div className="absolute top-4 right-4">
+                  <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white shadow-sm" size={20} />
+                </div>
                 {deal.isFeatured && (
                   <Badge className="absolute top-4 left-4 bg-blue-600 text-white">
                     Exclusive
@@ -189,7 +185,7 @@ export default function DealDetails() {
                     
                     <div className="flex items-center space-x-3">
                       <span className="text-blue-600 font-medium">{deal.store.name}</span>
-                      <Heart className="w-4 h-4 text-gray-400" />
+                      <HeartButton dealId={deal.id} size={16} />
                     </div>
 
                     {deal.freeShipping && (
@@ -284,14 +280,9 @@ export default function DealDetails() {
                           </Badge>
                         )}
                         
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-1 right-1 p-1 bg-white/80 hover:bg-white"
-                          data-testid={`button-favorite-related-${relatedDeal.id}`}
-                        >
-                          <Heart className="w-3 h-3" />
-                        </Button>
+                        <div className="absolute top-1 right-1">
+                          <HeartButton dealId={relatedDeal.id} className="bg-white/80 hover:bg-white" size={12} />
+                        </div>
                       </div>
                       
                       <div className="p-3">
