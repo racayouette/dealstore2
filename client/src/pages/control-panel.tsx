@@ -944,7 +944,8 @@ function PageListItem({
   onDragStart,
   onDragOver,
   onDrop,
-  isDragging
+  isDragging,
+  isPermanent = false
 }: { 
   page: Page; 
   selectedPage: Page; 
@@ -958,6 +959,7 @@ function PageListItem({
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, index: number) => void;
   isDragging: boolean;
+  isPermanent?: boolean;
 }) {
   const { toast } = useToast();
   const IconComponent = page.icon;
@@ -1077,18 +1079,20 @@ function PageListItem({
         >
           <Edit className="w-4 h-4" />
         </button>
-        <button
-          onClick={() => onDelete(page)}
-          className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
-            selectedPage.url === page.url 
-              ? 'bg-red-600 text-white border-net-green-dark hover:bg-red-500' 
-              : 'text-red-500 hover:bg-red-50 hover:text-red-700 border-gray-200'
-          }`}
-          title={`Delete ${page.name} page`}
-          data-testid={`delete-page-${page.url.replace('/', '')}`}
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {!isPermanent && (
+          <button
+            onClick={() => onDelete(page)}
+            className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
+              selectedPage.url === page.url 
+                ? 'bg-red-600 text-white border-net-green-dark hover:bg-red-500' 
+                : 'text-red-500 hover:bg-red-50 hover:text-red-700 border-gray-200'
+            }`}
+            title={`Delete ${page.name} page`}
+            data-testid={`delete-page-${page.url.replace('/', '')}`}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={() => onDuplicate(page)}
           className={`px-3 py-3 transition-colors border-l flex-shrink-0 ${
@@ -1103,7 +1107,7 @@ function PageListItem({
         </button>
         <button
           onClick={() => window.open(page.url, '_blank')}
-          className={`px-3 py-3 rounded-r-lg transition-colors border-l flex-shrink-0 ${
+          className={`px-3 py-3 ${isPermanent ? 'rounded-r-lg' : ''} transition-colors border-l flex-shrink-0 ${
             selectedPage.url === page.url 
               ? 'bg-net-green-dark text-white border-net-green-dark hover:bg-net-green' 
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 border-gray-200'
@@ -1171,19 +1175,22 @@ export default function AdvertisingPanelPage() {
     };
   }) : [];
 
-  // Combine static pages with dynamic pages, ensuring static pages are always included
-  const allPagesUnsorted: Page[] = [
-    ...STATIC_PAGES, // Always include static pages like Site Settings
-    ...dynamicPages.filter(dp => !STATIC_PAGES.some(sp => sp.url === dp.url)) // Add dynamic pages that aren't already in static
-  ];
-
-  const allPages = allPagesUnsorted.sort((a, b) => {
+  // Separate system/permanent pages from custom pages
+  const systemPages = STATIC_PAGES;
+  
+  // Only include dynamic pages that aren't already in static pages
+  const customPagesUnsorted = dynamicPages.filter(dp => !STATIC_PAGES.some(sp => sp.url === dp.url));
+  
+  const customPages = customPagesUnsorted.sort((a, b) => {
     const aSettings = allSettings.find((s: any) => s.pageUrl === a.url);
     const bSettings = allSettings.find((s: any) => s.pageUrl === b.url);
     const aSort = aSettings?.sortOrder || 999;
     const bSort = bSettings?.sortOrder || 999;
     return aSort !== bSort ? aSort - bSort : a.name.localeCompare(b.name);
   });
+
+  // Combine all pages for compatibility with existing code
+  const allPages = [...systemPages, ...customPages];
   
   // Auto-select first page when pages are loaded
   useEffect(() => {
@@ -1570,45 +1577,88 @@ export default function AdvertisingPanelPage() {
           
           <ScrollArea className="h-[calc(100vh-120px)]">
             <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-gray-900">Pages</h2>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setPageToDuplicate(null);
-                    setDuplicateForm({ name: '', url: '', description: '' });
-                    setDuplicateErrors({ name: '', url: '', general: '' });
-                    setIsDuplicateDialogOpen(true);
-                  }}
-                  className="flex items-center gap-1 bg-net-green hover:bg-net-green-dark"
-                  data-testid="button-add-new-page"
-                >
-                  <Plus className="w-3 h-3" />
-                  Add
-                </Button>
+              {/* System Pages Section */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold text-gray-900">System Pages</h2>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                    Permanent
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {systemPages.map((page, index) => {
+                    return (
+                      <PageListItem 
+                        key={page.url} 
+                        page={page} 
+                        selectedPage={selectedPage} 
+                        setSelectedPage={setSelectedPage}
+                        updateSettingsMutation={updateSettingsMutation}
+                        onDuplicate={handleDuplicatePage}
+                        onDelete={handleDeletePage}
+                        onRename={handleRenamePage}
+                        index={index}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        isDragging={draggedPageIndex === index}
+                        isPermanent={true}
+                      />
+                    );
+                  })}
+                </div>
               </div>
-              
-              
-              <div className="space-y-1">
-                {allPages.map((page, index) => {
-                  return (
-                    <PageListItem 
-                      key={page.url} 
-                      page={page} 
-                      selectedPage={selectedPage} 
-                      setSelectedPage={setSelectedPage}
-                      updateSettingsMutation={updateSettingsMutation}
-                      onDuplicate={handleDuplicatePage}
-                      onDelete={handleDeletePage}
-                      onRename={handleRenamePage}
-                      index={index}
-                      onDragStart={handleDragStart}
-                      onDragOver={handleDragOver}
-                      onDrop={handleDrop}
-                      isDragging={draggedPageIndex === index}
-                    />
-                  );
-                })}
+
+              {/* Custom Pages Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold text-gray-900">Custom Pages</h2>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setPageToDuplicate(null);
+                      setDuplicateForm({ name: '', url: '', description: '' });
+                      setDuplicateErrors({ name: '', url: '', general: '' });
+                      setIsDuplicateDialogOpen(true);
+                    }}
+                    className="flex items-center gap-1 bg-net-green hover:bg-net-green-dark"
+                    data-testid="button-add-new-page"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add
+                  </Button>
+                </div>
+                <div className="space-y-1">
+                  {customPages.length > 0 ? (
+                    customPages.map((page, index) => {
+                      const globalIndex = systemPages.length + index;
+                      return (
+                        <PageListItem 
+                          key={page.url} 
+                          page={page} 
+                          selectedPage={selectedPage} 
+                          setSelectedPage={setSelectedPage}
+                          updateSettingsMutation={updateSettingsMutation}
+                          onDuplicate={handleDuplicatePage}
+                          onDelete={handleDeletePage}
+                          onRename={handleRenamePage}
+                          index={globalIndex}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          isDragging={draggedPageIndex === globalIndex}
+                          isPermanent={false}
+                        />
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No custom pages yet</p>
+                      <p className="text-xs">Click "Add" to create a new page</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </ScrollArea>
