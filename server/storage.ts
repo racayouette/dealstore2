@@ -147,6 +147,8 @@ export interface IStorage {
   createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings>;
   updateBannerSettings(pageUrl: string, updates: Partial<InsertBannerSettings>): Promise<BannerSettings | undefined>;
   upsertBannerSettings(pageUrl: string, settings: InsertBannerSettings): Promise<BannerSettings>;
+  deleteBannerSettings(pageUrl: string): Promise<void>;
+  reorderPages(pageUrls: string[]): Promise<void>;
   
   // Directory Business Categories
   getBusinessCategories(): Promise<BusinessCategory[]>;
@@ -1297,7 +1299,7 @@ export class DatabaseStorage implements IStorage {
       await db.insert(userFavorites).values({ userId, dealId });
     } catch (error) {
       // Handle unique constraint violation silently (user already favorited this deal)
-      if (!error.message.includes('unique_user_deal')) {
+      if (error instanceof Error && !error.message.includes('unique_user_deal')) {
         throw error;
       }
     }
