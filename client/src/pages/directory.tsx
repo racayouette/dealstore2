@@ -11,7 +11,8 @@ import Footer from '@/components/footer';
 import AdvertisementBanner from '@/components/advertisement-banner';
 import { usePageTracking } from '@/hooks/use-page-tracking';
 
-import type { BusinessWithCategory, SiteSettings } from '@shared/schema';
+import type { BusinessWithCategory } from '@shared/schema';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 
 export default function Directory() {
   // Track page view for analytics
@@ -47,15 +48,8 @@ export default function Directory() {
   };
 
 
-  // Fetch site settings for dynamic site name
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({

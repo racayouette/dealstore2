@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { api } from "@/lib/api";
-import type { Store, SiteSettings, BannerSettings } from "@shared/schema";
+import type { Store, BannerSettings } from "@shared/schema";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function Stores() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -35,15 +36,8 @@ export default function Stores() {
     enabled: !!selectedLetter,
   });
 
-  // Fetch site settings for dynamic site name
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
