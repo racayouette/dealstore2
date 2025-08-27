@@ -217,7 +217,7 @@ export default function Directory() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold" data-testid="title-directory">
-                {siteSettings?.siteName || 'NETDISCOUNT'}
+                {siteSettings?.siteName}
               </h1>
               <nav className="hidden md:flex items-center space-x-6">
                 <a href="/" className="hover:text-blue-200 transition-colors">Home</a>
