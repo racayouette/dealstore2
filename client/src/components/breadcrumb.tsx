@@ -17,7 +17,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
         <li>
           <Link href="/" className="text-net-green hover:underline flex items-center" data-testid="breadcrumb-home">
             <Home className="w-4 h-4 mr-1" />
-            Home
+            Stores
           </Link>
         </li>
         {items.map((item, index) => (
