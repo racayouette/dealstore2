@@ -8,13 +8,7 @@ import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
 import { useRef } from "react";
-
-interface SiteSettings {
-  id: string;
-  siteName: string;
-  siteDescription: string;
-  affiliateDisclosure: string;
-}
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function Store44() {
   // Track page view for analytics
@@ -28,15 +22,8 @@ export default function Store44() {
     queryKey: ["/api/deals"],
   });
 
-  // Fetch site settings
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({

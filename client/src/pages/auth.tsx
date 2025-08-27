@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, User, Lock, Mail } from 'lucide-react';
 import Footer from '@/components/footer';
-import type { SiteSettings } from '@shared/schema';
+import { useSiteSettings } from '@/hooks/use-site-settings';
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -17,15 +17,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch site settings
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({

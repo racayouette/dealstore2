@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-react";
-import type { Blog, SiteSettings } from "@shared/schema";
+import type { Blog } from "@shared/schema";
 import Footer from "@/components/footer";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { usePageTracking } from "@/hooks/use-page-tracking";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 
 export default function Blogs() {
@@ -21,15 +22,8 @@ export default function Blogs() {
   const [currentPage, setCurrentPage] = useState(1);
   const blogsPerPage = 6;
 
-  // Fetch site settings for dynamic site name
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({

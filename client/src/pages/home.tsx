@@ -13,13 +13,7 @@ import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import type { DealWithRelations, Store, BannerSettings } from "@shared/schema";
 import { usePageTracking } from "@/hooks/use-page-tracking";
-
-interface SiteSettings {
-  id: string;
-  siteName: string;
-  siteDescription: string;
-  affiliateDisclosure: string;
-}
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function Home() {
   // Track page view for analytics
@@ -47,15 +41,8 @@ export default function Home() {
     queryFn: () => api.getFeaturedStores(),
   });
 
-  // Fetch site settings
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({

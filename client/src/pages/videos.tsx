@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, Users, ChevronLeft, ChevronRight, User } from "lucide-react";
 import { api } from "@/lib/api";
-import type { VideoChannel, SiteSettings } from "@shared/schema";
+import type { VideoChannel } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { usePageTracking } from "@/hooks/use-page-tracking";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 
 export default function Videos() {
@@ -22,15 +23,8 @@ export default function Videos() {
   const [currentPage, setCurrentPage] = useState(1);
   const videosPerPage = 9;
 
-  // Fetch site settings for dynamic site name
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({

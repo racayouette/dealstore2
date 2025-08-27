@@ -80,15 +80,8 @@ const newsletterPopupSettingsSchema = z.object({
 function SiteSettingsForm() {
   const { toast } = useToast();
   
-  // Fetch current site settings
-  const { data: siteSettings, isLoading } = useQuery({
-    queryKey: ['/api/site-settings'],
-    queryFn: async (): Promise<SiteSettings> => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch current site settings from global cache
+  const { data: siteSettings, isLoading } = useSiteSettings();
 
   // Update site settings mutation
   const updateSiteSettingsMutation = useMutation({

@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Search, Play, ExternalLink, User, Eye, Clock } from "lucide-react";
-import type { YoutubeVideo, SiteSettings } from "@shared/schema";
+import type { YoutubeVideo } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 
 export default function Video2() {
@@ -15,15 +16,8 @@ export default function Video2() {
   const [currentPage, setCurrentPage] = useState(1);
   const videosPerPage = 6;
 
-  // Fetch site settings for dynamic site name
-  const { data: siteSettings } = useQuery<SiteSettings>({
-    queryKey: ['/api/site-settings'],
-    queryFn: async () => {
-      const response = await fetch('/api/site-settings');
-      if (!response.ok) throw new Error('Failed to fetch site settings');
-      return response.json();
-    },
-  });
+  // Fetch site settings from global cache
+  const { data: siteSettings } = useSiteSettings();
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({
