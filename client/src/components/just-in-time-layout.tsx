@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { useQuery } from "@tanstack/react-query";
+import Navbar from "./nav-menu";
+import NavMenu from "./nav-menu";
 
 interface JustInTimeLayoutProps {
   children: ReactNode;
@@ -49,18 +51,7 @@ export function JustInTimeLayout({
               <h1 className="text-2xl font-bold" data-testid={`title-${pageTitle.toLowerCase()}`}>
                 {siteSettings?.siteName}
               </h1>
-              <nav className="hidden md:flex items-center space-x-6">
-                {/* Navigation loads progressively as visiblePages data becomes available */}
-                {Array.isArray(visiblePages) && visiblePages.map((page: any) => (
-                  <a
-                    key={page.pageUrl}
-                    href={page.pageUrl}
-                    className="hover:text-blue-200 transition-colors"
-                  >
-                    {page.pageName}
-                  </a>
-                ))}
-              </nav>
+              <NavMenu />
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">

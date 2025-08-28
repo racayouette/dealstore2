@@ -13,6 +13,7 @@ import type { DealWithRelations } from "@shared/schema";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import { HeartButton } from "@/components/HeartButton";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import NavMenu from "@/components/nav-menu";
 
 export default function DealDetails() {
   usePageTracking("Deal Details", "/deal/:id");
@@ -113,18 +114,7 @@ export default function DealDetails() {
                 <h1 className="text-2xl font-bold" data-testid="title-deal-details">
                   {siteSettings?.siteName}
                 </h1>
-                <nav className="hidden md:flex items-center space-x-6">
-                  <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                  {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                    <a
-                      key={page.pageUrl}
-                      href={page.pageUrl}
-                      className="hover:text-blue-200 transition-colors"
-                    >
-                      {page.pageName}
-                    </a>
-                  ))}
-                </nav>
+                <NavMenu />
               </div>
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
@@ -166,18 +156,7 @@ export default function DealDetails() {
               <h1 className="text-2xl font-bold" data-testid="title-deal-details">
                 {siteSettings?.siteName}
               </h1>
-              <nav className="hidden md:flex items-center space-x-6">
-                <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                  <a
-                    key={page.pageUrl}
-                    href={page.pageUrl}
-                    className="hover:text-blue-200 transition-colors"
-                  >
-                    {page.pageName}
-                  </a>
-                ))}
-              </nav>
+              <NavMenu />
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
