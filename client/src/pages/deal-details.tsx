@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { ExternalLink, Copy, Clock, User } from "lucide-react";
 import Footer from "@/components/footer";
 import Breadcrumb from "@/components/breadcrumb";
@@ -327,46 +327,48 @@ export default function DealDetails() {
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                   {relatedDeals.slice(0, 6).map((relatedDeal, index) => (
-                    <div key={relatedDeal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
-                      <div className="relative">
-                        <img 
-                          src={relatedDeal.imageUrl || ''} 
-                          alt={relatedDeal.title}
-                          className="w-full h-32 object-cover"
-                          data-testid={`img-related-deal-${index}`}
-                        />
-                        
-                        
-                        <div className="absolute top-1 right-1">
-                          <HeartButton dealId={relatedDeal.id} className="bg-white/80 hover:bg-white" size={12} />
-                        </div>
-                      </div>
-                      
-                      <div className="p-3">
-                        <h3 className="font-medium text-xs text-gray-900 mb-2 line-clamp-2" data-testid={`title-related-deal-${index}`}>
-                          {relatedDeal.title}
-                        </h3>
-                        
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-1">
-                            {relatedDeal.salePrice && (
-                              <span className="text-sm font-bold text-red-600">
-                                {formatPrice(relatedDeal.salePrice)}
-                              </span>
-                            )}
-                            {relatedDeal.originalPrice && relatedDeal.originalPrice !== relatedDeal.salePrice && (
-                              <span className="text-xs text-gray-500 line-through">
-                                {formatPrice(relatedDeal.originalPrice)}
-                              </span>
-                            )}
-                          </div>
+                    <Link key={relatedDeal.id} href={`/deal/${relatedDeal.id}`}>
+                      <div className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow cursor-pointer">
+                        <div className="relative">
+                          <img 
+                            src={relatedDeal.imageUrl || ''} 
+                            alt={relatedDeal.title}
+                            className="w-full h-32 object-cover"
+                            data-testid={`img-related-deal-${index}`}
+                          />
                           
-                          <div className="text-xs text-gray-500">
-                            {relatedDeal.store?.name}
+                          
+                          <div className="absolute top-1 right-1">
+                            <HeartButton dealId={relatedDeal.id} className="bg-white/80 hover:bg-white" size={12} />
+                          </div>
+                        </div>
+                        
+                        <div className="p-3">
+                          <h3 className="font-medium text-xs text-gray-900 mb-2 line-clamp-2" data-testid={`title-related-deal-${index}`}>
+                            {relatedDeal.title}
+                          </h3>
+                          
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-1">
+                              {relatedDeal.salePrice && (
+                                <span className="text-sm font-bold text-red-600">
+                                  {formatPrice(relatedDeal.salePrice)}
+                                </span>
+                              )}
+                              {relatedDeal.originalPrice && relatedDeal.originalPrice !== relatedDeal.salePrice && (
+                                <span className="text-xs text-gray-500 line-through">
+                                  {formatPrice(relatedDeal.originalPrice)}
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="text-xs text-gray-500">
+                              {relatedDeal.store?.name}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </section>
