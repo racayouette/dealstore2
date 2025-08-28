@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import StoreCard from "@/components/store-card";
@@ -8,7 +7,7 @@ import Breadcrumb from "@/components/breadcrumb";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import UserMenu from "@/components/user-menu";
 import { api } from "@/lib/api";
 import type { Store, BannerSettings } from "@shared/schema";
 import { useSiteSettings } from "@/hooks/use-site-settings";
@@ -94,11 +93,7 @@ export default function Stores() {
                 </nav>
               </div>
               <div className="flex items-center space-x-4">
-                <Link href="/auth">
-                  <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                    <User className="w-5 h-5" />
-                  </Button>
-                </Link>
+                <UserMenu />
               </div>
             </div>
           </div>

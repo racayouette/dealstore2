@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { useLocation, Link } from 'wouter';
+import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
+import { setUserSession } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, User, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import Footer from '@/components/footer';
+import UserMenu from '@/components/user-menu';
 import { useSiteSettings } from '@/hooks/use-site-settings';
 
 export default function Auth() {
@@ -59,6 +61,8 @@ export default function Auth() {
       });
 
       if (response.ok) {
+        const userData = await response.json();
+        setUserSession(userData);
         setLocation('/');
       } else {
         const errorData = await response.text();
@@ -96,6 +100,8 @@ export default function Auth() {
       });
 
       if (response.ok) {
+        const userData = await response.json();
+        setUserSession(userData);
         setLocation('/');
       } else {
         const errorData = await response.text();
@@ -141,11 +147,7 @@ export default function Auth() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth">
-                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              <UserMenu />
             </div>
           </div>
         </div>
