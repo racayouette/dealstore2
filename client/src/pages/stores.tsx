@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import StoreCard from "@/components/store-card";
@@ -93,9 +94,11 @@ export default function Stores() {
                 </nav>
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  <User className="w-5 h-5" />
-                </Button>
+                <Link href="/auth">
+                  <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
+                    <User className="w-5 h-5" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
