@@ -9,6 +9,7 @@ import { usePageTracking } from "@/hooks/use-page-tracking";
 import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import UserMenu from "@/components/user-menu";
 
 export default function Store55() {
   // Track page view for analytics
@@ -155,9 +156,7 @@ export default function Store55() {
                 </nav>
               </div>
               <div className="flex items-center space-x-4">
-                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  <User className="w-5 h-5" />
-                </Button>
+                <UserMenu />
               </div>
             </div>
           </div>
