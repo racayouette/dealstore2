@@ -31,7 +31,7 @@ import { useNewsletterPopup } from "@/hooks/use-newsletter-popup";
 
 function Router() {
   // Get all banner settings to create dynamic routes
-  const { data: bannerSettings = [] } = useQuery({
+  const { data: bannerSettings = [], isLoading: bannerSettingsLoading } = useQuery({
     queryKey: ['/api/banner-settings'],
     queryFn: async () => {
       const response = await fetch('/api/banner-settings');
@@ -53,6 +53,40 @@ function Router() {
     !setting.pageUrl.startsWith('/category/') && 
     !setting.pageUrl.startsWith('/deal/')
   );
+
+  // If banner settings are still loading, render a minimal loading state
+  // to prevent 404 flash for dynamic routes
+  if (bannerSettingsLoading) {
+    return (
+      <Switch>
+        <Route path="/" component={Stores} />
+        <Route path="/category/:slug" component={Category} />
+        <Route path="/deal/:id" component={DealDetails} />
+        <Route path="/store33" component={Store33} />
+        <Route path="/store44" component={Store44} />
+        <Route path="/store55" component={Store55} />
+        <VisibleRoute path="/videos" component={Videos} />
+        <VisibleRoute path="/video2" component={Video2} />
+        <VisibleRoute path="/posts" component={Posts} />
+        <VisibleRoute path="/blogs" component={Blogs} />
+        <VisibleRoute path="/directory" component={Directory} />
+        <VisibleRoute path="/search" component={Search} />
+        <Route path="/auth" component={Auth} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/terms" component={Terms} />
+        <Route path="/advertising-panel" component={ControlPanel} />
+        <Route path="/control-panel" component={ControlPanel} />
+        <Route path="/seo-panel" component={SEOPanel} />
+        <Route path="/wp-admin" component={AdminLogin} />
+        <Route path="/admin-login" component={AdminLogin} />
+        <Route path="/analytics" component={Analytics} />
+        <Route path="/admin/users" component={AdminUsers} />
+        
+        {/* Show loading component for potential dynamic routes */}
+        <Route component={() => <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>} />
+      </Switch>
+    );
+  }
 
   return (
     <Switch>
