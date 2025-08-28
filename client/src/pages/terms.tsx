@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import Footer from "@/components/footer";
 import Breadcrumb from "@/components/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import UserMenu from "@/components/user-menu";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export default function TermsPage() {
@@ -58,11 +56,7 @@ export default function TermsPage() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth">
-                <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              <UserMenu />
             </div>
           </div>
         </div>
