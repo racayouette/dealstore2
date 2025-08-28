@@ -11,6 +11,7 @@ import logoImage from "@/assets/logo.png";
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showElectronicsMenu, setShowElectronicsMenu] = useState(false);
   const [location, navigate] = useLocation();
 
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
@@ -42,6 +43,44 @@ export default function Header() {
   const isAdminPage = location === "/advertising-panel" || 
                       location === "/site-settings" || 
                       location?.startsWith("/admin");
+
+  // Electronics supermenu data with actual store names
+  const electronicsCategories = [
+    {
+      title: "Computers & Laptops",
+      items: [
+        { name: "Dell", slug: "dell" },
+        { name: "HP", slug: "hp" }, 
+        { name: "Lenovo", slug: "lenovo" },
+        { name: "Microsoft", slug: "microsoft" }
+      ]
+    },
+    {
+      title: "Mobile & Wireless",
+      items: [
+        { name: "T-Mobile", slug: "t-mobile" },
+        { name: "Verizon", slug: "verizon" },
+        { name: "Amazon", slug: "amazon" }
+      ]
+    },
+    {
+      title: "Electronics & Hardware",
+      items: [
+        { name: "Newegg", slug: "newegg" },
+        { name: "Dell Technologies", slug: "dell-technologies" },
+        { name: "Amazon", slug: "amazon" }
+      ]
+    },
+    {
+      title: "Featured Electronics Stores",
+      items: [
+        { name: "Amazon", slug: "amazon" },
+        { name: "Dell", slug: "dell" },
+        { name: "Microsoft", slug: "microsoft" },
+        { name: "Newegg", slug: "newegg" }
+      ]
+    }
+  ];
 
   return (
     <>
@@ -130,17 +169,56 @@ export default function Header() {
         </div>
         
         {/* Desktop Navigation Menu */}
-        <nav className="hidden md:block border-t border-green-600">
+        <nav className="hidden md:block border-t border-green-600 relative">
           <div className="flex space-x-6 lg:space-x-8 py-2 overflow-x-auto">
             {Array.isArray(visiblePages) && visiblePages.map((page) => (
-              <Link
+              <div
                 key={page.pageUrl}
-                href={page.pageUrl}
-                className="hover:text-blue-200 font-medium whitespace-nowrap text-sm lg:text-base"
-                data-testid={`nav-${page.pageUrl.replace('/', '')}`}
+                className="relative"
+                onMouseEnter={() => page.pageName.toLowerCase() === 'electronics' && setShowElectronicsMenu(true)}
+                onMouseLeave={() => page.pageName.toLowerCase() === 'electronics' && setShowElectronicsMenu(false)}
               >
-                {page.pageName}
-              </Link>
+                <Link
+                  href={page.pageUrl}
+                  className="hover:text-blue-200 font-medium whitespace-nowrap text-sm lg:text-base"
+                  data-testid={`nav-${page.pageUrl.replace('/', '')}`}
+                >
+                  {page.pageName}
+                </Link>
+                
+                {/* Electronics Supermenu */}
+                {page.pageName.toLowerCase() === 'electronics' && showElectronicsMenu && (
+                  <div 
+                    className="absolute left-1/2 transform -translate-x-1/2 top-full mt-0 bg-white shadow-2xl border border-gray-300 rounded-lg z-[9999] w-[800px]"
+                    onMouseEnter={() => setShowElectronicsMenu(true)}
+                    onMouseLeave={() => setShowElectronicsMenu(false)}
+                    style={{ position: 'fixed', top: '140px', left: '50%', transform: 'translateX(-50%)' }}
+                  >
+                    <div className="grid grid-cols-2 gap-8 p-8">
+                      {electronicsCategories.map((category, index) => (
+                        <div key={index} className="space-y-3">
+                          <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide border-b border-gray-300 pb-2">
+                            {category.title}
+                          </h3>
+                          <ul className="space-y-2">
+                            {category.items.map((store, itemIndex) => (
+                              <li key={itemIndex}>
+                                <Link
+                                  href={`/stores/${store.slug}`}
+                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150 block py-1 font-medium"
+                                  data-testid={`electronics-store-${store.slug}`}
+                                >
+                                  {store.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </nav>
