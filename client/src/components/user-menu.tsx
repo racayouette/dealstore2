@@ -1,13 +1,25 @@
 import { Link } from "wouter";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isUserAuthenticated } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import UserDropdown from "@/components/user-dropdown";
 
 export default function UserMenu() {
-  const isLoggedIn = isUserAuthenticated();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoggedIn) {
+  if (isLoading) {
+    return (
+      <Button 
+        variant="ghost" 
+        className="text-white hover:text-blue-200 hover:bg-blue-700"
+        disabled
+      >
+        <User className="w-5 h-5" />
+      </Button>
+    );
+  }
+
+  if (isAuthenticated) {
     return <UserDropdown />;
   }
 
