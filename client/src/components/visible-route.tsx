@@ -17,9 +17,13 @@ export function VisibleRoute({ path, component: Component }: VisibleRouteProps) 
     },
   });
 
-  // If still loading, render nothing to avoid flicker
+  // If still loading, show a loading state instead of nothing
   if (isLoading) {
-    return <Route path={path} component={() => <div />} />;
+    return <Route path={path} component={() => (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading...</div>
+      </div>
+    )} />;
   }
 
   // Check if this page is visible
