@@ -74,26 +74,15 @@ export default function TopNav() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem data-testid="menu-profile">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </DropdownMenuItem>
                 {isAdmin && (
-                  <>
-                    <DropdownMenuItem data-testid="menu-settings">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Account Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="text-red-600" 
-                      data-testid="menu-logout"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Admin Logout
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem 
+                    className="text-red-600" 
+                    data-testid="menu-logout"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Admin Logout
+                  </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
