@@ -179,14 +179,15 @@ export default function Header() {
                 {/* Electronics Supermenu */}
                 {page.pageName.toLowerCase() === 'electronics' && showElectronicsMenu && (
                   <div 
-                    className="absolute left-0 top-full mt-0 bg-white shadow-lg border border-gray-200 rounded-lg z-50 w-screen max-w-4xl"
+                    className="absolute left-1/2 transform -translate-x-1/2 top-full mt-0 bg-white shadow-2xl border border-gray-300 rounded-lg z-[9999] w-[800px]"
                     onMouseEnter={() => setShowElectronicsMenu(true)}
                     onMouseLeave={() => setShowElectronicsMenu(false)}
+                    style={{ position: 'fixed', top: '140px', left: '50%', transform: 'translateX(-50%)' }}
                   >
-                    <div className="grid grid-cols-3 gap-6 p-6">
+                    <div className="grid grid-cols-3 gap-6 p-8">
                       {electronicsCategories.map((category, index) => (
                         <div key={index} className="space-y-3">
-                          <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide border-b border-gray-200 pb-2">
+                          <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide border-b border-gray-300 pb-2">
                             {category.title}
                           </h3>
                           <ul className="space-y-2">
@@ -194,7 +195,7 @@ export default function Header() {
                               <li key={itemIndex}>
                                 <Link
                                   href={`/search?q=${encodeURIComponent(item)}`}
-                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150"
+                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150 block py-1"
                                   data-testid={`electronics-${item.toLowerCase().replace(/\s+/g, '-')}`}
                                 >
                                   {item}
