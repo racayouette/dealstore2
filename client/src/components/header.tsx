@@ -44,31 +44,41 @@ export default function Header() {
                       location === "/site-settings" || 
                       location?.startsWith("/admin");
 
-  // Electronics supermenu data
+  // Electronics supermenu data with actual store names
   const electronicsCategories = [
     {
-      title: "Computers & Tablets",
-      items: ["Laptops", "Desktop PCs", "Tablets", "Monitors", "Computer Accessories"]
+      title: "Computers & Laptops",
+      items: [
+        { name: "Dell", slug: "dell" },
+        { name: "HP", slug: "hp" }, 
+        { name: "Lenovo", slug: "lenovo" },
+        { name: "Microsoft", slug: "microsoft" }
+      ]
     },
     {
-      title: "Mobile Devices",
-      items: ["Smartphones", "Cell Phone Cases", "Phone Accessories", "Smartwatches", "Wireless Chargers"]
+      title: "Mobile & Wireless",
+      items: [
+        { name: "T-Mobile", slug: "t-mobile" },
+        { name: "Verizon", slug: "verizon" },
+        { name: "Amazon", slug: "amazon" }
+      ]
     },
     {
-      title: "Audio & Video",
-      items: ["Headphones & Earbuds", "Speakers", "TVs", "Home Theater", "Streaming Devices"]
+      title: "Electronics & Hardware",
+      items: [
+        { name: "Newegg", slug: "newegg" },
+        { name: "Dell Technologies", slug: "dell-technologies" },
+        { name: "Amazon", slug: "amazon" }
+      ]
     },
     {
-      title: "Gaming",
-      items: ["Gaming Consoles", "Gaming Laptops", "Gaming Accessories", "Video Games", "VR Headsets"]
-    },
-    {
-      title: "Smart Home",
-      items: ["Smart Speakers", "Security Cameras", "Smart Lighting", "Home Automation", "Smart Thermostats"]
-    },
-    {
-      title: "Photography",
-      items: ["Digital Cameras", "Camera Lenses", "Tripods", "Camera Bags", "Photo Accessories"]
+      title: "Featured Electronics Stores",
+      items: [
+        { name: "Amazon", slug: "amazon" },
+        { name: "Dell", slug: "dell" },
+        { name: "Microsoft", slug: "microsoft" },
+        { name: "Newegg", slug: "newegg" }
+      ]
     }
   ];
 
@@ -184,21 +194,21 @@ export default function Header() {
                     onMouseLeave={() => setShowElectronicsMenu(false)}
                     style={{ position: 'fixed', top: '140px', left: '50%', transform: 'translateX(-50%)' }}
                   >
-                    <div className="grid grid-cols-3 gap-6 p-8">
+                    <div className="grid grid-cols-2 gap-8 p-8">
                       {electronicsCategories.map((category, index) => (
                         <div key={index} className="space-y-3">
                           <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide border-b border-gray-300 pb-2">
                             {category.title}
                           </h3>
                           <ul className="space-y-2">
-                            {category.items.map((item, itemIndex) => (
+                            {category.items.map((store, itemIndex) => (
                               <li key={itemIndex}>
                                 <Link
-                                  href={`/search?q=${encodeURIComponent(item)}`}
-                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150 block py-1"
-                                  data-testid={`electronics-${item.toLowerCase().replace(/\s+/g, '-')}`}
+                                  href={`/stores/${store.slug}`}
+                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150 block py-1 font-medium"
+                                  data-testid={`electronics-store-${store.slug}`}
                                 >
-                                  {item}
+                                  {store.name}
                                 </Link>
                               </li>
                             ))}
