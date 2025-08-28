@@ -1,6 +1,6 @@
 import { User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { clearUserSession, getUserSession } from "@/lib/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import {
@@ -14,10 +14,10 @@ import {
 export default function UserDropdown() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const userSession = getUserSession();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    clearUserSession();
+    logout();
     toast({
       title: "Logged Out",
       description: "You have been logged out successfully.",
@@ -41,7 +41,7 @@ export default function UserDropdown() {
     });
   };
 
-  if (!userSession) return null;
+  if (!user) return null;
 
   return (
     <DropdownMenu>
