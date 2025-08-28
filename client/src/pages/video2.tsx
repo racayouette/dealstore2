@@ -8,6 +8,7 @@ import { Search, Play, ExternalLink, User, Eye, Clock } from "lucide-react";
 import type { YoutubeVideo } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import UserMenu from "@/components/user-menu";
 
 
 export default function Video2() {
@@ -91,9 +92,7 @@ export default function Video2() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                <User className="w-5 h-5" />
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>

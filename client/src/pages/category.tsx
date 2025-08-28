@@ -12,6 +12,7 @@ import { User } from "lucide-react";
 import { api } from "@/lib/api";
 import type { Category, DealWithRelations } from "@shared/schema";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import UserMenu from "@/components/user-menu";
 
 export default function Category() {
   const { slug } = useParams<{ slug: string }>();
@@ -144,9 +145,7 @@ export default function Category() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                <User className="w-5 h-5" />
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>
