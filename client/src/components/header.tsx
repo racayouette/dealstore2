@@ -11,6 +11,7 @@ import logoImage from "@/assets/logo.png";
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showElectronicsMenu, setShowElectronicsMenu] = useState(false);
   const [location, navigate] = useLocation();
 
   const { data: visiblePages = [] } = useQuery<BannerSettings[]>({
@@ -42,6 +43,34 @@ export default function Header() {
   const isAdminPage = location === "/advertising-panel" || 
                       location === "/site-settings" || 
                       location?.startsWith("/admin");
+
+  // Electronics supermenu data
+  const electronicsCategories = [
+    {
+      title: "Computers & Tablets",
+      items: ["Laptops", "Desktop PCs", "Tablets", "Monitors", "Computer Accessories"]
+    },
+    {
+      title: "Mobile Devices",
+      items: ["Smartphones", "Cell Phone Cases", "Phone Accessories", "Smartwatches", "Wireless Chargers"]
+    },
+    {
+      title: "Audio & Video",
+      items: ["Headphones & Earbuds", "Speakers", "TVs", "Home Theater", "Streaming Devices"]
+    },
+    {
+      title: "Gaming",
+      items: ["Gaming Consoles", "Gaming Laptops", "Gaming Accessories", "Video Games", "VR Headsets"]
+    },
+    {
+      title: "Smart Home",
+      items: ["Smart Speakers", "Security Cameras", "Smart Lighting", "Home Automation", "Smart Thermostats"]
+    },
+    {
+      title: "Photography",
+      items: ["Digital Cameras", "Camera Lenses", "Tripods", "Camera Bags", "Photo Accessories"]
+    }
+  ];
 
   return (
     <>
@@ -130,17 +159,55 @@ export default function Header() {
         </div>
         
         {/* Desktop Navigation Menu */}
-        <nav className="hidden md:block border-t border-green-600">
+        <nav className="hidden md:block border-t border-green-600 relative">
           <div className="flex space-x-6 lg:space-x-8 py-2 overflow-x-auto">
             {Array.isArray(visiblePages) && visiblePages.map((page) => (
-              <Link
+              <div
                 key={page.pageUrl}
-                href={page.pageUrl}
-                className="hover:text-blue-200 font-medium whitespace-nowrap text-sm lg:text-base"
-                data-testid={`nav-${page.pageUrl.replace('/', '')}`}
+                className="relative"
+                onMouseEnter={() => page.pageName.toLowerCase() === 'electronics' && setShowElectronicsMenu(true)}
+                onMouseLeave={() => page.pageName.toLowerCase() === 'electronics' && setShowElectronicsMenu(false)}
               >
-                {page.pageName}
-              </Link>
+                <Link
+                  href={page.pageUrl}
+                  className="hover:text-blue-200 font-medium whitespace-nowrap text-sm lg:text-base"
+                  data-testid={`nav-${page.pageUrl.replace('/', '')}`}
+                >
+                  {page.pageName}
+                </Link>
+                
+                {/* Electronics Supermenu */}
+                {page.pageName.toLowerCase() === 'electronics' && showElectronicsMenu && (
+                  <div 
+                    className="absolute left-0 top-full mt-0 bg-white shadow-lg border border-gray-200 rounded-lg z-50 w-screen max-w-4xl"
+                    onMouseEnter={() => setShowElectronicsMenu(true)}
+                    onMouseLeave={() => setShowElectronicsMenu(false)}
+                  >
+                    <div className="grid grid-cols-3 gap-6 p-6">
+                      {electronicsCategories.map((category, index) => (
+                        <div key={index} className="space-y-3">
+                          <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide border-b border-gray-200 pb-2">
+                            {category.title}
+                          </h3>
+                          <ul className="space-y-2">
+                            {category.items.map((item, itemIndex) => (
+                              <li key={itemIndex}>
+                                <Link
+                                  href={`/search?q=${encodeURIComponent(item)}`}
+                                  className="text-gray-600 hover:text-blue-600 text-sm transition-colors duration-150"
+                                  data-testid={`electronics-${item.toLowerCase().replace(/\s+/g, '-')}`}
+                                >
+                                  {item}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </nav>
