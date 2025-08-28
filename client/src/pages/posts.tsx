@@ -9,6 +9,7 @@ import { Search, ArrowUp, MessageSquare, ExternalLink, User } from "lucide-react
 import type { Post } from "@shared/schema";
 import Footer from "@/components/footer";
 import AdvertisementBanner from "@/components/advertisement-banner";
+import UserMenu from "@/components/user-menu";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
@@ -89,9 +90,7 @@ export default function Posts() {
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                <User className="w-5 h-5" />
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>
@@ -175,31 +174,33 @@ export default function Posts() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage).map((post) => (
-              <Card key={post.id} className="hover:shadow-md transition-shadow" data-testid={`post-card-${post.id}`}>
+              <Card key={post.id} className="hover:shadow-md transition-shadow overflow-hidden" data-testid={`post-card-${post.id}`}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg leading-6 mb-2" data-testid={`post-title-${post.id}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg leading-6 mb-2 line-clamp-2" data-testid={`post-title-${post.id}`}>
                         {post.title}
                       </CardTitle>
                       <CardDescription className="flex items-center gap-2 text-sm" data-testid={`post-meta-${post.id}`}>
-                        <User className="h-3 w-3" />
-                        <span>u/{post.author}</span>
+                        <User className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">u/{post.author}</span>
                         {post.subreddit && (
                           <>
-                            <span>•</span>
-                            <span>r/{post.subreddit}</span>
+                            <span className="flex-shrink-0">•</span>
+                            <span className="truncate">r/{post.subreddit}</span>
                           </>
                         )}
                       </CardDescription>
                     </div>
                     {post.imageUrl && (
-                      <img 
-                        src={post.imageUrl} 
-                        alt={post.title}
-                        className="w-16 h-16 object-cover rounded ml-3"
-                        data-testid={`post-image-${post.id}`}
-                      />
+                      <div className="flex-shrink-0">
+                        <img 
+                          src={post.imageUrl} 
+                          alt={post.title}
+                          className="w-16 h-16 object-cover rounded"
+                          data-testid={`post-image-${post.id}`}
+                        />
+                      </div>
                     )}
                   </div>
                 </CardHeader>
