@@ -44,23 +44,7 @@ export function JustInTimeLayout({
       )}
       
       {/* Header - Shows immediately with cached site settings */}
-      <div className="bg-blue-600 text-white">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold" data-testid={`title-${pageTitle.toLowerCase()}`}>
-                {siteSettings?.siteName}
-              </h1>
-              <NavMenu />
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-white hover:text-blue-200 hover:bg-blue-700">
-                <User className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <NavMenu />
       
       {/* Content area - Renders immediately, individual sections load as data becomes available */}
       {children}
