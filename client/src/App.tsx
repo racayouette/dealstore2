@@ -25,6 +25,7 @@ import SEOPanel from "@/pages/seo-panel";
 import AdminLogin from "@/pages/admin-login";
 import Analytics from "@/pages/analytics";
 import AdminUsers from "@/pages/admin-users";
+import AdminDownloads from "@/pages/admin-downloads";
 import DynamicPage from "@/pages/dynamic-page";
 import NewsletterPopup from "@/components/newsletter-popup";
 import { useNewsletterPopup } from "@/hooks/use-newsletter-popup";
@@ -44,7 +45,7 @@ function Router() {
     '/', '/stores', '/store33', '/store44', '/store55', '/videos', '/video2', 
     '/posts', '/blogs', '/directory', '/search', '/auth', '/privacy', 
     '/terms', '/advertising-panel', '/control-panel', '/seo-panel', '/wp-admin', 
-    '/admin-login', '/analytics', '/admin/users'
+    '/admin-login', '/analytics', '/admin/users', '/admin/downloads'
   ];
 
   // Find dynamic pages that aren't static routes
@@ -81,6 +82,7 @@ function Router() {
         <Route path="/admin-login" component={AdminLogin} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/admin/users" component={AdminUsers} />
+        <Route path="/admin/downloads" component={AdminDownloads} />
         
         {/* Show loading component for potential dynamic routes */}
         <Route component={() => <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>} />
@@ -112,6 +114,7 @@ function Router() {
       <Route path="/admin-login" component={AdminLogin} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/downloads" component={AdminDownloads} />
       
       {/* Dynamic routes for duplicated pages */}
       {dynamicPages.map((setting: any) => (

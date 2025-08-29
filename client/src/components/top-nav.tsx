@@ -49,6 +49,9 @@ export default function TopNav() {
             <Link href="/admin/users" className="hover:text-gray-200 transition-colors" data-testid="nav-users">
               Users
             </Link>
+            <Link href="/admin/downloads" className="hover:text-gray-200 transition-colors" data-testid="nav-downloads">
+              Downloads
+            </Link>
           </div>
           
           {/* Right side - User Menu */}
