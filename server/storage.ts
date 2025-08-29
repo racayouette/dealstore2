@@ -1317,7 +1317,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userFavorites.userId, userId), 
         eq(userFavorites.dealId, dealId),
-        eq(userFavorites.pageUrl, pageUrl)
+        // eq(userFavorites.pageUrl, pageUrl)
       ));
   }
 
@@ -1328,7 +1328,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userFavorites.userId, userId), 
         eq(userFavorites.dealId, dealId),
-        eq(userFavorites.pageUrl, pageUrl)
+        // eq(userFavorites.pageUrl, pageUrl)
       ))
       .limit(1);
     
