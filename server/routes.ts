@@ -3,6 +3,10 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateSitemap, generateRobotsTxt } from "./sitemap";
 import { z } from "zod";
+import multer from "multer";
+import csv from "csv-parser";
+import { Readable } from "stream";
+import fetch from "node-fetch";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -136,6 +140,393 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error exporting users:", error);
       res.status(500).send("Failed to export users");
+    }
+  });
+
+  // CSV Template Downloads
+  app.get("/api/admin/csv-templates/categories", async (req, res) => {
+    try {
+      const csvHeader = "name,slug,description,parent_id,is_active,sort_order\n";
+      const sampleRow = '"Electronics","electronics","Electronic devices and gadgets","","true","1"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=categories_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating categories template:", error);
+      res.status(500).send("Failed to generate categories template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/stores", async (req, res) => {
+    try {
+      const csvHeader = "name,slug,description,logo_url,website_url,is_active,featured\n";
+      const sampleRow = '"Amazon","amazon","Online marketplace and retailer","https://example.com/amazon-logo.png","https://amazon.com","true","true"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=stores_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating stores template:", error);
+      res.status(500).send("Failed to generate stores template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/deals", async (req, res) => {
+    try {
+      const csvHeader = "title,description,original_price,sale_price,discount_percent,coupon_code,deal_url,image_url,rating,review_count,store_id,category_id,is_active,is_featured,free_shipping,editor_insights,how_to_get_it,expires_at,author_name\n";
+      const sampleRow = '"50% Off Gaming Laptop","High-performance gaming laptop with RTX graphics","1999.99","999.99","50","SAVE50","https://example.com/deal","https://example.com/laptop.jpg","4.5","150","store-uuid","category-uuid","true","true","true","Great value for gaming enthusiasts","Add to cart and apply coupon","2024-12-31T23:59:59Z","John Doe"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=deals_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating deals template:", error);
+      res.status(500).send("Failed to generate deals template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/products", async (req, res) => {
+    try {
+      const csvHeader = "name,description,brand,model,sku,image_url,category_id,is_active\n";
+      const sampleRow = '"Gaming Laptop Pro","High-performance laptop for gaming and content creation","TechBrand","LP-2024-PRO","TBL2024PRO","https://example.com/product.jpg","category-uuid","true"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=products_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating products template:", error);
+      res.status(500).send("Failed to generate products template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/video-channels", async (req, res) => {
+    try {
+      const csvHeader = "title,description,thumbnail_url,channel_url,video_count,follower_count,tags,is_active\n";
+      const sampleRow = '"Tech Reviews Channel","Latest tech product reviews and tutorials","https://example.com/channel-thumb.jpg","https://youtube.com/@techreviews","150","50000","[\"tech\",\"reviews\",\"gadgets\"]","true"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=video_channels_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating video channels template:", error);
+      res.status(500).send("Failed to generate video channels template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/posts", async (req, res) => {
+    try {
+      const csvHeader = "title,content,author,subreddit,image_url,post_url,upvotes,comment_count,tags,is_active\n";
+      const sampleRow = '"Best Budget Smartphones 2024","Discussion about the best budget smartphones available this year","user123","deals","https://example.com/post-image.jpg","https://reddit.com/r/deals/123","250","45","[\"smartphones\",\"budget\",\"deals\"]","true"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=posts_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating posts template:", error);
+      res.status(500).send("Failed to generate posts template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/blogs", async (req, res) => {
+    try {
+      const csvHeader = "title,description,excerpt,author,website,website_url,blog_url,image_url,publish_date,read_time,category,tags,is_active\n";
+      const sampleRow = '"How to Save Money on Electronics","Complete guide to finding the best deals on electronic devices","Learn proven strategies for saving money when buying electronics...","Jane Smith","TechSaver","https://techsaver.com","https://techsaver.com/save-money-electronics","https://example.com/blog-image.jpg","2024-01-15","5 min read","Electronics","[\"electronics\",\"saving\",\"deals\"]","true"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=blogs_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating blogs template:", error);
+      res.status(500).send("Failed to generate blogs template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/business-categories", async (req, res) => {
+    try {
+      const csvHeader = "name,slug,description,icon_name,is_active,sort_order\n";
+      const sampleRow = '"Restaurants","restaurants","Food and dining establishments","utensils","true","1"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=business_categories_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating business categories template:", error);
+      res.status(500).send("Failed to generate business categories template");
+    }
+  });
+
+  app.get("/api/admin/csv-templates/businesses", async (req, res) => {
+    try {
+      const csvHeader = "name,slug,description,address,city,state,zip_code,phone,email,website,image_url,business_category_id,rating,review_count,price_range,is_active,is_featured,is_open_now,latitude,longitude\n";
+      const sampleRow = '"Joe\'s Pizza","joes-pizza","Best pizza in town","123 Main St","Springfield","IL","62701","(555) 123-4567","info@joespizza.com","https://joespizza.com","https://example.com/pizza.jpg","category-uuid","4.5","200","$$","true","true","true","39.7817","-89.6501"\n';
+      const csvContent = csvHeader + sampleRow;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=businesses_template.csv');
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error generating businesses template:", error);
+      res.status(500).send("Failed to generate businesses template");
+    }
+  });
+
+  // Configure multer for file uploads
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only CSV files are allowed'));
+      }
+    }
+  });
+
+  // Helper function to determine table from filename
+  const getTableFromFilename = (filename: string): string | null => {
+    const baseName = filename.toLowerCase().replace('.csv', '');
+    const supportedTables = [
+      'categories', 'stores', 'deals', 'products', 'video-channels', 
+      'posts', 'blogs', 'business-categories', 'businesses', 'users'
+    ];
+    
+    for (const table of supportedTables) {
+      if (baseName.startsWith(table)) {
+        return table;
+      }
+    }
+    return null;
+  };
+
+  // Helper function to process CSV data
+  const processCsvData = async (csvData: string, tableName: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
+    return new Promise((resolve, reject) => {
+      const results: any[] = [];
+      const stream = Readable.from([csvData]);
+      
+      stream
+        .pipe(csv())
+        .on('data', (data) => results.push(data))
+        .on('end', async () => {
+          try {
+            let recordsProcessed = 0;
+            let duplicatesSkipped = 0;
+
+            for (const row of results) {
+              try {
+                let isDuplicate = false;
+
+                // Check for duplicates based on table type
+                switch (tableName) {
+                  case 'categories':
+                    const existingCategory = await storage.getCategoryBySlug(row.slug);
+                    if (existingCategory) {
+                      isDuplicate = true;
+                    } else {
+                      await storage.createCategory({
+                        name: row.name,
+                        slug: row.slug,
+                        description: row.description || null,
+                        parentId: row.parent_id || null,
+                        isActive: row.is_active === 'true',
+                        sortOrder: parseInt(row.sort_order) || 0
+                      });
+                    }
+                    break;
+
+                  case 'stores':
+                    const existingStore = await storage.getStoreBySlug(row.slug);
+                    if (existingStore) {
+                      isDuplicate = true;
+                    } else {
+                      await storage.createStore({
+                        name: row.name,
+                        slug: row.slug,
+                        description: row.description || null,
+                        logoUrl: row.logo_url || null,
+                        websiteUrl: row.website_url || null,
+                        isActive: row.is_active === 'true',
+                        featured: row.featured === 'true'
+                      });
+                    }
+                    break;
+
+                  case 'deals':
+                    // For deals, try to find similar deals to avoid duplicates
+                    try {
+                      await storage.createDeal({
+                        title: row.title,
+                        description: row.description || null,
+                        originalPrice: row.original_price ? row.original_price : null,
+                        salePrice: row.sale_price,
+                        discountPercent: row.discount_percent ? parseInt(row.discount_percent) : null,
+                        couponCode: row.coupon_code || null,
+                        dealUrl: row.deal_url,
+                        imageUrl: row.image_url || null,
+                        rating: row.rating ? row.rating : null,
+                        reviewCount: row.review_count ? parseInt(row.review_count) : 0,
+                        storeId: row.store_id,
+                        categoryId: row.category_id,
+                        isActive: row.is_active === 'true',
+                        isFeatured: row.is_featured === 'true',
+                        freeShipping: row.free_shipping === 'true',
+                        editorInsights: row.editor_insights || null,
+                        howToGetIt: row.how_to_get_it || null,
+                        expiresAt: row.expires_at ? new Date(row.expires_at) : null,
+                        authorName: row.author_name || null
+                      });
+                    } catch (error) {
+                      // If creation fails due to duplicate constraint, skip
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'products':
+                    // For products, try to create and catch duplicate errors
+                    try {
+                      await storage.createProduct({
+                        name: row.name,
+                        description: row.description || null,
+                        brand: row.brand || null,
+                        model: row.model || null,
+                        sku: row.sku || null,
+                        imageUrl: row.image_url || null,
+                        categoryId: row.category_id,
+                        isActive: row.is_active === 'true'
+                      });
+                    } catch (error) {
+                      // If creation fails due to duplicate constraint, skip
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'users':
+                    const existingUser = await storage.getUserByUsername(row.username);
+                    if (existingUser) {
+                      isDuplicate = true;
+                    } else {
+                      await storage.createUser({
+                        username: row.username,
+                        email: row.email,
+                        password: row.password // In production, hash the password
+                      });
+                    }
+                    break;
+
+                  default:
+                    throw new Error(`Unsupported table: ${tableName}`);
+                }
+
+                if (isDuplicate) {
+                  duplicatesSkipped++;
+                } else {
+                  recordsProcessed++;
+                }
+              } catch (rowError) {
+                console.error(`Error processing row:`, rowError);
+                // Continue processing other rows
+              }
+            }
+
+            resolve({ recordsProcessed, duplicatesSkipped });
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .on('error', reject);
+    });
+  };
+
+  // CSV Upload endpoint
+  app.post("/api/admin/upload-csv", upload.single('csv'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "No CSV file uploaded" 
+        });
+      }
+
+      const filename = req.file.originalname;
+      const tableName = getTableFromFilename(filename);
+
+      if (!tableName) {
+        return res.status(400).json({
+          success: false,
+          message: `Unsupported filename: ${filename}. File must start with a supported table name (categories, stores, deals, products, etc.)`
+        });
+      }
+
+      const csvData = req.file.buffer.toString('utf-8');
+      const result = await processCsvData(csvData, tableName);
+
+      res.json({
+        success: true,
+        message: `Successfully processed ${filename}`,
+        table: tableName,
+        recordsProcessed: result.recordsProcessed,
+        duplicatesSkipped: result.duplicatesSkipped
+      });
+    } catch (error) {
+      console.error("Error processing CSV upload:", error);
+      res.status(500).json({
+        success: false,
+        message: `Failed to process CSV: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
+  });
+
+  // Cron-accessible endpoint for remote file processing
+  app.post("/api/admin/process-remote-csv", async (req, res) => {
+    try {
+      const { filename, fileUrl } = req.body;
+
+      if (!filename || !fileUrl) {
+        return res.status(400).json({
+          success: false,
+          message: "filename and fileUrl are required"
+        });
+      }
+
+      const tableName = getTableFromFilename(filename);
+      if (!tableName) {
+        return res.status(400).json({
+          success: false,
+          message: `Unsupported filename: ${filename}. File must start with a supported table name`
+        });
+      }
+
+      // Fetch the CSV file from the remote URL
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${response.statusText}`);
+      }
+
+      const csvData = await response.text();
+      const result = await processCsvData(csvData, tableName);
+
+      res.json({
+        success: true,
+        message: `Successfully processed remote file ${filename}`,
+        table: tableName,
+        recordsProcessed: result.recordsProcessed,
+        duplicatesSkipped: result.duplicatesSkipped
+      });
+    } catch (error) {
+      console.error("Error processing remote CSV:", error);
+      res.status(500).json({
+        success: false,
+        message: `Failed to process remote CSV: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
     }
   });
 
