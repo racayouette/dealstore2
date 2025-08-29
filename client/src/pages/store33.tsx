@@ -12,6 +12,7 @@ import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import UserMenu from "@/components/user-menu";
+import NavMenu from "@/components/nav-menu";
 
 export default function Store33() {
   // Track page view for analytics
@@ -198,39 +199,14 @@ export default function Store33() {
           </div>
         </div>
         
-        <div className="bg-blue-600 text-white">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-8">
-                <h1 className="text-2xl font-bold" data-testid="title-store33">
-                  {siteSettings?.siteName}
-                </h1>
-                <nav className="hidden md:flex items-center space-x-6">
-                  <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                  {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                    <a
-                      key={page.pageUrl}
-                      href={page.pageUrl}
-                      className="hover:text-blue-200 transition-colors"
-                    >
-                      {page.pageName}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-              <div className="flex items-center space-x-4">
-                <UserMenu />
-              </div>
-            </div>
-          </div>
-        </div>
+      <NavMenu />
       </div>
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="flex gap-8">
+      <main className=" px-2 sm:px-4 py-6">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
           {/* Left Filter Panel */}
-          <div className="w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
+          <div className="w-full md:w-64 flex-shrink-0 mb-6 md:mb-0">
+            <div className="bg-white rounded-lg shadow-sm border p-4 sm:p-6 sticky top-4">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
               
               {/* Categories Filter */}
@@ -380,199 +356,198 @@ export default function Store33() {
 
           {/* Main Content */}
           <div className="flex-1">
-        {/* Featured Section */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6" data-testid="title-featured">Featured</h2>
-          
-          <div className="relative">
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {dealsLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex-none w-64">
-                    <Skeleton className="w-full h-48 rounded-lg mb-3" />
-                    <Skeleton className="h-4 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                ))
-              ) : (
-                filteredFeaturedDeals.slice(0, 5).map((deal, index) => (
-                  <a href={`/deal/${deal.id}`} key={deal.id} className="flex-none w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
-                    <div className="relative">
-                      <img 
-                        src={deal.imageUrl || ''} 
-                        alt={deal.title}
-                        className="w-full h-40 object-cover"
-                        data-testid={`img-featured-deal-${index}`}
-                      />
-                      <div className="absolute top-2 right-2">
-                        <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+            {/* Featured Section */}
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-6" data-testid="title-featured">Featured</h2>
+              <div className="relative">
+                <div className="flex flex-wrap gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {dealsLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex-none w-64">
+                        <Skeleton className="w-full h-48 rounded-lg mb-3" />
+                        <Skeleton className="h-4 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-1/2" />
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-featured-deal-${index}`}>
-                        {deal.title}
-                      </h3>
-                      <div className="flex items-center space-x-2">
-                        {deal.salePrice && (
-                          <span className="text-lg font-bold text-red-600">
-                            {formatPrice(deal.salePrice)}
-                          </span>
-                        )}
-                        {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
-                          <span className="text-sm text-gray-500 line-through">
-                            {formatPrice(deal.originalPrice)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                ))
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* All Deals Section */}
-        <section>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900" data-testid="title-all-deals">All Deals</h2>
-          </div>
-
-          {/* Deals Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {allDealsLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                  <Skeleton className="w-full h-48" />
-                  <div className="p-4 space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-6 w-1/2" />
-                  </div>
+                    ))
+                  ) : (
+                    filteredFeaturedDeals.slice(0, 5).map((deal, index) => (
+                      <a href={`/deal/${deal.id}`} key={deal.id} className="flex-none w-full sm:w-64 bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="relative">
+                          <img 
+                            src={deal.imageUrl || ''} 
+                            alt={deal.title}
+                            className="w-full h-40 object-cover"
+                            data-testid={`img-featured-deal-${index}`}
+                          />
+                          <div className="absolute top-2 right-2">
+                            <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+                          </div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-featured-deal-${index}`}>
+                            {deal.title}
+                          </h3>
+                          <div className="flex items-center space-x-2">
+                            {deal.salePrice && (
+                              <span className="text-lg font-bold text-red-600">
+                                {formatPrice(deal.salePrice)}
+                              </span>
+                            )}
+                            {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
+                              <span className="text-sm text-gray-500 line-through">
+                                {formatPrice(deal.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </a>
+                    ))
+                  )}
                 </div>
-              ))
-            ) : (
-              paginatedDeals.map((deal, index) => {
-                const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
-                
-                return (
-                  <a href={`/deal/${deal.id}`} key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
-                    <div className="relative">
-                      <img 
-                        src={deal.imageUrl || ''} 
-                        alt={deal.title}
-                        className="w-full h-48 object-cover"
-                        data-testid={`img-deal-${index}`}
-                      />
-                      
-                      
-                      <div className="absolute top-2 right-2">
-                        <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+              </div>
+            </section>
+
+            {/* All Deals Section */}
+            <section>
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-2xl font-bold text-gray-900" data-testid="title-all-deals">All Deals</h2>
+              </div>
+
+              {/* Deals Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {allDealsLoading ? (
+                  Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                      <Skeleton className="w-full h-48" />
+                      <div className="p-4 space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-6 w-1/2" />
                       </div>
                     </div>
+                  ))
+                ) : (
+                  paginatedDeals.map((deal, index) => {
+                    const discount = calculateDiscount(deal.originalPrice, deal.salePrice);
                     
-                    <div className="p-4">
-                      <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-deal-${index}`}>
-                        {deal.title}
-                      </h3>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {deal.salePrice && (
-                            <span className="text-lg font-bold text-red-600">
-                              {formatPrice(deal.salePrice)}
-                            </span>
-                          )}
-                          {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
-                            <span className="text-sm text-gray-500 line-through">
-                              {formatPrice(deal.originalPrice)}
-                            </span>
-                          )}
+                    return (
+                      <a href={`/deal/${deal.id}`} key={deal.id} className="bg-white rounded-lg shadow-sm border overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="relative">
+                          <img 
+                            src={deal.imageUrl || ''} 
+                            alt={deal.title}
+                            className="w-full h-48 object-cover"
+                            data-testid={`img-deal-${index}`}
+                          />
+                          
+                          
+                          <div className="absolute top-2 right-2">
+                            <HeartButton dealId={deal.id} className="bg-white/80 hover:bg-white" />
+                          </div>
                         </div>
                         
-                        {discount > 0 && (
-                          <Badge variant="secondary" className="text-green-700 bg-green-100">
-                            {discount}% off
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      <div className="mt-2 text-xs text-gray-500">
-                        {deal.store?.name}
-                      </div>
-                    </div>
-                  </a>
-                );
-              })
-            )}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center space-x-2 mt-8">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                data-testid="button-prev-page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Previous
-              </Button>
-              
-              <div className="flex space-x-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current page
-                  const showPage = page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2;
-                  const showEllipsis = (page === 2 && currentPage > 4) || (page === totalPages - 1 && currentPage < totalPages - 3);
-                  
-                  if (showEllipsis) {
-                    return <span key={page} className="px-2 text-gray-500">...</span>;
-                  }
-                  
-                  if (!showPage) {
-                    return null;
-                  }
-                  
-                  return (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      data-testid={`button-page-${page}`}
-                      className="w-10"
-                    >
-                      {page}
-                    </Button>
-                  );
-                })}
+                        <div className="p-4">
+                          <h3 className="font-medium text-sm text-gray-900 mb-2 line-clamp-2" data-testid={`title-deal-${index}`}>
+                            {deal.title}
+                          </h3>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              {deal.salePrice && (
+                                <span className="text-lg font-bold text-red-600">
+                                  {formatPrice(deal.salePrice)}
+                                </span>
+                              )}
+                              {deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice && (
+                                <span className="text-sm text-gray-500 line-through">
+                                  {formatPrice(deal.originalPrice)}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {discount > 0 && (
+                              <Badge variant="secondary" className="text-green-700 bg-green-100">
+                                {discount}% off
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          <div className="mt-2 text-xs text-gray-500">
+                            {deal.store?.name}
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  })
+                )}
               </div>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                data-testid="button-next-page"
-              >
-                Next
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
 
-          {/* Show results count */}
-          <div className="text-center text-sm text-gray-600 mt-4">
-            Showing {paginatedDeals.length} of {filteredDeals.length} deals
-            {(selectedCategories.length > 0 || selectedStores.length > 0 || freeShippingOnly || featuredOnly || minDiscount > 0 || priceRange[0] > 0 || priceRange[1] < 1000) && 
-              ` (filtered from ${allDeals.length} total deals)`
-            }
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center space-x-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    data-testid="button-prev-page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  
+                  <div className="flex space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first page, last page, current page, and pages around current page
+                      const showPage = page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2;
+                      const showEllipsis = (page === 2 && currentPage > 4) || (page === totalPages - 1 && currentPage < totalPages - 3);
+                      
+                      if (showEllipsis) {
+                        return <span key={page} className="px-2 text-gray-500">...</span>;
+                      }
+                      
+                      if (!showPage) {
+                        return null;
+                      }
+                      
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          data-testid={`button-page-${page}`}
+                          className="w-10"
+                        >
+                          {page}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    data-testid="button-next-page"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Show results count */}
+              <div className="text-center text-sm text-gray-600 mt-4">
+                Showing {paginatedDeals.length} of {filteredDeals.length} deals
+                {(selectedCategories.length > 0 || selectedStores.length > 0 || freeShippingOnly || featuredOnly || minDiscount > 0 || priceRange[0] > 0 || priceRange[1] < 1000) && 
+                  ` (filtered from ${allDeals.length} total deals)`
+                }
+              </div>
+            </section>
           </div>
-        </section>
-            </div>
-          </div>
+        </div>
       </main>
 
       <Footer />
