@@ -4,13 +4,15 @@
 
 NetDiscount is a modern web application for aggregating and displaying net deals, coupons, and discounts from various retailers. The platform allows users to browse deals by categories, search for specific products, and discover featured offers from popular stores. Built with a React frontend and Express backend, it provides a comprehensive deal discovery experience with features like deal categorization, store browsing, search functionality, detailed deal pages, and a comprehensive advertisement banner management system through the Advertising Panel.
 
+
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Page Visibility & SEO Management
+### Page Visibility & SEO Management.
 The application features a comprehensive page visibility system that allows administrators to dynamically control which pages are accessible to users and search engines:
 
 - **Dynamic Navigation**: Header menu automatically updates to show/hide pages based on visibility settings
