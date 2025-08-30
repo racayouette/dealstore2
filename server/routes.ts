@@ -214,8 +214,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSV Template Downloads
   app.get("/api/admin/csv-templates/categories", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,parent_id,is_active,sort_order\n";
-      const sampleRow = '"Electronics","electronics","Electronic devices and gadgets","","true","1"\n';
+      const csvHeader = "name,slug,description,parent_id,subdomain_id,is_active,sort_order\n";
+      const sampleRow = '"Electronics","electronics","Electronic devices and gadgets","","example-subdomain-id","true","1"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -229,8 +229,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/stores", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,logo_url,website_url,is_active,featured\n";
-      const sampleRow = '"Amazon","amazon","Online marketplace and retailer","https://example.com/amazon-logo.png","https://amazon.com","true","true"\n';
+      const csvHeader = "name,slug,description,logo_url,website_url,subdomain_id,is_active,featured\n";
+      const sampleRow = '"Amazon","amazon","Online marketplace and retailer","https://example.com/amazon-logo.png","https://amazon.com","example-subdomain-id","true","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -244,8 +244,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/deals", async (req, res) => {
     try {
-      const csvHeader = "title,description,original_price,sale_price,discount_percent,coupon_code,deal_url,image_url,rating,review_count,store_id,category_id,is_active,is_featured,free_shipping,editor_insights,how_to_get_it,expires_at,author_name\n";
-      const sampleRow = '"50% Off Gaming Laptop","High-performance gaming laptop with RTX graphics","1999.99","999.99","50","SAVE50","https://example.com/deal","https://example.com/laptop.jpg","4.5","150","store-uuid","category-uuid","true","true","true","Great value for gaming enthusiasts","Add to cart and apply coupon","2024-12-31T23:59:59Z","John Doe"\n';
+      const csvHeader = "title,description,original_price,sale_price,discount_percent,coupon_code,deal_url,image_url,rating,review_count,store_id,category_id,subdomain_id,is_active,is_featured,free_shipping,editor_insights,how_to_get_it,expires_at,author_name\n";
+      const sampleRow = '"50% Off Gaming Laptop","High-performance gaming laptop with RTX graphics","1999.99","999.99","50","SAVE50","https://example.com/deal","https://example.com/laptop.jpg","4.5","150","store-uuid","category-uuid","example-subdomain-id","true","true","true","Great value for gaming enthusiasts","Add to cart and apply coupon","2024-12-31T23:59:59Z","John Doe"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -259,8 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/products", async (req, res) => {
     try {
-      const csvHeader = "name,description,brand,model,sku,image_url,category_id,is_active\n";
-      const sampleRow = '"Gaming Laptop Pro","High-performance laptop for gaming and content creation","TechBrand","LP-2024-PRO","TBL2024PRO","https://example.com/product.jpg","category-uuid","true"\n';
+      const csvHeader = "name,description,brand,model,sku,image_url,category_id,subdomain_id,is_active\n";
+      const sampleRow = '"Gaming Laptop Pro","High-performance laptop for gaming and content creation","TechBrand","LP-2024-PRO","TBL2024PRO","https://example.com/product.jpg","category-uuid","example-subdomain-id","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -274,8 +274,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/video-channels", async (req, res) => {
     try {
-      const csvHeader = "title,description,thumbnail_url,channel_url,video_count,follower_count,tags,is_active\n";
-      const sampleRow = '"Tech Reviews Channel","Latest tech product reviews and tutorials","https://example.com/channel-thumb.jpg","https://youtube.com/@techreviews","150","50000","[\"tech\",\"reviews\",\"gadgets\"]","true"\n';
+      const csvHeader = "title,description,thumbnail_url,channel_url,video_count,follower_count,tags,subdomain_id,is_active\n";
+      const sampleRow = '"Tech Reviews Channel","Latest tech product reviews and tutorials","https://example.com/channel-thumb.jpg","https://youtube.com/@techreviews","150","50000","[\"tech\",\"reviews\",\"gadgets\"]","example-subdomain-id","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -289,8 +289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/posts", async (req, res) => {
     try {
-      const csvHeader = "title,content,author,subreddit,image_url,post_url,upvotes,comment_count,tags,is_active\n";
-      const sampleRow = '"Best Budget Smartphones 2024","Discussion about the best budget smartphones available this year","user123","deals","https://example.com/post-image.jpg","https://reddit.com/r/deals/123","250","45","[\"smartphones\",\"budget\",\"deals\"]","true"\n';
+      const csvHeader = "title,content,author,subreddit,image_url,post_url,upvotes,comment_count,tags,subdomain_id,is_active\n";
+      const sampleRow = '"Best Budget Smartphones 2024","Discussion about the best budget smartphones available this year","user123","deals","https://example.com/post-image.jpg","https://reddit.com/r/deals/123","250","45","[\"smartphones\",\"budget\",\"deals\"]","example-subdomain-id","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -304,8 +304,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/blogs", async (req, res) => {
     try {
-      const csvHeader = "title,description,excerpt,author,website,website_url,blog_url,image_url,publish_date,read_time,category,tags,is_active\n";
-      const sampleRow = '"How to Save Money on Electronics","Complete guide to finding the best deals on electronic devices","Learn proven strategies for saving money when buying electronics...","Jane Smith","TechSaver","https://techsaver.com","https://techsaver.com/save-money-electronics","https://example.com/blog-image.jpg","2024-01-15","5 min read","Electronics","[\"electronics\",\"saving\",\"deals\"]","true"\n';
+      const csvHeader = "title,description,excerpt,author,website,website_url,blog_url,image_url,publish_date,read_time,category,tags,subdomain_id,is_active\n";
+      const sampleRow = '"How to Save Money on Electronics","Complete guide to finding the best deals on electronic devices","Learn proven strategies for saving money when buying electronics...","Jane Smith","TechSaver","https://techsaver.com","https://techsaver.com/save-money-electronics","https://example.com/blog-image.jpg","2024-01-15","5 min read","Electronics","[\"electronics\",\"saving\",\"deals\"]","example-subdomain-id","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -319,8 +319,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/business-categories", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,icon_name,is_active,sort_order\n";
-      const sampleRow = '"Restaurants","restaurants","Food and dining establishments","utensils","true","1"\n';
+      const csvHeader = "name,slug,description,icon_name,subdomain_id,is_active,sort_order\n";
+      const sampleRow = '"Restaurants","restaurants","Food and dining establishments","utensils","example-subdomain-id","true","1"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -334,8 +334,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/businesses", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,address,city,state,zip_code,phone,email,website,image_url,business_category_id,rating,review_count,price_range,is_active,is_featured,is_open_now,latitude,longitude\n";
-      const sampleRow = '"Joe\'s Pizza","joes-pizza","Best pizza in town","123 Main St","Springfield","IL","62701","(555) 123-4567","info@joespizza.com","https://joespizza.com","https://example.com/pizza.jpg","category-uuid","4.5","200","$$","true","true","true","39.7817","-89.6501"\n';
+      const csvHeader = "name,slug,description,address,city,state,zip_code,phone,email,website,image_url,business_category_id,subdomain_id,rating,review_count,price_range,is_active,is_featured,is_open_now,latitude,longitude\n";
+      const sampleRow = '"Joe\'s Pizza","joes-pizza","Best pizza in town","123 Main St","Springfield","IL","62701","(555) 123-4567","info@joespizza.com","https://joespizza.com","https://example.com/pizza.jpg","category-uuid","example-subdomain-id","4.5","200","$$","true","true","true","39.7817","-89.6501"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -376,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Helper function to process CSV data
-  const processCsvData = async (csvData: string, tableName: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
+  const processCsvData = async (csvData: string, tableName: string, subdomainId?: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
     return new Promise((resolve, reject) => {
       const results: any[] = [];
       const stream = Readable.from([csvData]);
@@ -405,6 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         slug: row.slug,
                         description: row.description || null,
                         parentId: row.parent_id || null,
+                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         sortOrder: parseInt(row.sort_order) || 0
                       });
@@ -422,6 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         description: row.description || null,
                         logoUrl: row.logo_url || null,
                         websiteUrl: row.website_url || null,
+                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         featured: row.featured === 'true'
                       });
@@ -444,6 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         reviewCount: row.review_count ? parseInt(row.review_count) : 0,
                         storeId: row.store_id,
                         categoryId: row.category_id,
+                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         isFeatured: row.is_featured === 'true',
                         freeShipping: row.free_shipping === 'true',
@@ -469,10 +472,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         sku: row.sku || null,
                         imageUrl: row.image_url || null,
                         categoryId: row.category_id,
+                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true'
                       });
                     } catch (error) {
                       // If creation fails due to duplicate constraint, skip
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'video-channels':
+                    try {
+                      await storage.createVideoChannel({
+                        title: row.title,
+                        description: row.description || null,
+                        thumbnailUrl: row.thumbnail_url,
+                        channelUrl: row.channel_url,
+                        videoCount: row.video_count ? parseInt(row.video_count) : 0,
+                        followerCount: row.follower_count ? parseInt(row.follower_count) : 0,
+                        tags: row.tags ? JSON.parse(row.tags) : [],
+                        subdomainId: row.subdomain_id || subdomainId,
+                        isActive: row.is_active === 'true'
+                      });
+                    } catch (error) {
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'posts':
+                    try {
+                      await storage.createPost({
+                        title: row.title,
+                        content: row.content,
+                        author: row.author,
+                        subreddit: row.subreddit || null,
+                        imageUrl: row.image_url || null,
+                        postUrl: row.post_url,
+                        upvotes: row.upvotes ? parseInt(row.upvotes) : 0,
+                        commentCount: row.comment_count ? parseInt(row.comment_count) : 0,
+                        tags: row.tags ? JSON.parse(row.tags) : [],
+                        subdomainId: row.subdomain_id || subdomainId,
+                        isActive: row.is_active === 'true'
+                      });
+                    } catch (error) {
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'blogs':
+                    try {
+                      await storage.createBlog({
+                        title: row.title,
+                        description: row.description || null,
+                        excerpt: row.excerpt || null,
+                        author: row.author,
+                        website: row.website || null,
+                        websiteUrl: row.website_url || null,
+                        blogUrl: row.blog_url,
+                        imageUrl: row.image_url || null,
+                        publishDate: row.publish_date || null,
+                        readTime: row.read_time || null,
+                        category: row.category || null,
+                        tags: row.tags ? JSON.parse(row.tags) : [],
+                        subdomainId: row.subdomain_id || subdomainId,
+                        isActive: row.is_active === 'true'
+                      });
+                    } catch (error) {
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'business-categories':
+                    try {
+                      await storage.createBusinessCategory({
+                        name: row.name,
+                        slug: row.slug,
+                        description: row.description || null,
+                        iconName: row.icon_name || null,
+                        subdomainId: row.subdomain_id || subdomainId,
+                        isActive: row.is_active === 'true',
+                        sortOrder: row.sort_order ? parseInt(row.sort_order) : 0
+                      });
+                    } catch (error) {
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'businesses':
+                    try {
+                      await storage.createBusiness({
+                        name: row.name,
+                        slug: row.slug,
+                        description: row.description || null,
+                        address: row.address || null,
+                        city: row.city || null,
+                        state: row.state || null,
+                        zipCode: row.zip_code || null,
+                        phone: row.phone || null,
+                        email: row.email || null,
+                        website: row.website || null,
+                        imageUrl: row.image_url || null,
+                        businessCategoryId: row.business_category_id,
+                        subdomainId: row.subdomain_id || subdomainId,
+                        rating: row.rating ? parseFloat(row.rating) : null,
+                        reviewCount: row.review_count ? parseInt(row.review_count) : 0,
+                        priceRange: row.price_range || null,
+                        isActive: row.is_active === 'true',
+                        isFeatured: row.is_featured === 'true',
+                        isOpenNow: row.is_open_now === 'true',
+                        latitude: row.latitude ? parseFloat(row.latitude) : null,
+                        longitude: row.longitude ? parseFloat(row.longitude) : null
+                      });
+                    } catch (error) {
                       isDuplicate = true;
                     }
                     break;
@@ -526,6 +637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const filename = req.file.originalname;
       const tableName = getTableFromFilename(filename);
+      const subdomainId = req.body.subdomainId;
 
       if (!tableName) {
         return res.status(400).json({
@@ -534,8 +646,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      if (!subdomainId) {
+        return res.status(400).json({
+          success: false,
+          message: "subdomainId is required for data import"
+        });
+      }
+
       const csvData = req.file.buffer.toString('utf-8');
-      const result = await processCsvData(csvData, tableName);
+      const result = await processCsvData(csvData, tableName, subdomainId);
 
       res.json({
         success: true,
