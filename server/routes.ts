@@ -579,6 +579,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'banner_settings': bannerSettings,
         'page_views': pageViews,
         'click_thru': clickThru,
+        'subdomains': subdomains,
         'business_categories': businessCategories,
         'businesses': businesses,
         'business_hours': businessHours,
@@ -734,6 +735,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: { type: 'text', required: false },
           categoryId: { type: 'text', required: true },
           isActive: { type: 'boolean', required: false }
+        },
+        'business_categories': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          iconName: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          sortOrder: { type: 'number', required: false }
+        },
+        'business_hours': {
+          businessId: { type: 'text', required: true },
+          dayOfWeek: { type: 'number', required: true },
+          openTime: { type: 'time', required: false },
+          closeTime: { type: 'time', required: false },
+          isClosed: { type: 'boolean', required: false }
+        },
+        'business_reviews': {
+          businessId: { type: 'text', required: true },
+          rating: { type: 'number', required: true },
+          reviewText: { type: 'textarea', required: false },
+          reviewerName: { type: 'text', required: true },
+          reviewerEmail: { type: 'text', required: false }
+        },
+        'business_photos': {
+          businessId: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: true },
+          caption: { type: 'text', required: false },
+          isPrimary: { type: 'boolean', required: false }
+        },
+        'click_thru': {
+          pageName: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          advertisementId: { type: 'text', required: true },
+          advertisementTitle: { type: 'text', required: true },
+          advertisementClickUrl: { type: 'text', required: true },
+          bannerPosition: { type: 'text', required: true },
+          ipAddress: { type: 'text', required: true },
+          userAgent: { type: 'text', required: false }
+        },
+        'newsletter_popup_settings': {
+          isEnabled: { type: 'boolean', required: false },
+          popupType: { type: 'select', required: true, options: [
+            { value: 'dark', label: 'Dark' },
+            { value: 'light', label: 'Light' }
+          ]},
+          showDelay: { type: 'number', required: false },
+          showOnPages: { type: 'textarea', required: false, help: 'JSON array of page URLs' },
+          frequency: { type: 'select', required: false, options: [
+            { value: 'once_per_session', label: 'Once Per Session' },
+            { value: 'daily', label: 'Daily' },
+            { value: 'always', label: 'Always' }
+          ]}
+        },
+        'page_views': {
+          pageName: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          ipAddress: { type: 'text', required: true },
+          userAgent: { type: 'text', required: false }
+        },
+        'site_settings': {
+          siteName: { type: 'text', required: true },
+          siteDescription: { type: 'textarea', required: false },
+          logoUrl: { type: 'text', required: false },
+          faviconUrl: { type: 'text', required: false },
+          primaryColor: { type: 'color', required: false },
+          secondaryColor: { type: 'color', required: false }
+        },
+        'subdomains': {
+          subdomain: { type: 'text', required: true },
+          displayName: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'user_favorites': {
+          userId: { type: 'text', required: true },
+          dealId: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true }
         }
       };
 
@@ -799,6 +879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'banner_settings': bannerSettings,
         'page_views': pageViews,
         'click_thru': clickThru,
+        'subdomains': subdomains,
         'business_categories': businessCategories,
         'businesses': businesses,
         'business_hours': businessHours,
@@ -850,6 +931,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'banner_settings': bannerSettings,
         'page_views': pageViews,
         'click_thru': clickThru,
+        'subdomains': subdomains,
         'business_categories': businessCategories,
         'businesses': businesses,
         'business_hours': businessHours,
