@@ -93,12 +93,22 @@ export default function AdminDataEntry() {
   // Fetch table data with pagination
   const { data: tableData, isLoading } = useQuery<PaginatedResponse>({
     queryKey: ['/api/admin/table-data', selectedTable, currentPage],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/table-data/${selectedTable}?page=${currentPage}&pageSize=10`);
+      if (!response.ok) throw new Error('Failed to fetch table data');
+      return response.json();
+    },
     enabled: !!selectedTable,
   });
 
   // Fetch table schema for form generation
   const { data: tableSchema } = useQuery<any>({
     queryKey: ['/api/admin/table-schema', selectedTable],
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/table-schema/${selectedTable}`);
+      if (!response.ok) throw new Error('Failed to fetch table schema');
+      return response.json();
+    },
     enabled: !!selectedTable,
   });
 

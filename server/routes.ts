@@ -668,6 +668,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
           imageUrl: { type: 'text', required: false },
           categoryId: { type: 'text', required: true },
           isActive: { type: 'boolean', required: false }
+        },
+        'video_channels': {
+          name: { type: 'text', required: true },
+          channelUrl: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          subscriberCount: { type: 'number', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'posts': {
+          title: { type: 'text', required: true },
+          content: { type: 'textarea', required: true },
+          excerpt: { type: 'textarea', required: false },
+          featured_image: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'youtube_videos': {
+          title: { type: 'text', required: true },
+          videoId: { type: 'text', required: true },
+          channelId: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          thumbnailUrl: { type: 'text', required: false },
+          duration: { type: 'text', required: false },
+          viewCount: { type: 'number', required: false }
+        },
+        'blogs': {
+          title: { type: 'text', required: true },
+          content: { type: 'textarea', required: true },
+          excerpt: { type: 'textarea', required: false },
+          featuredImage: { type: 'text', required: false },
+          authorName: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'advertisement_banners': {
+          content: { type: 'textarea', required: true },
+          backgroundColor: { type: 'text', required: false },
+          textColor: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          impressionLimit: { type: 'number', required: false },
+          currentImpressions: { type: 'number', required: false }
+        },
+        'banner_settings': {
+          pageUrl: { type: 'text', required: true },
+          showBanner: { type: 'boolean', required: false },
+          isVisible: { type: 'boolean', required: false }
+        },
+        'users': {
+          username: { type: 'text', required: true },
+          email: { type: 'text', required: true },
+          password: { type: 'text', required: true },
+          isActive: { type: 'boolean', required: false }
+        },
+        'newsletter_subscribers': {
+          email: { type: 'text', required: true },
+          signupMethod: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'businesses': {
+          name: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          address: { type: 'text', required: false },
+          phone: { type: 'text', required: false },
+          website: { type: 'text', required: false },
+          email: { type: 'text', required: false },
+          categoryId: { type: 'text', required: true },
+          isActive: { type: 'boolean', required: false }
         }
       };
 
