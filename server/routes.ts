@@ -35,6 +35,47 @@ import {
   siteSettings
 } from "@shared/schema";
 
+// Helper function to extract subdomain from request
+function getSubdomainFromRequest(req: any): string | null {
+  // Try to get subdomain from query parameter first (for testing)
+  if (req.query.subdomain) {
+    return req.query.subdomain as string;
+  }
+  
+  // Extract subdomain from Host header
+  const host = req.get('host') || '';
+  const hostParts = host.split('.');
+  
+  // If the host is like 'subdomain.example.com', get the first part
+  if (hostParts.length >= 3) {
+    const potentialSubdomain = hostParts[0];
+    // Exclude common subdomains that aren't tenant subdomains
+    if (!['www', 'api', 'admin'].includes(potentialSubdomain)) {
+      return potentialSubdomain;
+    }
+  }
+  
+  return null; // Default/main site (no subdomain filtering)
+}
+
+// Helper function to get subdomain ID from subdomain string
+async function getSubdomainId(subdomainString: string | null): Promise<string | null> {
+  if (!subdomainString) return null;
+  
+  try {
+    const [subdomainRecord] = await db
+      .select({ id: subdomains.id })
+      .from(subdomains)
+      .where(eq(subdomains.subdomain, subdomainString))
+      .limit(1);
+    
+    return subdomainRecord?.id || null;
+  } catch (error) {
+    console.error('Error fetching subdomain ID:', error);
+    return null;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/register", async (req, res) => {
@@ -628,6 +669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           slug: { type: 'text', required: true },
           description: { type: 'textarea', required: false },
           parentId: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false },
           sortOrder: { type: 'number', required: false }
         },
@@ -637,6 +679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           description: { type: 'textarea', required: false },
           logoUrl: { type: 'text', required: false },
           websiteUrl: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false },
           featured: { type: 'boolean', required: false }
         },
@@ -653,6 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           reviewCount: { type: 'number', required: false },
           storeId: { type: 'text', required: true },
           categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false },
           isFeatured: { type: 'boolean', required: false },
           freeShipping: { type: 'boolean', required: false },
@@ -669,43 +713,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sku: { type: 'text', required: false },
           imageUrl: { type: 'text', required: false },
           categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'video_channels': {
-          name: { type: 'text', required: true },
-          channelUrl: { type: 'text', required: true },
+          title: { type: 'text', required: true },
           description: { type: 'textarea', required: false },
-          subscriberCount: { type: 'number', required: false },
+          thumbnailUrl: { type: 'text', required: true },
+          channelUrl: { type: 'text', required: true },
+          videoCount: { type: 'number', required: false },
+          followerCount: { type: 'number', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'posts': {
           title: { type: 'text', required: true },
           content: { type: 'textarea', required: true },
-          excerpt: { type: 'textarea', required: false },
-          featured_image: { type: 'text', required: false },
+          author: { type: 'text', required: true },
+          subreddit: { type: 'text', required: false },
+          imageUrl: { type: 'text', required: false },
+          postUrl: { type: 'text', required: true },
+          upvotes: { type: 'number', required: false },
+          commentCount: { type: 'number', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'youtube_videos': {
           title: { type: 'text', required: true },
-          videoId: { type: 'text', required: true },
-          channelId: { type: 'text', required: true },
           description: { type: 'textarea', required: false },
-          thumbnailUrl: { type: 'text', required: false },
+          channelName: { type: 'text', required: true },
+          channelUrl: { type: 'text', required: true },
+          videoUrl: { type: 'text', required: true },
+          thumbnailUrl: { type: 'text', required: true },
           duration: { type: 'text', required: false },
-          viewCount: { type: 'number', required: false }
+          viewCount: { type: 'number', required: false },
+          uploadDate: { type: 'text', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
         },
         'blogs': {
           title: { type: 'text', required: true },
-          content: { type: 'textarea', required: true },
-          excerpt: { type: 'textarea', required: false },
-          featuredImage: { type: 'text', required: false },
-          authorName: { type: 'text', required: false },
+          description: { type: 'textarea', required: true },
+          excerpt: { type: 'textarea', required: true },
+          author: { type: 'text', required: true },
+          website: { type: 'text', required: true },
+          websiteUrl: { type: 'text', required: true },
+          blogUrl: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: true },
+          publishDate: { type: 'text', required: true },
+          readTime: { type: 'text', required: true },
+          category: { type: 'text', required: true },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'advertisement_banners': {
           content: { type: 'textarea', required: true },
           backgroundColor: { type: 'text', required: false },
           textColor: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false },
           impressionLimit: { type: 'number', required: false },
           currentImpressions: { type: 'number', required: false }
@@ -724,6 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'newsletter_subscribers': {
           email: { type: 'text', required: true },
           signupMethod: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'businesses': {
@@ -734,6 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           website: { type: 'text', required: false },
           email: { type: 'text', required: false },
           categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false }
         },
         'business_categories': {
@@ -741,6 +812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           slug: { type: 'text', required: true },
           description: { type: 'textarea', required: false },
           iconName: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
           isActive: { type: 'boolean', required: false },
           sortOrder: { type: 'number', required: false }
         },
@@ -749,6 +821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dayOfWeek: { type: 'number', required: true },
           openTime: { type: 'time', required: false },
           closeTime: { type: 'time', required: false },
+          subdomainId: { type: 'text', required: false },
           isClosed: { type: 'boolean', required: false }
         },
         'business_reviews': {
@@ -756,13 +829,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rating: { type: 'number', required: true },
           reviewText: { type: 'textarea', required: false },
           reviewerName: { type: 'text', required: true },
-          reviewerEmail: { type: 'text', required: false }
+          reviewerEmail: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false }
         },
         'business_photos': {
           businessId: { type: 'text', required: true },
           imageUrl: { type: 'text', required: true },
           caption: { type: 'text', required: false },
-          isPrimary: { type: 'boolean', required: false }
+          isPrimary: { type: 'boolean', required: false },
+          subdomainId: { type: 'text', required: false }
         },
         'click_thru': {
           pageName: { type: 'text', required: true },
@@ -813,7 +888,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'user_favorites': {
           userId: { type: 'text', required: true },
           dealId: { type: 'text', required: true },
-          pageUrl: { type: 'text', required: true }
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false }
         }
       };
 
@@ -1083,8 +1159,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {
-      const categories = await storage.getCategoriesWithChildren();
-      res.json(categories);
+      const subdomainString = getSubdomainFromRequest(req);
+      
+      // If subdomain is specified in query, always filter by subdomain
+      let categoriesData;
+      if (subdomainString) {
+        const subdomainId = await getSubdomainId(subdomainString);
+        if (subdomainId) {
+          // Subdomain exists, filter by it
+          categoriesData = await db.select().from(categories).where(eq(categories.subdomainId, subdomainId));
+        } else {
+          // Subdomain specified but doesn't exist, return empty results
+          categoriesData = [];
+        }
+      } else {
+        // No subdomain specified, use main site data
+        categoriesData = await storage.getCategoriesWithChildren();
+      }
+      
+      res.json(categoriesData);
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Failed to fetch categories" });
@@ -1107,8 +1200,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stores
   app.get("/api/stores", async (req, res) => {
     try {
-      const stores = await storage.getStores();
-      res.json(stores);
+      const subdomainString = getSubdomainFromRequest(req);
+      
+      // If subdomain is specified in query, always filter by subdomain
+      let storesData;
+      if (subdomainString) {
+        const subdomainId = await getSubdomainId(subdomainString);
+        if (subdomainId) {
+          // Subdomain exists, filter by it
+          storesData = await db.select().from(stores).where(eq(stores.subdomainId, subdomainId));
+        } else {
+          // Subdomain specified but doesn't exist, return empty results
+          storesData = [];
+        }
+      } else {
+        // No subdomain specified, use main site data
+        storesData = await storage.getStores();
+      }
+      
+      res.json(storesData);
     } catch (error) {
       console.error("Error fetching stores:", error);
       res.status(500).json({ error: "Failed to fetch stores" });
@@ -1117,8 +1227,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/stores/featured", async (req, res) => {
     try {
-      const stores = await storage.getFeaturedStores();
-      res.json(stores);
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
+      
+      // If subdomain is specified, filter by it; otherwise get all featured stores
+      let featuredStores;
+      if (subdomainId) {
+        featuredStores = await db.select().from(stores)
+          .where(sql`${stores.subdomainId} = ${subdomainId} AND ${stores.isFeatured} = true`);
+      } else {
+        featuredStores = await storage.getFeaturedStores();
+      }
+      
+      res.json(featuredStores);
     } catch (error) {
       console.error("Error fetching featured stores:", error);
       res.status(500).json({ error: "Failed to fetch featured stores" });
@@ -1156,8 +1277,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/deals", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-      const deals = await storage.getDeals(limit);
-      res.json(deals);
+      const subdomainString = getSubdomainFromRequest(req);
+      
+      // If subdomain is specified in query, always filter by subdomain
+      let dealsData;
+      if (subdomainString) {
+        const subdomainId = await getSubdomainId(subdomainString);
+        if (subdomainId) {
+          // Subdomain exists, filter by it
+          dealsData = await db.select().from(deals).where(eq(deals.subdomainId, subdomainId)).limit(limit);
+        } else {
+          // Subdomain specified but doesn't exist, return empty results
+          dealsData = [];
+        }
+      } else {
+        // No subdomain specified, use main site data
+        dealsData = await storage.getDeals(limit);
+      }
+      
+      res.json(dealsData);
     } catch (error) {
       console.error("Error fetching deals:", error);
       res.status(500).json({ error: "Failed to fetch deals" });
@@ -1167,8 +1305,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/deals/featured", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
-      const deals = await storage.getFeaturedDeals(limit);
-      res.json(deals);
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
+      
+      // If subdomain is specified, filter by it; otherwise get all featured deals
+      let featuredDeals;
+      if (subdomainId) {
+        featuredDeals = await db.select().from(deals)
+          .where(sql`${deals.subdomainId} = ${subdomainId} AND ${deals.isFeatured} = true`)
+          .limit(limit);
+      } else {
+        featuredDeals = await storage.getFeaturedDeals(limit);
+      }
+      
+      res.json(featuredDeals);
     } catch (error) {
       console.error("Error fetching featured deals:", error);
       res.status(500).json({ error: "Failed to fetch featured deals" });
@@ -1287,8 +1437,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/video-channels", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
-      const channels = await storage.getVideoChannels(limit);
-      res.json(channels);
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
+      
+      let channelsData;
+      if (subdomainId) {
+        channelsData = await db.select().from(videoChannels)
+          .where(eq(videoChannels.subdomainId, subdomainId))
+          .limit(limit);
+      } else {
+        channelsData = await storage.getVideoChannels(limit);
+      }
+      
+      res.json(channelsData);
     } catch (error) {
       console.error("Error fetching video channels:", error);
       res.status(500).json({ error: "Failed to fetch video channels" });
@@ -1313,15 +1474,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const query = req.query.q as string;
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
       
-      let posts;
-      if (query) {
-        posts = await storage.searchPosts(query, limit);
+      let postsData;
+      if (subdomainId) {
+        // Filter by subdomain using direct database query
+        if (query) {
+          postsData = await db.select().from(posts)
+            .where(sql`${posts.subdomainId} = ${subdomainId} AND (${posts.title} ILIKE ${'%' + query + '%'} OR ${posts.content} ILIKE ${'%' + query + '%'})`)
+            .limit(limit);
+        } else {
+          postsData = await db.select().from(posts)
+            .where(eq(posts.subdomainId, subdomainId))
+            .limit(limit);
+        }
       } else {
-        posts = await storage.getPosts(limit);
+        // Use storage methods for main site
+        if (query) {
+          postsData = await storage.searchPosts(query, limit);
+        } else {
+          postsData = await storage.getPosts(limit);
+        }
       }
       
-      res.json(posts);
+      res.json(postsData);
     } catch (error) {
       console.error("Error fetching posts:", error);
       res.status(500).json({ error: "Failed to fetch posts" });
@@ -1346,15 +1523,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const search = req.query.search as string;
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
       
-      let videos;
-      if (search) {
-        videos = await storage.searchYoutubeVideos(search, limit);
+      let videosData;
+      if (subdomainId) {
+        // Filter by subdomain using direct database query
+        if (search) {
+          videosData = await db.select().from(youtubeVideos)
+            .where(sql`${youtubeVideos.subdomainId} = ${subdomainId} AND (${youtubeVideos.title} ILIKE ${'%' + search + '%'} OR ${youtubeVideos.description} ILIKE ${'%' + search + '%'})`)
+            .limit(limit);
+        } else {
+          videosData = await db.select().from(youtubeVideos)
+            .where(eq(youtubeVideos.subdomainId, subdomainId))
+            .limit(limit);
+        }
       } else {
-        videos = await storage.getYoutubeVideos(limit);
+        // Use storage methods for main site
+        if (search) {
+          videosData = await storage.searchYoutubeVideos(search, limit);
+        } else {
+          videosData = await storage.getYoutubeVideos(limit);
+        }
       }
       
-      res.json(videos);
+      res.json(videosData);
     } catch (error) {
       console.error("Error fetching YouTube videos:", error);
       res.status(500).json({ error: "Failed to fetch YouTube videos" });
@@ -1379,15 +1572,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const search = req.query.search as string;
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
       
-      let blogs;
-      if (search) {
-        blogs = await storage.searchBlogs(search, limit);
+      let blogsData;
+      if (subdomainId) {
+        // Filter by subdomain using direct database query
+        if (search) {
+          blogsData = await db.select().from(blogs)
+            .where(sql`${blogs.subdomainId} = ${subdomainId} AND (${blogs.title} ILIKE ${'%' + search + '%'} OR ${blogs.description} ILIKE ${'%' + search + '%'})`)
+            .limit(limit);
+        } else {
+          blogsData = await db.select().from(blogs)
+            .where(eq(blogs.subdomainId, subdomainId))
+            .limit(limit);
+        }
       } else {
-        blogs = await storage.getBlogs(limit);
+        // Use storage methods for main site
+        if (search) {
+          blogsData = await storage.searchBlogs(search, limit);
+        } else {
+          blogsData = await storage.getBlogs(limit);
+        }
       }
       
-      res.json(blogs);
+      res.json(blogsData);
     } catch (error) {
       console.error("Error fetching blogs:", error);
       res.status(500).json({ error: "Failed to fetch blogs" });
@@ -1616,8 +1825,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Directory Business Categories API
   app.get("/api/business-categories", async (req, res) => {
     try {
-      const categories = await storage.getBusinessCategories();
-      res.json(categories);
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
+      
+      let categoriesData;
+      if (subdomainId) {
+        categoriesData = await db.select().from(businessCategories)
+          .where(eq(businessCategories.subdomainId, subdomainId));
+      } else {
+        categoriesData = await storage.getBusinessCategories();
+      }
+      
+      res.json(categoriesData);
     } catch (error) {
       console.error("Error fetching business categories:", error);
       res.status(500).json({ error: "Failed to fetch business categories" });
@@ -1645,19 +1864,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = req.query.location as string;
       const category = req.query.category as string;
       const featured = req.query.featured === "true";
+      const subdomainString = getSubdomainFromRequest(req);
+      const subdomainId = await getSubdomainId(subdomainString);
       
-      let businesses;
-      if (search) {
-        businesses = await storage.searchBusinesses(search, location, limit);
-      } else if (category) {
-        businesses = await storage.getBusinessesByCategory(category, limit);
-      } else if (featured) {
-        businesses = await storage.getFeaturedBusinesses(limit);
+      let businessesData;
+      if (subdomainId) {
+        // Filter by subdomain using direct database query
+        if (search) {
+          businessesData = await db.select().from(businesses)
+            .where(sql`${businesses.subdomainId} = ${subdomainId} AND (${businesses.name} ILIKE ${'%' + search + '%'} OR ${businesses.description} ILIKE ${'%' + search + '%'})`)
+            .limit(limit);
+        } else if (featured) {
+          businessesData = await db.select().from(businesses)
+            .where(sql`${businesses.subdomainId} = ${subdomainId} AND ${businesses.isActive} = true`)
+            .limit(limit);
+        } else {
+          businessesData = await db.select().from(businesses)
+            .where(eq(businesses.subdomainId, subdomainId))
+            .limit(limit);
+        }
       } else {
-        businesses = await storage.getBusinesses(limit);
+        // Use storage methods for main site
+        if (search) {
+          businessesData = await storage.searchBusinesses(search, location, limit);
+        } else if (category) {
+          businessesData = await storage.getBusinessesByCategory(category, limit);
+        } else if (featured) {
+          businessesData = await storage.getFeaturedBusinesses(limit);
+        } else {
+          businessesData = await storage.getBusinesses(limit);
+        }
       }
       
-      res.json(businesses);
+      res.json(businessesData);
     } catch (error) {
       console.error("Error fetching businesses:", error);
       res.status(500).json({ error: "Failed to fetch businesses" });
