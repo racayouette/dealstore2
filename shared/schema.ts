@@ -10,6 +10,7 @@ export const categories = pgTable("categories", {
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   description: text("description"),
   parentId: uuid("parent_id"),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   sortOrder: integer("sort_order").default(0),
 });
@@ -21,6 +22,7 @@ export const stores = pgTable("stores", {
   description: text("description"),
   logoUrl: text("logo_url"),
   websiteUrl: text("website_url"),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   featured: boolean("featured").default(false),
 });
@@ -39,6 +41,7 @@ export const deals = pgTable("deals", {
   reviewCount: integer("review_count").default(0),
   storeId: uuid("store_id").notNull(),
   categoryId: uuid("category_id").notNull(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   isFeatured: boolean("is_featured").default(false),
   freeShipping: boolean("free_shipping").default(false),
@@ -59,6 +62,7 @@ export const products = pgTable("products", {
   sku: varchar("sku", { length: 100 }),
   imageUrl: text("image_url"),
   categoryId: uuid("category_id").notNull(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
 });
 
@@ -77,6 +81,7 @@ export const videoChannels = pgTable("video_channels", {
   videoCount: integer("video_count").default(0),
   followerCount: integer("follower_count").default(0),
   tags: text("tags").array(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -93,6 +98,7 @@ export const posts = pgTable("posts", {
   upvotes: integer("upvotes").default(0),
   commentCount: integer("comment_count").default(0),
   tags: text("tags").array(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -110,6 +116,7 @@ export const youtubeVideos = pgTable("youtube_videos", {
   viewCount: integer("view_count").default(0),
   uploadDate: varchar("upload_date", { length: 50 }),
   tags: text("tags").array(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -130,6 +137,7 @@ export const blogs = pgTable("blogs", {
   readTime: text("read_time").notNull(),
   category: text("category").notNull(),
   tags: text("tags").array(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -145,6 +153,7 @@ export const advertisementBanners = pgTable("advertisement_banners", {
   description: text("description").notNull(),
   imageUrl: text("image_url").notNull(),
   clickUrl: text("click_url").notNull(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   alwaysShow: boolean("always_show").default(true), // if true, banner always shows; if false, limited by impressions
   maxImpressions: integer("max_impressions").default(0), // max number of impressions when always_show is false (0 = unlimited)
@@ -212,6 +221,7 @@ export const userFavorites = pgTable("user_favorites", {
   userId: text("user_id").notNull(), // For now, using session ID or IP as user identifier
   dealId: uuid("deal_id").notNull(),
   pageUrl: text("page_url").notNull().default("/"), // Track which page the favorite was made on
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   createdAt: timestamp("created_at").default(sql`now()`),
 }, (table) => {
   return {
@@ -368,6 +378,7 @@ export const businessCategories = pgTable("business_categories", {
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   description: text("description"),
   iconName: varchar("icon_name", { length: 100 }),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   sortOrder: integer("sort_order").default(0),
 });
@@ -386,6 +397,7 @@ export const businesses = pgTable("businesses", {
   website: text("website"),
   imageUrl: text("image_url"),
   businessCategoryId: uuid("business_category_id").notNull(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0"),
   reviewCount: integer("review_count").default(0),
   priceRange: varchar("price_range", { length: 10 }).default("$$"),
@@ -404,6 +416,7 @@ export const businessHours = pgTable("business_hours", {
   dayOfWeek: integer("day_of_week").notNull(), // 0-6 (Sunday-Saturday)
   openTime: varchar("open_time", { length: 8 }), // Format: "09:00:00"
   closeTime: varchar("close_time", { length: 8 }), // Format: "17:00:00"
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isClosed: boolean("is_closed").default(false),
 });
 
@@ -417,6 +430,7 @@ export const businessReviews = pgTable("business_reviews", {
   content: text("content").notNull(),
   isVerified: boolean("is_verified").default(false),
   helpfulCount: integer("helpful_count").default(0),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
@@ -428,6 +442,7 @@ export const businessPhotos = pgTable("business_photos", {
   caption: varchar("caption", { length: 255 }),
   isMainPhoto: boolean("is_main_photo").default(false),
   sortOrder: integer("sort_order").default(0),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -444,6 +459,7 @@ export const newsletterSubscribers = pgTable("newsletter_subscribers", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email", { length: 255 }).notNull().unique(),
   signupMethod: varchar("signup_method", { length: 50 }).notNull(), // 'email', 'facebook', 'google', 'apple'
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
