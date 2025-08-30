@@ -885,10 +885,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           delete data.createdAt;
           delete data.updatedAt;
 
-          const [newRecord] = await db.insert(table)
+          const result = await db.insert(table)
             .values(data)
             .returning();
 
+          const newRecord = Array.isArray(result) ? result[0] : result;
           res.json(newRecord);
           break;
       }
