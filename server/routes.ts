@@ -853,7 +853,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           res.json(product);
           break;
         default:
-          res.status(400).json({ error: "Table operations not supported yet" });
+          // Generic table insert for all other tables
+          const tableMap: Record<string, any> = {
+            'video_channels': videoChannels,
+            'posts': posts,
+            'youtube_videos': youtubeVideos,
+            'blogs': blogs,
+            'advertisement_banners': advertisementBanners,
+            'banner_settings': bannerSettings,
+            'page_views': pageViews,
+            'click_thru': clickThru,
+            'subdomains': subdomains,
+            'business_categories': businessCategories,
+            'businesses': businesses,
+            'business_hours': businessHours,
+            'business_reviews': businessReviews,
+            'business_photos': businessPhotos,
+            'users': users,
+            'newsletter_subscribers': newsletterSubscribers,
+            'newsletter_popup_settings': newsletterPopupSettings,
+            'user_favorites': userFavorites,
+            'site_settings': siteSettings
+          };
+
+          const table = tableMap[tableName];
+          if (!table) {
+            return res.status(400).json({ error: "Invalid table name" });
+          }
+
+          // Remove timestamp fields that shouldn't be set manually
+          delete data.createdAt;
+          delete data.updatedAt;
+
+          const [newRecord] = await db.insert(table)
+            .values(data)
+            .returning();
+
+          res.json(newRecord);
+          break;
       }
     } catch (error) {
       console.error("Error creating record:", error);
