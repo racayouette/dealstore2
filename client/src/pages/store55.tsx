@@ -11,6 +11,7 @@ import { HeartButton } from "@/components/HeartButton";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import UserMenu from "@/components/user-menu";
 import NavMenu from "@/components/nav-menu";
+import { FAlLLBACK_IMAGE } from "@/lib/constant";
 
 export default function Store55() {
   // Track page view for analytics
@@ -87,6 +88,11 @@ export default function Store55() {
             alt={deal.title}
             className="w-full h-48 object-cover"
             data-testid={`img-${section}-deal-${index}`}
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.onerror = null; // prevent infinite loop
+              target.src = FAlLLBACK_IMAGE;
+            }}
           />
           
           <div className="absolute top-2 right-2">
