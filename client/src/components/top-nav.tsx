@@ -55,6 +55,9 @@ export default function TopNav() {
             <Link href="/admin/upload" className="hover:text-gray-200 transition-colors" data-testid="nav-upload">
               Upload
             </Link>
+            <Link href="/admin/data-entry" className="hover:text-gray-200 transition-colors" data-testid="nav-data-entry">
+              DataEntry
+            </Link>
           </div>
           
           {/* Right side - User Menu */}

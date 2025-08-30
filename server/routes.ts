@@ -7,6 +7,32 @@ import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import fetch from "node-fetch";
+import { db } from "./db";
+import { eq, sql } from "drizzle-orm";
+import { 
+  categories, 
+  stores, 
+  deals, 
+  products, 
+  videoChannels,
+  posts,
+  youtubeVideos,
+  blogs,
+  advertisementBanners,
+  bannerSettings,
+  pageViews,
+  clickThru,
+  businessCategories,
+  businesses,
+  businessHours,
+  businessReviews,
+  businessPhotos,
+  users,
+  newsletterSubscribers,
+  newsletterPopupSettings,
+  userFavorites,
+  siteSettings
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -527,6 +553,259 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: `Failed to process remote CSV: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
+    }
+  });
+
+  // DataEntry API endpoints for table management
+  app.get("/api/admin/table-data/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const offset = (page - 1) * pageSize;
+
+      // Map frontend table names to actual database table names
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores, 
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      // Get total count
+      const totalCountResult = await db.select({ count: sql<number>`count(*)` }).from(table);
+      const total = totalCountResult[0]?.count || 0;
+
+      // Get paginated data
+      const data = await db.select().from(table).limit(pageSize).offset(offset);
+
+      res.json({
+        data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      });
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      res.status(500).json({ error: "Failed to fetch table data" });
+    }
+  });
+
+  app.get("/api/admin/table-schema/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      
+      // Define field types for each table to help with form generation
+      const schemaMap: Record<string, Record<string, any>> = {
+        'categories': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          parentId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          sortOrder: { type: 'number', required: false }
+        },
+        'stores': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          logoUrl: { type: 'text', required: false },
+          websiteUrl: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          featured: { type: 'boolean', required: false }
+        },
+        'deals': {
+          title: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          originalPrice: { type: 'number', required: false },
+          salePrice: { type: 'number', required: true },
+          discountPercent: { type: 'number', required: false },
+          couponCode: { type: 'text', required: false },
+          dealUrl: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: false },
+          rating: { type: 'number', required: false },
+          reviewCount: { type: 'number', required: false },
+          storeId: { type: 'text', required: true },
+          categoryId: { type: 'text', required: true },
+          isActive: { type: 'boolean', required: false },
+          isFeatured: { type: 'boolean', required: false },
+          freeShipping: { type: 'boolean', required: false },
+          editorInsights: { type: 'textarea', required: false },
+          howToGetIt: { type: 'textarea', required: false },
+          expiresAt: { type: 'datetime-local', required: false },
+          authorName: { type: 'text', required: false }
+        },
+        'products': {
+          name: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          brand: { type: 'text', required: false },
+          model: { type: 'text', required: false },
+          sku: { type: 'text', required: false },
+          imageUrl: { type: 'text', required: false },
+          categoryId: { type: 'text', required: true },
+          isActive: { type: 'boolean', required: false }
+        }
+      };
+
+      const schema = schemaMap[tableName];
+      if (!schema) {
+        return res.status(400).json({ error: "Schema not found for table" });
+      }
+
+      res.json(schema);
+    } catch (error) {
+      console.error("Error fetching table schema:", error);
+      res.status(500).json({ error: "Failed to fetch table schema" });
+    }
+  });
+
+  app.post("/api/admin/table-data/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const data = req.body;
+
+      // Use the existing storage methods where available
+      switch (tableName) {
+        case 'categories':
+          const category = await storage.createCategory(data);
+          res.json(category);
+          break;
+        case 'stores':
+          const store = await storage.createStore(data);
+          res.json(store);
+          break;
+        case 'deals':
+          const deal = await storage.createDeal(data);
+          res.json(deal);
+          break;
+        case 'products':
+          const product = await storage.createProduct(data);
+          res.json(product);
+          break;
+        default:
+          res.status(400).json({ error: "Table operations not supported yet" });
+      }
+    } catch (error) {
+      console.error("Error creating record:", error);
+      res.status(500).json({ error: "Failed to create record" });
+    }
+  });
+
+  app.put("/api/admin/table-data/:tableName/:id", async (req, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const data = req.body;
+
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores,
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      // Remove timestamp fields that shouldn't be updated manually
+      delete data.createdAt;
+      delete data.updatedAt;
+      delete data.id;
+
+      const [updatedRecord] = await db.update(table)
+        .set(data)
+        .where(eq(table.id, id))
+        .returning();
+
+      res.json(updatedRecord);
+    } catch (error) {
+      console.error("Error updating record:", error);
+      res.status(500).json({ error: "Failed to update record" });
+    }
+  });
+
+  app.delete("/api/admin/table-data/:tableName/:id", async (req, res) => {
+    try {
+      const { tableName, id } = req.params;
+
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores,
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      await db.delete(table).where(eq(table.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      res.status(500).json({ error: "Failed to delete record" });
     }
   });
 
