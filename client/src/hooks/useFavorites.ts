@@ -84,5 +84,8 @@ export function useIsFavorite(dealId: string, pageUrl?: string) {
       if (!response.ok) throw new Error('Failed to check favorite status');
       return response.json();
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    refetchOnMount: true
   });
 }
