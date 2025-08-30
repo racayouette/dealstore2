@@ -32,6 +32,8 @@ import {
   Database
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import TopNav from "@/components/top-nav";
+import { ProtectedAdminRoute } from "@/components/protected-admin-route";
 
 interface TableInfo {
   name: string;
@@ -279,8 +281,10 @@ export default function AdminDataEntry() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="container mx-auto">
+    <ProtectedAdminRoute>
+      <TopNav />
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="container mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">DataEntry</h1>
           <p className="text-gray-600">Manage database tables and records</p>
@@ -377,7 +381,7 @@ export default function AdminDataEntry() {
                                 <TableCell>
                                   <Checkbox
                                     checked={selectedRows.includes(row.id)}
-                                    onCheckedChange={(checked) => handleRowSelect(row.id, checked)}
+                                    onCheckedChange={(checked) => handleRowSelect(row.id, Boolean(checked))}
                                     data-testid={`select-row-${row.id}`}
                                   />
                                 </TableCell>
@@ -510,7 +514,8 @@ export default function AdminDataEntry() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
-    </div>
+    </ProtectedAdminRoute>
   );
 }
