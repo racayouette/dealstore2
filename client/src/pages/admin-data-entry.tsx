@@ -83,6 +83,7 @@ export default function AdminDataEntry() {
     { name: "posts", displayName: "Posts", primaryKey: "id" },
     { name: "products", displayName: "Products", primaryKey: "id" },
     { name: "site_settings", displayName: "Site Settings", primaryKey: "id" },
+    { name: "subdomains", displayName: "Subdomains", primaryKey: "id" },
     { name: "stores", displayName: "Stores", primaryKey: "id" },
     { name: "user_favorites", displayName: "User Favorites", primaryKey: "id" },
     { name: "users", displayName: "Users", primaryKey: "id" },
