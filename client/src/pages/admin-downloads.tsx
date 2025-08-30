@@ -6,9 +6,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import TopNav from "@/components/top-nav";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
+import { SubdomainSelector } from "@/components/subdomain-selector";
 
 export default function AdminDownloads() {
   const [downloadingFiles, setDownloadingFiles] = useState<Set<string>>(new Set());
+  const [selectedSubdomain, setSelectedSubdomain] = useState<string>("all");
   const { toast } = useToast();
 
   const csvTemplates = [
@@ -72,21 +74,26 @@ export default function AdminDownloads() {
     setDownloadingFiles(prev => new Set(prev).add(template.name));
 
     try {
-      const response = await fetch(template.endpoint);
+      const url = new URL(template.endpoint, window.location.origin);
+      if (selectedSubdomain && selectedSubdomain !== "all") {
+        url.searchParams.set('subdomainId', selectedSubdomain);
+      }
+      
+      const response = await fetch(url.toString());
       
       if (!response.ok) {
         throw new Error(`Failed to download ${template.name} template`);
       }
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = blobUrl;
       link.download = template.filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
 
       toast({
         title: "Download Complete",
@@ -120,6 +127,26 @@ export default function AdminDownloads() {
               <p className="text-gray-600">
                 Download CSV template files for bulk importing data into the database tables.
               </p>
+            </div>
+
+            <div className="mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Download Settings</CardTitle>
+                  <CardDescription>
+                    Select a subdomain to filter template data or choose "All Subdomains" for comprehensive templates
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubdomainSelector
+                    value={selectedSubdomain}
+                    onValueChange={setSelectedSubdomain}
+                    includeAllOption={true}
+                    label="Filter by Subdomain"
+                    placeholder="Select subdomain for template data"
+                  />
+                </CardContent>
+              </Card>
             </div>
 
             <Alert className="mb-8">
