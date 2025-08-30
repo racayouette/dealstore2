@@ -64,30 +64,30 @@ export default function AdminDataEntry() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Available tables list
+  // Available tables list (sorted A-Z)
   const tables: TableInfo[] = [
-    { name: "categories", displayName: "Categories", primaryKey: "id" },
-    { name: "stores", displayName: "Stores", primaryKey: "id" },
-    { name: "deals", displayName: "Deals", primaryKey: "id" },
-    { name: "products", displayName: "Products", primaryKey: "id" },
-    { name: "video_channels", displayName: "Video Channels", primaryKey: "id" },
-    { name: "posts", displayName: "Posts", primaryKey: "id" },
-    { name: "youtube_videos", displayName: "YouTube Videos", primaryKey: "id" },
-    { name: "blogs", displayName: "Blogs", primaryKey: "id" },
     { name: "advertisement_banners", displayName: "Advertisement Banners", primaryKey: "id" },
     { name: "banner_settings", displayName: "Banner Settings", primaryKey: "id" },
-    { name: "page_views", displayName: "Page Views", primaryKey: "id" },
-    { name: "click_thru", displayName: "Click Through", primaryKey: "id" },
+    { name: "blogs", displayName: "Blogs", primaryKey: "id" },
     { name: "business_categories", displayName: "Business Categories", primaryKey: "id" },
-    { name: "businesses", displayName: "Businesses", primaryKey: "id" },
     { name: "business_hours", displayName: "Business Hours", primaryKey: "id" },
-    { name: "business_reviews", displayName: "Business Reviews", primaryKey: "id" },
     { name: "business_photos", displayName: "Business Photos", primaryKey: "id" },
-    { name: "users", displayName: "Users", primaryKey: "id" },
-    { name: "newsletter_subscribers", displayName: "Newsletter Subscribers", primaryKey: "id" },
+    { name: "business_reviews", displayName: "Business Reviews", primaryKey: "id" },
+    { name: "businesses", displayName: "Businesses", primaryKey: "id" },
+    { name: "categories", displayName: "Categories", primaryKey: "id" },
+    { name: "click_thru", displayName: "Click Through", primaryKey: "id" },
+    { name: "deals", displayName: "Deals", primaryKey: "id" },
     { name: "newsletter_popup_settings", displayName: "Newsletter Popup Settings", primaryKey: "id" },
+    { name: "newsletter_subscribers", displayName: "Newsletter Subscribers", primaryKey: "id" },
+    { name: "page_views", displayName: "Page Views", primaryKey: "id" },
+    { name: "posts", displayName: "Posts", primaryKey: "id" },
+    { name: "products", displayName: "Products", primaryKey: "id" },
+    { name: "site_settings", displayName: "Site Settings", primaryKey: "id" },
+    { name: "stores", displayName: "Stores", primaryKey: "id" },
     { name: "user_favorites", displayName: "User Favorites", primaryKey: "id" },
-    { name: "site_settings", displayName: "Site Settings", primaryKey: "id" }
+    { name: "users", displayName: "Users", primaryKey: "id" },
+    { name: "video_channels", displayName: "Video Channels", primaryKey: "id" },
+    { name: "youtube_videos", displayName: "YouTube Videos", primaryKey: "id" }
   ];
 
   // Fetch table data with pagination
