@@ -22,6 +22,7 @@ import {
   bannerSettings,
   pageViews,
   clickThru,
+  subdomains,
   businessCategories,
   businesses,
   businessHours,
@@ -1977,11 +1978,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Subdomains API endpoints
+  app.get('/api/subdomains', async (req, res) => {
+    try {
+      const subdomainsList = await storage.getSubdomains();
+      res.json(subdomainsList);
+    } catch (error) {
+      console.error('Error getting subdomains:', error);
+      res.status(500).json({ error: 'Failed to get subdomains' });
+    }
+  });
+
   // Analytics endpoints
   app.get('/api/analytics/page-views', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const analytics = await storage.getPageViewAnalytics(days);
+      const subdomainId = req.query.subdomain as string;
+      const analytics = await storage.getPageViewAnalytics(days, subdomainId);
       res.json(analytics);
     } catch (error) {
       console.error('Error getting page view analytics:', error);
@@ -1992,7 +2005,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/click-thru', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const analytics = await storage.getClickThruAnalytics(days);
+      const subdomainId = req.query.subdomain as string;
+      const analytics = await storage.getClickThruAnalytics(days, subdomainId);
       res.json(analytics);
     } catch (error) {
       console.error('Error getting click-through analytics:', error);
@@ -2003,7 +2017,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/daily-summary', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const summary = await storage.getDailySummary(days);
+      const subdomainId = req.query.subdomain as string;
+      const summary = await storage.getDailySummary(days, subdomainId);
       res.json(summary);
     } catch (error) {
       console.error('Error getting daily summary:', error);

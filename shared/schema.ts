@@ -153,11 +153,23 @@ export const advertisementBanners = pgTable("advertisement_banners", {
   updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
+// Subdomains table for multi-tenant analytics tracking
+export const subdomains = pgTable("subdomains", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  subdomain: varchar("subdomain", { length: 100 }).notNull().unique(), // e.g., "demo", "site1", "site2"
+  displayName: varchar("display_name", { length: 255 }).notNull(), // e.g., "Demo Site", "Site 1", "Site 2"
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
 // Page views tracking table for analytics and impression counting
 export const pageViews = pgTable("page_views", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   pageName: text("page_name").notNull(), // e.g., "Videos", "Posts", "Blogs"
   pageUrl: text("page_url").notNull(), // e.g., "/videos", "/posts", "/blogs"
+  subdomainId: text("subdomain_id"), // reference to subdomains table, null for demo site
   ipAddress: text("ip_address").notNull(), // visitor's IP address
   userAgent: text("user_agent"), // browser/device information
   createdAt: timestamp("created_at").default(sql`now()`),
@@ -168,6 +180,7 @@ export const clickThru = pgTable("click_thru", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   pageName: text("page_name").notNull(), // e.g., "Videos", "Posts", "Blogs"  
   pageUrl: text("page_url").notNull(), // e.g., "/videos", "/posts", "/blogs"
+  subdomainId: text("subdomain_id"), // reference to subdomains table, null for demo site
   advertisementId: text("advertisement_id").notNull(), // banner ID that was clicked
   advertisementTitle: text("advertisement_title").notNull(), // banner title
   advertisementClickUrl: text("advertisement_click_url").notNull(), // URL user was taken to
@@ -332,6 +345,12 @@ export const insertUserFavoriteSchema = createInsertSchema(userFavorites).omit({
   createdAt: true,
 });
 
+export const insertSubdomainSchema = createInsertSchema(subdomains).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertPageViewSchema = createInsertSchema(pageViews).omit({
   id: true,
   createdAt: true,
@@ -453,6 +472,7 @@ export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
 export type Blog = typeof blogs.$inferSelect;
 export type AdvertisementBanner = typeof advertisementBanners.$inferSelect;
 export type BannerSettings = typeof bannerSettings.$inferSelect;
+export type Subdomain = typeof subdomains.$inferSelect;
 export type PageView = typeof pageViews.$inferSelect;
 export type ClickThru = typeof clickThru.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
@@ -468,6 +488,7 @@ export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type InsertAdvertisementBanner = z.infer<typeof insertAdvertisementBannerSchema>;
 export type InsertBannerSettings = z.infer<typeof insertBannerSettingsSchema>;
+export type InsertSubdomain = z.infer<typeof insertSubdomainSchema>;
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type InsertClickThru = z.infer<typeof insertClickThruSchema>;
 export type InsertSiteSettings = z.infer<typeof insertSiteSettingsSchema>;

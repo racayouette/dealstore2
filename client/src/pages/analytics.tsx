@@ -4,8 +4,9 @@ import TopNav from "@/components/top-nav";
 import Footer from "@/components/footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { Calendar, TrendingUp, Eye, Activity } from "lucide-react";
+import { Calendar, TrendingUp, Eye, Activity, Globe } from "lucide-react";
 import { format, parseISO, subDays, startOfDay, endOfDay } from "date-fns";
 
 interface PageViewSummary {
@@ -23,23 +24,49 @@ interface DailySummary {
   topPage: string;
 }
 
+interface Subdomain {
+  id: string;
+  subdomain: string;
+  displayName: string;
+  description: string;
+  isActive: boolean;
+}
+
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState(7); // Default to last 7 days
+  const [selectedSubdomain, setSelectedSubdomain] = useState<string>("all"); // Default to all subdomains
+
+  // Fetch subdomains list
+  const { data: subdomains } = useQuery<Subdomain[]>({
+    queryKey: ['/api/subdomains'],
+    queryFn: async () => {
+      const response = await fetch('/api/subdomains');
+      return response.json();
+    }
+  });
 
   // Fetch page view analytics data
   const { data: pageViewData, isLoading } = useQuery({
-    queryKey: ['/api/analytics/page-views', dateRange],
+    queryKey: ['/api/analytics/page-views', dateRange, selectedSubdomain],
     queryFn: async () => {
-      const response = await fetch(`/api/analytics/page-views?days=${dateRange}`);
+      const params = new URLSearchParams({ days: dateRange.toString() });
+      if (selectedSubdomain && selectedSubdomain !== "all") {
+        params.append('subdomain', selectedSubdomain);
+      }
+      const response = await fetch(`/api/analytics/page-views?${params}`);
       return response.json();
     }
   });
 
   // Fetch daily summary data
   const { data: dailySummary } = useQuery({
-    queryKey: ['/api/analytics/daily-summary', dateRange],
+    queryKey: ['/api/analytics/daily-summary', dateRange, selectedSubdomain],
     queryFn: async () => {
-      const response = await fetch(`/api/analytics/daily-summary?days=${dateRange}`);
+      const params = new URLSearchParams({ days: dateRange.toString() });
+      if (selectedSubdomain && selectedSubdomain !== "all") {
+        params.append('subdomain', selectedSubdomain);
+      }
+      const response = await fetch(`/api/analytics/daily-summary?${params}`);
       return response.json();
     }
   });
@@ -95,9 +122,33 @@ export default function AnalyticsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-net-dark mb-2">Page View Analytics</h1>
-              <p className="text-gray-600">Comprehensive analysis of page views and visitor engagement</p>
+            <div className="flex items-center gap-6">
+              <div>
+                <h1 className="text-3xl font-bold text-net-dark mb-2">Page View Analytics</h1>
+                <p className="text-gray-600">Comprehensive analysis of page views and visitor engagement</p>
+              </div>
+              
+              {/* Subdomain Selector */}
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-gray-600 font-medium">Subdomain</label>
+                <Select 
+                  value={selectedSubdomain} 
+                  onValueChange={setSelectedSubdomain}
+                  data-testid="select-subdomain"
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select subdomain" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subdomains (Demo Site)</SelectItem>
+                    {subdomains?.filter(sub => sub.isActive).map((subdomain) => (
+                      <SelectItem key={subdomain.id} value={subdomain.id}>
+                        {subdomain.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
             {/* Date Range Selector */}
