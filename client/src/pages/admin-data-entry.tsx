@@ -268,6 +268,25 @@ export default function AdminDataEntry() {
                 data-testid={`input-${field}`}
               />
             </div>
+          ) : config.type === 'select' ? (
+            <Select
+              value={formData[field] || ''}
+              onValueChange={(value) => setFormData({ ...formData, [field]: value })}
+            >
+              <SelectTrigger 
+                className="border-gray-400 focus:border-gray-600"
+                data-testid={`input-${field}`}
+              >
+                <SelectValue placeholder={`Select ${field}`} />
+              </SelectTrigger>
+              <SelectContent>
+                {config.options?.map((option: any) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ) : config.type === 'text' || config.type === 'textarea' ? (
             <Textarea
               id={field}
@@ -275,6 +294,7 @@ export default function AdminDataEntry() {
               onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
               placeholder={`Enter ${field}`}
               data-testid={`input-${field}`}
+              className="border-gray-400 focus:border-gray-600"
             />
           ) : (
             <Input
@@ -284,6 +304,7 @@ export default function AdminDataEntry() {
               onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
               placeholder={`Enter ${field}`}
               data-testid={`input-${field}`}
+              className="border-gray-400 focus:border-gray-600"
             />
           )}
         </div>
