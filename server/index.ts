@@ -6,6 +6,28 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+
+//middleware to get the subdomain
+declare global {
+  namespace Express {
+    interface Request {
+      subdomain: string; // Make user optional if it might not always be present
+    }
+  }
+}
+
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const host = req.hostname; // e.g., backpack.store.com
+  const mainDomain = "netdiscount.top";
+
+  if (host.endsWith(mainDomain)) {
+    const subdomain = host.replace(`.${mainDomain}`, ""); 
+    req.subdomain = subdomain === mainDomain ? '' : subdomain; 
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -64,7 +86,7 @@ app.use((req, res, next) => {
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
+    // reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });
