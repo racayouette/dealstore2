@@ -9,6 +9,7 @@ import type { YoutubeVideo } from "@shared/schema";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import UserMenu from "@/components/user-menu";
+import NavMenu from "@/components/nav-menu";
 
 
 export default function Video2() {
@@ -71,33 +72,7 @@ export default function Video2() {
       </div>
       
       {/* Header */}
-      <div className="bg-blue-600 text-white">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold" data-testid="title-video2">
-                {siteSettings?.siteName}
-              </h1>
-              <nav className="hidden md:flex items-center space-x-6">
-                <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                  <a
-                    key={page.pageUrl}
-                    href={page.pageUrl}
-                    className="hover:text-blue-200 transition-colors"
-                  >
-                    {page.pageName}
-                  </a>
-                ))}
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </div>
-      
+<NavMenu />
       {/* Header Banner Advertisement */}
       <div className="border-b border-gray-200 bg-white">
         <div className="container mx-auto px-4 py-2">

@@ -11,6 +11,7 @@ import UserMenu from "@/components/user-menu";
 import { api } from "@/lib/api";
 import type { Store, BannerSettings } from "@shared/schema";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import NavMenu from "@/components/nav-menu";
 
 export default function Stores() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -72,32 +73,7 @@ export default function Stores() {
           </div>
         </div>
         
-        <div className="bg-blue-600 text-white">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-8">
-                <h1 className="text-2xl font-bold" data-testid="title-stores">
-                  {siteSettings?.siteName}
-                </h1>
-                <nav className="hidden md:flex items-center space-x-6">
-                  <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                  {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                    <a
-                      key={page.pageUrl}
-                      href={page.pageUrl}
-                      className="hover:text-blue-200 transition-colors"
-                    >
-                      {page.pageName}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-              <div className="flex items-center space-x-4">
-                <UserMenu />
-              </div>
-            </div>
-          </div>
-        </div>
+<NavMenu />
       </div>
 
       <main className="container mx-auto px-4 py-6">
@@ -119,7 +95,7 @@ export default function Stores() {
                 )}
 
                 {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
                       <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-48 flex flex-col justify-center">
                         <Skeleton className="w-20 h-12 mx-auto mb-3" />
@@ -129,7 +105,7 @@ export default function Stores() {
                     ))}
                   </div>
                 ) : currentStores.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {currentStores.map((store) => (
                       <StoreCard key={store.id} store={store} />
                     ))}
@@ -190,7 +166,7 @@ export default function Stores() {
                   )}
 
                   {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                       {[1, 2, 3, 4, 5, 6].map(i => (
                         <div key={i} className="bg-white rounded-lg shadow-sm border p-6 text-center h-48 flex flex-col justify-center">
                           <Skeleton className="w-20 h-12 mx-auto mb-3" />
@@ -200,7 +176,7 @@ export default function Stores() {
                       ))}
                     </div>
                   ) : currentStores.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                       {currentStores.map((store) => (
                         <StoreCard key={store.id} store={store} />
                       ))}

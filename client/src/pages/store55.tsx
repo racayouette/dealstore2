@@ -10,6 +10,8 @@ import type { DealWithRelations } from "@shared/schema";
 import { HeartButton } from "@/components/HeartButton";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import UserMenu from "@/components/user-menu";
+import NavMenu from "@/components/nav-menu";
+import { FAlLLBACK_IMAGE } from "@/lib/constant";
 
 export default function Store55() {
   // Track page view for analytics
@@ -86,6 +88,11 @@ export default function Store55() {
             alt={deal.title}
             className="w-full h-48 object-cover"
             data-testid={`img-${section}-deal-${index}`}
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.onerror = null; // prevent infinite loop
+              target.src = FAlLLBACK_IMAGE;
+            }}
           />
           
           <div className="absolute top-2 right-2">
@@ -135,32 +142,7 @@ export default function Store55() {
           </div>
         </div>
         
-        <div className="bg-blue-600 text-white">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-8">
-                <h1 className="text-2xl font-bold" data-testid="title-store55">
-                  {siteSettings?.siteName}
-                </h1>
-                <nav className="hidden md:flex items-center space-x-6">
-                  <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                  {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                    <a
-                      key={page.pageUrl}
-                      href={page.pageUrl}
-                      className="hover:text-blue-200 transition-colors"
-                    >
-                      {page.pageName}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-              <div className="flex items-center space-x-4">
-                <UserMenu />
-              </div>
-            </div>
-          </div>
-        </div>
+<NavMenu />
       </div>
 
       <main className="container mx-auto px-4 py-6">

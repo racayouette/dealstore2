@@ -63,8 +63,8 @@ export function useToggleFavorite() {
     onSuccess: (_, { dealId, pageUrl }) => {
       const currentPageUrl = pageUrl || getCurrentPageUrl();
       // Invalidate both the general favorites list and the specific deal's favorite status
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`, currentPageUrl] });
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${dealId}`, currentPageUrl] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${dealId}`] });
     }
   });
 }
@@ -74,7 +74,7 @@ export function useIsFavorite(dealId: string, pageUrl?: string) {
   const currentPageUrl = pageUrl || getCurrentPageUrl();
   
   return useQuery({
-    queryKey: [`/api/favorites/${userId}/${dealId}`, currentPageUrl],
+    queryKey: [`/api/favorites/${userId}/${dealId}`],
     queryFn: async () => {
       const url = new URL(`/api/favorites/${userId}/${dealId}`, window.location.origin);
       if (currentPageUrl) {
@@ -84,5 +84,8 @@ export function useIsFavorite(dealId: string, pageUrl?: string) {
       if (!response.ok) throw new Error('Failed to check favorite status');
       return response.json();
     },
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+    refetchOnMount: true
   });
 }

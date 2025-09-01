@@ -1772,6 +1772,7 @@ export default function AdvertisingPanelPage() {
                         onCheckedChange={() => handleToggle('showHeader')}
                         disabled={updateSettingsMutation.isPending}
                         data-testid="switch-header-banner"
+                        className="data-[state=unchecked]:bg-gray-400/80"
                       />
                     </div>
 
@@ -1790,6 +1791,7 @@ export default function AdvertisingPanelPage() {
                         onCheckedChange={() => handleToggle('showTop')}
                         disabled={updateSettingsMutation.isPending}
                         data-testid="switch-top-banner"
+                        className="data-[state=unchecked]:bg-gray-400/80"
                       />
                     </div>
 
@@ -1808,6 +1810,7 @@ export default function AdvertisingPanelPage() {
                         onCheckedChange={() => handleToggle('showLeft')}
                         disabled={updateSettingsMutation.isPending}
                         data-testid="switch-left-banner"
+                        className="data-[state=unchecked]:bg-gray-400/80"
                       />
                     </div>
 
@@ -1826,6 +1829,7 @@ export default function AdvertisingPanelPage() {
                         onCheckedChange={() => handleToggle('showRight')}
                         disabled={updateSettingsMutation.isPending}
                         data-testid="switch-right-banner"
+                        className="data-[state=unchecked]:bg-gray-400/80"
                       />
                     </div>
 
@@ -1844,6 +1848,7 @@ export default function AdvertisingPanelPage() {
                         onCheckedChange={() => handleToggle('showBottom')}
                         disabled={updateSettingsMutation.isPending}
                         data-testid="switch-bottom-banner"
+                        className="data-[state=unchecked]:bg-gray-400/80"
                       />
                     </div>
                   </div>

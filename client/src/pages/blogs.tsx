@@ -1,23 +1,43 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Search, ExternalLink, Clock, User, BookOpen, Calendar } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Search,
+  ExternalLink,
+  Clock,
+  User,
+  BookOpen,
+  Calendar,
+} from "lucide-react";
 import type { Blog } from "@shared/schema";
 import Footer from "@/components/footer";
 import AdvertisementBanner from "@/components/advertisement-banner";
 import { usePageTracking } from "@/hooks/use-page-tracking";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import UserMenu from "@/components/user-menu";
-
+import NavMenu from "@/components/nav-menu";
+import { FAlLLBACK_IMAGE } from "@/lib/constant";
 
 export default function Blogs() {
   // Track page view for analytics
   usePageTracking("Blogs", "/blogs");
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSearch, setCurrentSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,10 +48,10 @@ export default function Blogs() {
 
   // Fetch visible pages for navigation
   const { data: visiblePages } = useQuery({
-    queryKey: ['/api/visible-pages'],
+    queryKey: ["/api/visible-pages"],
     queryFn: async () => {
-      const response = await fetch('/api/visible-pages');
-      if (!response.ok) throw new Error('Failed to fetch visible pages');
+      const response = await fetch("/api/visible-pages");
+      if (!response.ok) throw new Error("Failed to fetch visible pages");
       return response.json();
     },
   });
@@ -70,42 +90,22 @@ export default function Blogs() {
       <div className="bg-gray-100 py-1">
         <div className="container mx-auto px-4">
           <p className="text-center text-sm text-gray-600">
-            {siteSettings?.affiliateDisclosure || 'NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission.'}
+            {siteSettings?.affiliateDisclosure ||
+              "NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission."}
           </p>
         </div>
       </div>
-      
+
       {/* Header */}
-      <div className="bg-blue-600 text-white">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold" data-testid="title-blogs">
-                {siteSettings?.siteName}
-              </h1>
-              <nav className="hidden md:flex items-center space-x-6">
-                <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                  <a
-                    key={page.pageUrl}
-                    href={page.pageUrl}
-                    className="hover:text-blue-200 transition-colors"
-                  >
-                    {page.pageName}
-                  </a>
-                ))}
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </div>
-      
+      <NavMenu />
+
       {/* Header Banner Advertisement */}
       <div className="w-full">
-        <AdvertisementBanner position="header" size="medium" className="rounded-none" />
+        <AdvertisementBanner
+          position="header"
+          size="medium"
+          className="rounded-none"
+        />
       </div>
 
       {/* Top Banner Advertisement */}
@@ -135,7 +135,7 @@ export default function Blogs() {
                   About {blogs.length} results
                 </div>
               </div>
-              
+
               {/* Search bar */}
               <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl">
                 <Input
@@ -146,8 +146,8 @@ export default function Blogs() {
                   className="flex-1"
                   data-testid="input-blog-search"
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6"
                   data-testid="button-blog-search"
                 >
@@ -157,7 +157,6 @@ export default function Blogs() {
               </form>
             </div>
 
-
             {isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -165,171 +164,216 @@ export default function Blogs() {
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(groupedBlogs).map(([category, categoryBlogs]) => {
-                  const totalCategoryBlogs = categoryBlogs.length;
-                  const totalPages = Math.ceil(totalCategoryBlogs / blogsPerPage);
-                  const startIndex = (currentPage - 1) * blogsPerPage;
-                  const paginatedBlogs = categoryBlogs.slice(startIndex, startIndex + blogsPerPage);
-                  
-                  return (
-                    <div key={category} className="space-y-4">
-                      <h2 className="text-xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-4">
-                        {category}
-                      </h2>
-                      
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        {paginatedBlogs.map((blog) => (
-                        <Card key={blog.id} className="hover:shadow-lg transition-all duration-200 border border-gray-200">
-                          <div className="flex flex-col">
-                            {/* Blog Image */}
-                            <div className="w-full">
-                              <img
-                                src={blog.imageUrl}
-                                alt={blog.title}
-                                className="w-full h-40 object-cover rounded-t-lg"
-                                data-testid={`img-blog-${blog.id}`}
-                              />
-                            </div>
-                            
-                            {/* Blog Content */}
-                            <div className="flex-1 p-4">
-                              <div className="flex items-start justify-between mb-3">
-                                <div className="flex-1">
-                                  <a 
-                                    href={blog.blogUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="group"
-                                    data-testid={`link-blog-${blog.id}`}
-                                  >
-                                    <h3 className="text-lg font-semibold text-blue-600 group-hover:text-blue-800 line-clamp-2 mb-2">
-                                      {blog.title}
-                                    </h3>
-                                  </a>
-                                  
-                                  <div className="flex items-center text-sm text-gray-600 mb-2">
-                                    <a 
-                                      href={blog.websiteUrl} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-green-600 hover:text-green-800 font-medium mr-4"
-                                      data-testid={`link-website-${blog.id}`}
+                {Object.entries(groupedBlogs).map(
+                  ([category, categoryBlogs]) => {
+                    const totalCategoryBlogs = categoryBlogs.length;
+                    const totalPages = Math.ceil(
+                      totalCategoryBlogs / blogsPerPage
+                    );
+                    const startIndex = (currentPage - 1) * blogsPerPage;
+                    const paginatedBlogs = categoryBlogs.slice(
+                      startIndex,
+                      startIndex + blogsPerPage
+                    );
+
+                    return (
+                      <div key={category} className="space-y-4">
+                        <h2 className="text-xl font-semibold text-gray-800 border-l-4 border-blue-500 pl-4">
+                          {category}
+                        </h2>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          {paginatedBlogs.map((blog) => (
+                            <Card
+                              key={blog.id}
+                              className="hover:shadow-lg transition-all duration-200 border border-gray-200"
+                            >
+                              <div className="flex flex-col">
+                                {/* Blog Image */}
+                                <div className="w-full">
+                                  <img
+                                    src={blog.imageUrl}
+                                    alt={blog.title}
+                                    className="w-full h-40 object-cover rounded-t-lg"
+                                    data-testid={`img-blog-${blog.id}`}
+                                    onError={(e) => {
+                                      const target = e.currentTarget;
+                                      target.onerror = null; // prevent infinite loop
+                                      target.src = FAlLLBACK_IMAGE;
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Blog Content */}
+                                <div className="flex-1 p-4">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex-1">
+                                      <a
+                                        href={blog.blogUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group"
+                                        data-testid={`link-blog-${blog.id}`}
+                                      >
+                                        <h3 className="text-lg font-semibold text-blue-600 group-hover:text-blue-800 line-clamp-2 mb-2">
+                                          {blog.title}
+                                        </h3>
+                                      </a>
+
+                                      <div className="flex items-center text-sm text-gray-600 mb-2">
+                                        <a
+                                          href={blog.websiteUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-green-600 hover:text-green-800 font-medium mr-4"
+                                          data-testid={`link-website-${blog.id}`}
+                                        >
+                                          {blog.website}
+                                        </a>
+                                        <span className="text-gray-400">•</span>
+                                        <span className="ml-2">
+                                          {blog.publishDate}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      asChild
+                                      data-testid={`button-external-${blog.id}`}
                                     >
-                                      {blog.website}
-                                    </a>
-                                    <span className="text-gray-400">•</span>
-                                    <span className="ml-2">{blog.publishDate}</span>
+                                      <a
+                                        href={blog.blogUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <ExternalLink className="w-4 h-4" />
+                                      </a>
+                                    </Button>
+                                  </div>
+
+                                  <p className="text-gray-700 text-sm mb-2 line-clamp-2">
+                                    {blog.excerpt}
+                                  </p>
+
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                      <div className="flex items-center">
+                                        <User className="w-3 h-3 mr-1" />
+                                        <span>{blog.author}</span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <Clock className="w-3 h-3 mr-1" />
+                                        <span>{blog.readTime}</span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <BookOpen className="w-3 h-3 mr-1" />
+                                        <span>{blog.category}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Tags */}
+                                  <div className="flex flex-wrap gap-2 mt-3">
+                                    {blog.tags
+                                      ?.slice(0, 4)
+                                      .map((tag, index) => (
+                                        <Badge
+                                          key={index}
+                                          variant="secondary"
+                                          className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                          data-testid={`tag-${tag.replace(
+                                            " ",
+                                            "-"
+                                          )}`}
+                                        >
+                                          {tag}
+                                        </Badge>
+                                      ))}
+                                    {blog.tags && blog.tags.length > 4 && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        +{blog.tags.length - 4} more
+                                      </Badge>
+                                    )}
                                   </div>
                                 </div>
-                                
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  asChild
-                                  data-testid={`button-external-${blog.id}`}
-                                >
-                                  <a href={blog.blogUrl} target="_blank" rel="noopener noreferrer">
-                                    <ExternalLink className="w-4 h-4" />
-                                  </a>
-                                </Button>
                               </div>
-                              
-                              <p className="text-gray-700 text-sm mb-2 line-clamp-2">
-                                {blog.excerpt}
-                              </p>
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4 text-xs text-gray-500">
-                                  <div className="flex items-center">
-                                    <User className="w-3 h-3 mr-1" />
-                                    <span>{blog.author}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Clock className="w-3 h-3 mr-1" />
-                                    <span>{blog.readTime}</span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <BookOpen className="w-3 h-3 mr-1" />
-                                    <span>{blog.category}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Tags */}
-                              <div className="flex flex-wrap gap-2 mt-3">
-                                {blog.tags?.slice(0, 4).map((tag, index) => (
-                                  <Badge 
-                                    key={index} 
-                                    variant="secondary" 
-                                    className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    data-testid={`tag-${tag.replace(' ', '-')}`}
-                                  >
-                                    {tag}
-                                  </Badge>
-                                ))}
-                                {blog.tags && blog.tags.length > 4 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    +{blog.tags.length - 4} more
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                        ))}
+                            </Card>
+                          ))}
+                        </div>
+
+                        {/* Pagination Controls */}
+                        {totalCategoryBlogs > blogsPerPage && (
+                          <Pagination className="mt-8">
+                            <PaginationContent>
+                              <PaginationItem>
+                                <PaginationPrevious
+                                  onClick={() => {
+                                    if (currentPage > 1) {
+                                      setCurrentPage(currentPage - 1);
+                                      window.scrollTo({
+                                        top: 0,
+                                        behavior: "smooth",
+                                      });
+                                    }
+                                  }}
+                                  className={
+                                    currentPage === 1
+                                      ? "pointer-events-none opacity-50"
+                                      : "cursor-pointer"
+                                  }
+                                />
+                              </PaginationItem>
+
+                              <PaginationItem>
+                                <span className="text-sm text-gray-600">
+                                  Page {currentPage} of {totalPages} (
+                                  {totalCategoryBlogs} total blogs)
+                                </span>
+                              </PaginationItem>
+
+                              <PaginationItem>
+                                <PaginationNext
+                                  onClick={() => {
+                                    if (currentPage < totalPages) {
+                                      setCurrentPage(currentPage + 1);
+                                      window.scrollTo({
+                                        top: 0,
+                                        behavior: "smooth",
+                                      });
+                                    }
+                                  }}
+                                  className={
+                                    currentPage === totalPages
+                                      ? "pointer-events-none opacity-50"
+                                      : "cursor-pointer"
+                                  }
+                                />
+                              </PaginationItem>
+                            </PaginationContent>
+                          </Pagination>
+                        )}
                       </div>
-                      
-                      {/* Pagination Controls */}
-                      {totalCategoryBlogs > blogsPerPage && (
-                        <Pagination className="mt-8">
-                          <PaginationContent>
-                            <PaginationItem>
-                              <PaginationPrevious 
-                                onClick={() => {
-                                  if (currentPage > 1) {
-                                    setCurrentPage(currentPage - 1);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }
-                                }}
-                                className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                              />
-                            </PaginationItem>
-                            
-                            <PaginationItem>
-                              <span className="text-sm text-gray-600">
-                                Page {currentPage} of {totalPages} ({totalCategoryBlogs} total blogs)
-                              </span>
-                            </PaginationItem>
-                            
-                            <PaginationItem>
-                              <PaginationNext 
-                                onClick={() => {
-                                  if (currentPage < totalPages) {
-                                    setCurrentPage(currentPage + 1);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }
-                                }}
-                                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                              />
-                            </PaginationItem>
-                          </PaginationContent>
-                        </Pagination>
-                      )}
-                    </div>
-                  );
-                })}
-                
+                    );
+                  }
+                )}
+
                 {blogs.length === 0 && !isLoading && (
                   <div className="text-center py-12">
                     <div className="text-gray-400 mb-4">
                       <BookOpen className="w-16 h-16 mx-auto" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No blogs found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No blogs found
+                    </h3>
                     <p className="text-gray-600">
-                      {currentSearch 
+                      {currentSearch
                         ? `No blogs found for "${currentSearch}". Try a different search term.`
-                        : "No blogs available at the moment."
-                      }
+                        : "No blogs available at the moment."}
                     </p>
                   </div>
                 )}
@@ -350,7 +394,7 @@ export default function Blogs() {
       <div className="container mx-auto px-4 pb-6">
         <AdvertisementBanner position="bottom" size="medium" />
       </div>
-      
+
       <Footer />
     </div>
   );

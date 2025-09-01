@@ -3,6 +3,7 @@ import Footer from "@/components/footer";
 import Breadcrumb from "@/components/breadcrumb";
 import UserMenu from "@/components/user-menu";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import NavMenu from "@/components/nav-menu";
 
 export default function TermsPage() {
   // Fetch site settings from global cache
@@ -35,32 +36,7 @@ export default function TermsPage() {
       </div>
       
       {/* Header */}
-      <div className="bg-blue-600 text-white">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold" data-testid="title-terms">
-                {siteSettings?.siteName}
-              </h1>
-              <nav className="hidden md:flex items-center space-x-6">
-                <a href="/" className="hover:text-blue-200 transition-colors">Stores</a>
-                {Array.isArray(visiblePages) && visiblePages.map((page) => (
-                  <a
-                    key={page.pageUrl}
-                    href={page.pageUrl}
-                    className="hover:text-blue-200 transition-colors"
-                  >
-                    {page.pageName}
-                  </a>
-                ))}
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <UserMenu />
-            </div>
-          </div>
-        </div>
-      </div>
+<NavMenu />
       
       <main className="container mx-auto px-4 py-6">
         <Breadcrumb items={breadcrumbItems} />
