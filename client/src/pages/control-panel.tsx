@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Settings, Eye, EyeOff, Home, ShoppingBag, Store, Video, FileText, Users, Search, LogOut, ExternalLink, ChevronDown, ChevronRight, Edit3, Globe, Copy, Plus, Trash2, Edit, GripVertical, Save, Mail } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
@@ -62,6 +63,14 @@ interface SiteSettings {
   affiliateDisclosure: string;
   createdAt: string;
   updatedAt: string;
+}
+
+interface Subdomain {
+  id: string;
+  subdomain: string;
+  displayName: string;
+  description: string;
+  isActive: boolean;
 }
 
 const siteSettingsSchema = z.object({
@@ -1166,6 +1175,7 @@ export default function AdvertisingPanelPage() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const adminSession = getAdminSession();
+  const [selectedSubdomain, setSelectedSubdomain] = useState<string>("all"); // Default to all subdomains
   
   const [selectedPage, setSelectedPage] = useState<Page>(STATIC_PAGES[0]);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
@@ -1191,6 +1201,15 @@ export default function AdvertisingPanelPage() {
   const { data: visiblePages } = useQuery({
     queryKey: ['/api/visible-pages'],
     queryFn: () => fetch('/api/visible-pages').then(res => res.json())
+  });
+
+  // Fetch subdomains list
+  const { data: subdomains } = useQuery<Subdomain[]>({
+    queryKey: ['/api/subdomains'],
+    queryFn: async () => {
+      const response = await fetch('/api/subdomains');
+      return response.json();
+    }
   });
 
   // Query for all banner settings
@@ -1608,11 +1627,35 @@ export default function AdvertisingPanelPage() {
         {/* Left Sidebar */}
         <div className="w-[560px] bg-white border-r border-gray-200 min-h-screen">
           <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <Settings className="w-6 h-6 text-net-green" />
-              <h1 className="text-xl font-bold text-net-dark">Advertising Panel</h1>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <Settings className="w-6 h-6 text-net-green" />
+                <h1 className="text-xl font-bold text-net-dark">Advertising Panel</h1>
+              </div>
+              
+              {/* Subdomain Selector */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-600 font-medium">Subdomain</label>
+                <Select 
+                  value={selectedSubdomain} 
+                  onValueChange={setSelectedSubdomain}
+                  data-testid="select-subdomain-advertising"
+                >
+                  <SelectTrigger className="w-48 h-8 text-sm">
+                    <SelectValue placeholder="Select subdomain" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subdomains (Demo Site)</SelectItem>
+                    {subdomains?.filter(sub => sub.isActive).map((subdomain) => (
+                      <SelectItem key={subdomain.id} value={subdomain.id}>
+                        {subdomain.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <p className="text-sm text-gray-600">Manage banner settings for each page</p>
+            <p className="text-sm text-gray-600">Manage banner settings for each page{selectedSubdomain !== "all" ? ` on ${subdomains?.find(s => s.id === selectedSubdomain)?.displayName || "selected subdomain"}` : ""}</p>
           </div>
           
           <ScrollArea className="h-[calc(100vh-120px)]">

@@ -13,6 +13,7 @@ import {
   siteSettings,
   pageViews,
   clickThru,
+  subdomains,
   businessCategories,
   businesses,
   businessHours,
@@ -35,6 +36,7 @@ import {
   type BannerSettings,
   type PageView,
   type ClickThru,
+  type Subdomain,
   type BusinessCategory,
   type Business,
   type BusinessHours,
@@ -58,6 +60,7 @@ import {
   insertUserFavoriteSchema,
   type InsertPageView,
   type InsertClickThru,
+  type InsertSubdomain,
   type SiteSettings,
   type InsertSiteSettings,
   type InsertBusinessCategory,
@@ -201,11 +204,15 @@ export interface IStorage {
   createClickThru(clickThru: InsertClickThru): Promise<ClickThru>;
   getClickThrus(pageName?: string, limit?: number): Promise<ClickThru[]>;
   getClickThruCount(advertisementId: string): Promise<number>;
-  getClickThruAnalytics(days: number): Promise<any[]>;
+  getClickThruAnalytics(days: number, subdomainId?: string): Promise<any[]>;
+  
+  // Subdomains
+  getSubdomains(): Promise<Subdomain[]>;
+  createSubdomain(subdomain: InsertSubdomain): Promise<Subdomain>;
   
   // Analytics
-  getPageViewAnalytics(days: number): Promise<any[]>;
-  getDailySummary(days: number): Promise<any[]>;
+  getPageViewAnalytics(days: number, subdomainId?: string): Promise<any[]>;
+  getDailySummary(days: number, subdomainId?: string): Promise<any[]>;
 
   // Site settings
   getSiteSettings(): Promise<SiteSettings>;
@@ -1160,9 +1167,15 @@ export class DatabaseStorage implements IStorage {
     return Number(result.count) || 0;
   }
 
-  async getClickThruAnalytics(days: number): Promise<any[]> {
+  async getClickThruAnalytics(days: number, subdomainId?: string): Promise<any[]> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    let whereConditions = [sql`${clickThru.createdAt} >= ${cutoffDate.toISOString()}`];
+    
+    if (subdomainId) {
+      whereConditions.push(eq(clickThru.subdomainId, subdomainId));
+    }
 
     const result = await db.select({
       advertisementId: clickThru.advertisementId,
@@ -1175,7 +1188,7 @@ export class DatabaseStorage implements IStorage {
       uniqueClickers: sql`COUNT(DISTINCT ${clickThru.ipAddress})`.as('uniqueClickers')
     })
     .from(clickThru)
-    .where(sql`${clickThru.createdAt} >= ${cutoffDate.toISOString()}`)
+    .where(and(...whereConditions))
     .groupBy(
       clickThru.advertisementId,
       clickThru.advertisementTitle,
@@ -1198,10 +1211,26 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  // Subdomains methods
+  async getSubdomains(): Promise<Subdomain[]> {
+    return await db.select().from(subdomains).where(eq(subdomains.isActive, true)).orderBy(asc(subdomains.displayName));
+  }
+
+  async createSubdomain(subdomain: InsertSubdomain): Promise<Subdomain> {
+    const [created] = await db.insert(subdomains).values(subdomain).returning();
+    return created;
+  }
+
   // Analytics methods
-  async getPageViewAnalytics(days: number): Promise<any[]> {
+  async getPageViewAnalytics(days: number, subdomainId?: string): Promise<any[]> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    let whereConditions = [sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`];
+    
+    if (subdomainId) {
+      whereConditions.push(eq(pageViews.subdomainId, subdomainId));
+    }
 
     const result = await db.select({
       pageName: pageViews.pageName,
@@ -1211,7 +1240,7 @@ export class DatabaseStorage implements IStorage {
       uniqueVisitors: sql`COUNT(DISTINCT ${pageViews.ipAddress})`.as('uniqueVisitors')
     })
     .from(pageViews)
-    .where(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`)
+    .where(and(...whereConditions))
     .groupBy(pageViews.pageName, pageViews.pageUrl, sql`DATE(${pageViews.createdAt})`)
     .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
 
@@ -1224,9 +1253,15 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getDailySummary(days: number): Promise<any[]> {
+  async getDailySummary(days: number, subdomainId?: string): Promise<any[]> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    let whereConditions = [sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`];
+    
+    if (subdomainId) {
+      whereConditions.push(eq(pageViews.subdomainId, subdomainId));
+    }
 
     const result = await db.select({
       date: sql`DATE(${pageViews.createdAt})`.as('date'),
@@ -1236,13 +1271,14 @@ export class DatabaseStorage implements IStorage {
         (SELECT ${pageViews.pageName} 
          FROM ${pageViews} pv2 
          WHERE DATE(pv2.created_at) = DATE(${pageViews.createdAt})
+         ${subdomainId ? sql` AND pv2.subdomain_id = ${subdomainId}` : sql``}
          GROUP BY pv2.page_name 
          ORDER BY COUNT(*) DESC 
          LIMIT 1)
       `.as('topPage')
     })
     .from(pageViews)
-    .where(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`)
+    .where(and(...whereConditions))
     .groupBy(sql`DATE(${pageViews.createdAt})`)
     .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
 

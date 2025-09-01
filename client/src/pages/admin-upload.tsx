@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import TopNav from "@/components/top-nav";
 import { ProtectedAdminRoute } from "@/components/protected-admin-route";
+import { SubdomainSelector } from "@/components/subdomain-selector";
 
 interface UploadResult {
   success: boolean;
@@ -19,6 +20,7 @@ export default function AdminUpload() {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadResults, setUploadResults] = useState<UploadResult[]>([]);
+  const [selectedSubdomain, setSelectedSubdomain] = useState<string>("");
   const { toast } = useToast();
 
   const supportedTables = [
@@ -62,6 +64,15 @@ export default function AdminUpload() {
       return;
     }
 
+    if (!selectedSubdomain) {
+      toast({
+        title: "Subdomain Required",
+        description: "Please select a subdomain before uploading files.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
     setUploadResults([]);
 
@@ -83,6 +94,9 @@ export default function AdminUpload() {
   const uploadFile = async (file: File): Promise<UploadResult> => {
     const formData = new FormData();
     formData.append('csv', file);
+    if (selectedSubdomain) {
+      formData.append('subdomainId', selectedSubdomain);
+    }
 
     const response = await fetch('/api/admin/upload-csv', {
       method: 'POST',
@@ -122,6 +136,33 @@ export default function AdminUpload() {
               <p className="text-gray-600">
                 Upload CSV files to bulk import data into the database. Files will be automatically processed based on their filename prefix.
               </p>
+            </div>
+
+            <div className="mb-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upload Settings</CardTitle>
+                  <CardDescription>
+                    Select the subdomain where the uploaded data will be associated
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubdomainSelector
+                    value={selectedSubdomain}
+                    onValueChange={setSelectedSubdomain}
+                    includeAllOption={false}
+                    label="Target Subdomain"
+                    placeholder="Select subdomain for data import"
+                  />
+                  <Alert className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      <strong>Required:</strong> You must select a subdomain before uploading files. 
+                      All imported data will be associated with the selected subdomain.
+                    </AlertDescription>
+                  </Alert>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
