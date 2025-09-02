@@ -8,7 +8,7 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import fetch from "node-fetch";
 import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { 
   categories, 
   stores, 
@@ -1353,7 +1353,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let featuredStores;
       if (req.subdomain) {
         featuredStores = await db.select().from(stores)
-          .where(sql`${stores.subdomainId} = ${req.subdomain} AND ${stores.isFeatured} = true`);
+          // .where(sql`${stores.subdomainId} = ${req.subdomain} AND ${stores.isFeatured} = true`);
+          .where(and(eq(stores.isActive, true), eq(stores.featured, true), eq(stores.subdomainId, req.subdomain)));
       } else {
         featuredStores = await storage.getFeaturedStores();
       }
