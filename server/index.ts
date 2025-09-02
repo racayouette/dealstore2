@@ -20,7 +20,7 @@ declare global {
 app.use((req: Request, res: Response, next: NextFunction) => {
   const host = req.hostname; // e.g., backpack.store.com
   const mainDomain = "netdiscount.top";
-  return res.json(req);
+  return res.json(host);
   // if (host.endsWith(mainDomain)) {
   //   const subdomain = host.replace(`.${mainDomain}`, ""); 
   //   req.subdomain = subdomain === mainDomain ? '' : subdomain; 
