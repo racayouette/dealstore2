@@ -1354,11 +1354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.subdomain) {
         featuredStores = await db.select().from(stores)
           .where(sql`${stores.subdomainId} = ${req.subdomain} AND ${stores.isFeatured} = true`);
-      } else {
-        featuredStores = await storage.getFeaturedStores();
-      }
+      } 
+      // else {
+      //   featuredStores = await storage.getFeaturedStores();
+      // }
       
-      res.json(featuredStores.map(c => ({ ...c, subdomain: req.subdomain })));
+      res.json({subdomain: req.subdomain, featuredStores});
     } catch (error) {
       console.error("Error fetching featured stores:", error);
       res.status(500).json({ error: "Failed to fetch featured stores" });
