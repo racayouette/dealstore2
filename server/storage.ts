@@ -81,7 +81,7 @@ export interface IStorage {
   // ...interface unchanged...
 }
 
-const subdomainId = getTenantId() || "bagpack";
+const subdomainId = getTenantId() || "";
 
 console.log('subdomainid ', subdomainId)
 
