@@ -7,74 +7,6 @@ import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import fetch from "node-fetch";
-import { db } from "./db";
-import { and, eq, sql } from "drizzle-orm";
-import { 
-  categories, 
-  stores, 
-  deals, 
-  products, 
-  videoChannels,
-  posts,
-  youtubeVideos,
-  blogs,
-  advertisementBanners,
-  bannerSettings,
-  pageViews,
-  clickThru,
-  subdomains,
-  businessCategories,
-  businesses,
-  businessHours,
-  businessReviews,
-  businessPhotos,
-  users,
-  newsletterSubscribers,
-  newsletterPopupSettings,
-  userFavorites,
-  siteSettings
-} from "@shared/schema";
-
-// Helper function to extract subdomain from request
-function getSubdomainFromRequest(req: any): string | null {
-  // Try to get subdomain from query parameter first (for testing)
-  if (req.query.subdomain) {
-    return req.query.subdomain as string;
-  }
-  
-  // Extract subdomain from Host header
-  const host = req.get('host') || '';
-  const hostParts = host.split('.');
-  
-  // If the host is like 'subdomain.example.com', get the first part
-  if (hostParts.length >= 3) {
-    const potentialSubdomain = hostParts[0];
-    // Exclude common subdomains that aren't tenant subdomains
-    if (!['www', 'api', 'admin'].includes(potentialSubdomain)) {
-      return potentialSubdomain;
-    }
-  }
-  
-  return null; // Default/main site (no subdomain filtering)
-}
-
-// Helper function to get subdomain ID from subdomain string
-async function getSubdomainId(subdomainString: string | null): Promise<string | null> {
-  if (!subdomainString) return null;
-  
-  try {
-    const [subdomainRecord] = await db
-      .select({ id: subdomains.id })
-      .from(subdomains)
-      .where(eq(subdomains.subdomain, subdomainString))
-      .limit(1);
-    
-    return subdomainRecord?.id || null;
-  } catch (error) {
-    console.error('Error fetching subdomain ID:', error);
-    return null;
-  }
-}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -214,8 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSV Template Downloads
   app.get("/api/admin/csv-templates/categories", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,parent_id,subdomain_id,is_active,sort_order\n";
-      const sampleRow = '"Electronics","electronics","Electronic devices and gadgets","","example-subdomain-id","true","1"\n';
+      const csvHeader = "name,slug,description,parent_id,is_active,sort_order\n";
+      const sampleRow = '"Electronics","electronics","Electronic devices and gadgets","","true","1"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -229,8 +161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/stores", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,logo_url,website_url,subdomain_id,is_active,featured\n";
-      const sampleRow = '"Amazon","amazon","Online marketplace and retailer","https://example.com/amazon-logo.png","https://amazon.com","example-subdomain-id","true","true"\n';
+      const csvHeader = "name,slug,description,logo_url,website_url,is_active,featured\n";
+      const sampleRow = '"Amazon","amazon","Online marketplace and retailer","https://example.com/amazon-logo.png","https://amazon.com","true","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -244,8 +176,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/deals", async (req, res) => {
     try {
-      const csvHeader = "title,description,original_price,sale_price,discount_percent,coupon_code,deal_url,image_url,rating,review_count,store_id,category_id,subdomain_id,is_active,is_featured,free_shipping,editor_insights,how_to_get_it,expires_at,author_name\n";
-      const sampleRow = '"50% Off Gaming Laptop","High-performance gaming laptop with RTX graphics","1999.99","999.99","50","SAVE50","https://example.com/deal","https://example.com/laptop.jpg","4.5","150","store-uuid","category-uuid","example-subdomain-id","true","true","true","Great value for gaming enthusiasts","Add to cart and apply coupon","2024-12-31T23:59:59Z","John Doe"\n';
+      const csvHeader = "title,description,original_price,sale_price,discount_percent,coupon_code,deal_url,image_url,rating,review_count,store_id,category_id,is_active,is_featured,free_shipping,editor_insights,how_to_get_it,expires_at,author_name\n";
+      const sampleRow = '"50% Off Gaming Laptop","High-performance gaming laptop with RTX graphics","1999.99","999.99","50","SAVE50","https://example.com/deal","https://example.com/laptop.jpg","4.5","150","store-uuid","category-uuid","true","true","true","Great value for gaming enthusiasts","Add to cart and apply coupon","2024-12-31T23:59:59Z","John Doe"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -259,8 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/products", async (req, res) => {
     try {
-      const csvHeader = "name,description,brand,model,sku,image_url,category_id,subdomain_id,is_active\n";
-      const sampleRow = '"Gaming Laptop Pro","High-performance laptop for gaming and content creation","TechBrand","LP-2024-PRO","TBL2024PRO","https://example.com/product.jpg","category-uuid","example-subdomain-id","true"\n';
+      const csvHeader = "name,description,brand,model,sku,image_url,category_id,is_active\n";
+      const sampleRow = '"Gaming Laptop Pro","High-performance laptop for gaming and content creation","TechBrand","LP-2024-PRO","TBL2024PRO","https://example.com/product.jpg","category-uuid","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -274,8 +206,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/video-channels", async (req, res) => {
     try {
-      const csvHeader = "title,description,thumbnail_url,channel_url,video_count,follower_count,tags,subdomain_id,is_active\n";
-      const sampleRow = '"Tech Reviews Channel","Latest tech product reviews and tutorials","https://example.com/channel-thumb.jpg","https://youtube.com/@techreviews","150","50000","[\"tech\",\"reviews\",\"gadgets\"]","example-subdomain-id","true"\n';
+      const csvHeader = "title,description,thumbnail_url,channel_url,video_count,follower_count,tags,is_active\n";
+      const sampleRow = '"Tech Reviews Channel","Latest tech product reviews and tutorials","https://example.com/channel-thumb.jpg","https://youtube.com/@techreviews","150","50000","[\"tech\",\"reviews\",\"gadgets\"]","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -289,8 +221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/posts", async (req, res) => {
     try {
-      const csvHeader = "title,content,author,subreddit,image_url,post_url,upvotes,comment_count,tags,subdomain_id,is_active\n";
-      const sampleRow = '"Best Budget Smartphones 2024","Discussion about the best budget smartphones available this year","user123","deals","https://example.com/post-image.jpg","https://reddit.com/r/deals/123","250","45","[\"smartphones\",\"budget\",\"deals\"]","example-subdomain-id","true"\n';
+      const csvHeader = "title,content,author,subreddit,image_url,post_url,upvotes,comment_count,tags,is_active\n";
+      const sampleRow = '"Best Budget Smartphones 2024","Discussion about the best budget smartphones available this year","user123","deals","https://example.com/post-image.jpg","https://reddit.com/r/deals/123","250","45","[\"smartphones\",\"budget\",\"deals\"]","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -304,8 +236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/blogs", async (req, res) => {
     try {
-      const csvHeader = "title,description,excerpt,author,website,website_url,blog_url,image_url,publish_date,read_time,category,tags,subdomain_id,is_active\n";
-      const sampleRow = '"How to Save Money on Electronics","Complete guide to finding the best deals on electronic devices","Learn proven strategies for saving money when buying electronics...","Jane Smith","TechSaver","https://techsaver.com","https://techsaver.com/save-money-electronics","https://example.com/blog-image.jpg","2024-01-15","5 min read","Electronics","[\"electronics\",\"saving\",\"deals\"]","example-subdomain-id","true"\n';
+      const csvHeader = "title,description,excerpt,author,website,website_url,blog_url,image_url,publish_date,read_time,category,tags,is_active\n";
+      const sampleRow = '"How to Save Money on Electronics","Complete guide to finding the best deals on electronic devices","Learn proven strategies for saving money when buying electronics...","Jane Smith","TechSaver","https://techsaver.com","https://techsaver.com/save-money-electronics","https://example.com/blog-image.jpg","2024-01-15","5 min read","Electronics","[\"electronics\",\"saving\",\"deals\"]","true"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -319,8 +251,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/business-categories", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,icon_name,subdomain_id,is_active,sort_order\n";
-      const sampleRow = '"Restaurants","restaurants","Food and dining establishments","utensils","example-subdomain-id","true","1"\n';
+      const csvHeader = "name,slug,description,icon_name,is_active,sort_order\n";
+      const sampleRow = '"Restaurants","restaurants","Food and dining establishments","utensils","true","1"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -334,8 +266,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/csv-templates/businesses", async (req, res) => {
     try {
-      const csvHeader = "name,slug,description,address,city,state,zip_code,phone,email,website,image_url,business_category_id,subdomain_id,rating,review_count,price_range,is_active,is_featured,is_open_now,latitude,longitude\n";
-      const sampleRow = '"Joe\'s Pizza","joes-pizza","Best pizza in town","123 Main St","Springfield","IL","62701","(555) 123-4567","info@joespizza.com","https://joespizza.com","https://example.com/pizza.jpg","category-uuid","example-subdomain-id","4.5","200","$$","true","true","true","39.7817","-89.6501"\n';
+      const csvHeader = "name,slug,description,address,city,state,zip_code,phone,email,website,image_url,business_category_id,rating,review_count,price_range,is_active,is_featured,is_open_now,latitude,longitude\n";
+      const sampleRow = '"Joe\'s Pizza","joes-pizza","Best pizza in town","123 Main St","Springfield","IL","62701","(555) 123-4567","info@joespizza.com","https://joespizza.com","https://example.com/pizza.jpg","category-uuid","4.5","200","$$","true","true","true","39.7817","-89.6501"\n';
       const csvContent = csvHeader + sampleRow;
       
       res.setHeader('Content-Type', 'text/csv');
@@ -376,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Helper function to process CSV data
-  const processCsvData = async (csvData: string, tableName: string, subdomainId?: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
+  const processCsvData = async (csvData: string, tableName: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
     return new Promise((resolve, reject) => {
       const results: any[] = [];
       const stream = Readable.from([csvData]);
@@ -405,7 +337,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         slug: row.slug,
                         description: row.description || null,
                         parentId: row.parent_id || null,
-                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         sortOrder: parseInt(row.sort_order) || 0
                       });
@@ -423,7 +354,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         description: row.description || null,
                         logoUrl: row.logo_url || null,
                         websiteUrl: row.website_url || null,
-                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         featured: row.featured === 'true'
                       });
@@ -446,7 +376,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         reviewCount: row.review_count ? parseInt(row.review_count) : 0,
                         storeId: row.store_id,
                         categoryId: row.category_id,
-                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true',
                         isFeatured: row.is_featured === 'true',
                         freeShipping: row.free_shipping === 'true',
@@ -472,118 +401,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         sku: row.sku || null,
                         imageUrl: row.image_url || null,
                         categoryId: row.category_id,
-                        subdomainId: row.subdomain_id || subdomainId,
                         isActive: row.is_active === 'true'
                       });
                     } catch (error) {
                       // If creation fails due to duplicate constraint, skip
-                      isDuplicate = true;
-                    }
-                    break;
-
-                  case 'video-channels':
-                    try {
-                      await storage.createVideoChannel({
-                        title: row.title,
-                        description: row.description || null,
-                        thumbnailUrl: row.thumbnail_url,
-                        channelUrl: row.channel_url,
-                        videoCount: row.video_count ? parseInt(row.video_count) : 0,
-                        followerCount: row.follower_count ? parseInt(row.follower_count) : 0,
-                        tags: row.tags ? JSON.parse(row.tags) : [],
-                        subdomainId: row.subdomain_id || subdomainId,
-                        isActive: row.is_active === 'true'
-                      });
-                    } catch (error) {
-                      isDuplicate = true;
-                    }
-                    break;
-
-                  case 'posts':
-                    try {
-                      await storage.createPost({
-                        title: row.title,
-                        content: row.content,
-                        author: row.author,
-                        subreddit: row.subreddit || null,
-                        imageUrl: row.image_url || null,
-                        postUrl: row.post_url,
-                        upvotes: row.upvotes ? parseInt(row.upvotes) : 0,
-                        commentCount: row.comment_count ? parseInt(row.comment_count) : 0,
-                        tags: row.tags ? JSON.parse(row.tags) : [],
-                        subdomainId: row.subdomain_id || subdomainId,
-                        isActive: row.is_active === 'true'
-                      });
-                    } catch (error) {
-                      isDuplicate = true;
-                    }
-                    break;
-
-                  case 'blogs':
-                    try {
-                      await storage.createBlog({
-                        title: row.title,
-                        description: row.description || null,
-                        excerpt: row.excerpt || null,
-                        author: row.author,
-                        website: row.website || null,
-                        websiteUrl: row.website_url || null,
-                        blogUrl: row.blog_url,
-                        imageUrl: row.image_url || null,
-                        publishDate: row.publish_date || null,
-                        readTime: row.read_time || null,
-                        category: row.category || null,
-                        tags: row.tags ? JSON.parse(row.tags) : [],
-                        subdomainId: row.subdomain_id || subdomainId,
-                        isActive: row.is_active === 'true'
-                      });
-                    } catch (error) {
-                      isDuplicate = true;
-                    }
-                    break;
-
-                  case 'business-categories':
-                    try {
-                      await storage.createBusinessCategory({
-                        name: row.name,
-                        slug: row.slug,
-                        description: row.description || null,
-                        iconName: row.icon_name || null,
-                        subdomainId: row.subdomain_id || subdomainId,
-                        isActive: row.is_active === 'true',
-                        sortOrder: row.sort_order ? parseInt(row.sort_order) : 0
-                      });
-                    } catch (error) {
-                      isDuplicate = true;
-                    }
-                    break;
-
-                  case 'businesses':
-                    try {
-                      await storage.createBusiness({
-                        name: row.name,
-                        slug: row.slug,
-                        description: row.description || null,
-                        address: row.address || null,
-                        city: row.city || null,
-                        state: row.state || null,
-                        zipCode: row.zip_code || null,
-                        phone: row.phone || null,
-                        email: row.email || null,
-                        website: row.website || null,
-                        imageUrl: row.image_url || null,
-                        businessCategoryId: row.business_category_id,
-                        subdomainId: row.subdomain_id || subdomainId,
-                        rating: row.rating ? parseFloat(row.rating) : null,
-                        reviewCount: row.review_count ? parseInt(row.review_count) : 0,
-                        priceRange: row.price_range || null,
-                        isActive: row.is_active === 'true',
-                        isFeatured: row.is_featured === 'true',
-                        isOpenNow: row.is_open_now === 'true',
-                        latitude: row.latitude ? parseFloat(row.latitude) : null,
-                        longitude: row.longitude ? parseFloat(row.longitude) : null
-                      });
-                    } catch (error) {
                       isDuplicate = true;
                     }
                     break;
@@ -637,7 +458,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const filename = req.file.originalname;
       const tableName = getTableFromFilename(filename);
-      const subdomainId = req.body.subdomainId;
 
       if (!tableName) {
         return res.status(400).json({
@@ -646,15 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      if (!subdomainId) {
-        return res.status(400).json({
-          success: false,
-          message: "subdomainId is required for data import"
-        });
-      }
-
       const csvData = req.file.buffer.toString('utf-8');
-      const result = await processCsvData(csvData, tableName, subdomainId);
+      const result = await processCsvData(csvData, tableName);
 
       res.json({
         success: true,
@@ -714,479 +527,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: `Failed to process remote CSV: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
-    }
-  });
-
-  // DataEntry API endpoints for table management
-  app.get("/api/admin/table-data/:tableName", async (req, res) => {
-    try {
-      const { tableName } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 10;
-      const offset = (page - 1) * pageSize;
-
-      // Map frontend table names to actual database table names
-      const tableMap: Record<string, any> = {
-        'categories': categories,
-        'stores': stores, 
-        'deals': deals,
-        'products': products,
-        'video_channels': videoChannels,
-        'posts': posts,
-        'youtube_videos': youtubeVideos,
-        'blogs': blogs,
-        'advertisement_banners': advertisementBanners,
-        'banner_settings': bannerSettings,
-        'page_views': pageViews,
-        'click_thru': clickThru,
-        'subdomains': subdomains,
-        'business_categories': businessCategories,
-        'businesses': businesses,
-        'business_hours': businessHours,
-        'business_reviews': businessReviews,
-        'business_photos': businessPhotos,
-        'users': users,
-        'newsletter_subscribers': newsletterSubscribers,
-        'newsletter_popup_settings': newsletterPopupSettings,
-        'user_favorites': userFavorites,
-        'site_settings': siteSettings
-      };
-
-      const table = tableMap[tableName];
-      if (!table) {
-        return res.status(400).json({ error: "Invalid table name" });
-      }
-
-      // Get total count
-      const totalCountResult = await db.select({ count: sql<number>`count(*)` }).from(table);
-      const total = totalCountResult[0]?.count || 0;
-
-      // Get paginated data
-      const data = await db.select().from(table).limit(pageSize).offset(offset);
-
-      res.json({
-        data,
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize)
-      });
-    } catch (error) {
-      console.error("Error fetching table data:", error);
-      res.status(500).json({ error: "Failed to fetch table data" });
-    }
-  });
-
-  app.get("/api/admin/table-schema/:tableName", async (req, res) => {
-    try {
-      const { tableName } = req.params;
-      
-      // Define field types for each table to help with form generation
-      const schemaMap: Record<string, Record<string, any>> = {
-        'categories': {
-          name: { type: 'text', required: true },
-          slug: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          parentId: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false },
-          sortOrder: { type: 'number', required: false }
-        },
-        'stores': {
-          name: { type: 'text', required: true },
-          slug: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          logoUrl: { type: 'text', required: false },
-          websiteUrl: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false },
-          featured: { type: 'boolean', required: false }
-        },
-        'deals': {
-          title: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          originalPrice: { type: 'number', required: false },
-          salePrice: { type: 'number', required: true },
-          discountPercent: { type: 'number', required: false },
-          couponCode: { type: 'text', required: false },
-          dealUrl: { type: 'text', required: true },
-          imageUrl: { type: 'text', required: false },
-          rating: { type: 'number', required: false },
-          reviewCount: { type: 'number', required: false },
-          storeId: { type: 'text', required: true },
-          categoryId: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false },
-          isFeatured: { type: 'boolean', required: false },
-          freeShipping: { type: 'boolean', required: false },
-          editorInsights: { type: 'textarea', required: false },
-          howToGetIt: { type: 'textarea', required: false },
-          expiresAt: { type: 'datetime-local', required: false },
-          authorName: { type: 'text', required: false }
-        },
-        'products': {
-          name: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          brand: { type: 'text', required: false },
-          model: { type: 'text', required: false },
-          sku: { type: 'text', required: false },
-          imageUrl: { type: 'text', required: false },
-          categoryId: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'video_channels': {
-          title: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          thumbnailUrl: { type: 'text', required: true },
-          channelUrl: { type: 'text', required: true },
-          videoCount: { type: 'number', required: false },
-          followerCount: { type: 'number', required: false },
-          tags: { type: 'textarea', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'posts': {
-          title: { type: 'text', required: true },
-          content: { type: 'textarea', required: true },
-          author: { type: 'text', required: true },
-          subreddit: { type: 'text', required: false },
-          imageUrl: { type: 'text', required: false },
-          postUrl: { type: 'text', required: true },
-          upvotes: { type: 'number', required: false },
-          commentCount: { type: 'number', required: false },
-          tags: { type: 'textarea', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'youtube_videos': {
-          title: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          channelName: { type: 'text', required: true },
-          channelUrl: { type: 'text', required: true },
-          videoUrl: { type: 'text', required: true },
-          thumbnailUrl: { type: 'text', required: true },
-          duration: { type: 'text', required: false },
-          viewCount: { type: 'number', required: false },
-          uploadDate: { type: 'text', required: false },
-          tags: { type: 'textarea', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'blogs': {
-          title: { type: 'text', required: true },
-          description: { type: 'textarea', required: true },
-          excerpt: { type: 'textarea', required: true },
-          author: { type: 'text', required: true },
-          website: { type: 'text', required: true },
-          websiteUrl: { type: 'text', required: true },
-          blogUrl: { type: 'text', required: true },
-          imageUrl: { type: 'text', required: true },
-          publishDate: { type: 'text', required: true },
-          readTime: { type: 'text', required: true },
-          category: { type: 'text', required: true },
-          tags: { type: 'textarea', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'advertisement_banners': {
-          content: { type: 'textarea', required: true },
-          backgroundColor: { type: 'text', required: false },
-          textColor: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false },
-          impressionLimit: { type: 'number', required: false },
-          currentImpressions: { type: 'number', required: false }
-        },
-        'banner_settings': {
-          pageUrl: { type: 'text', required: true },
-          showBanner: { type: 'boolean', required: false },
-          isVisible: { type: 'boolean', required: false }
-        },
-        'users': {
-          username: { type: 'text', required: true },
-          email: { type: 'text', required: true },
-          password: { type: 'text', required: true },
-          isActive: { type: 'boolean', required: false }
-        },
-        'newsletter_subscribers': {
-          email: { type: 'text', required: true },
-          signupMethod: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'businesses': {
-          name: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          address: { type: 'text', required: false },
-          phone: { type: 'text', required: false },
-          website: { type: 'text', required: false },
-          email: { type: 'text', required: false },
-          categoryId: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'business_categories': {
-          name: { type: 'text', required: true },
-          slug: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          iconName: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false },
-          isActive: { type: 'boolean', required: false },
-          sortOrder: { type: 'number', required: false }
-        },
-        'business_hours': {
-          businessId: { type: 'text', required: true },
-          dayOfWeek: { type: 'number', required: true },
-          openTime: { type: 'time', required: false },
-          closeTime: { type: 'time', required: false },
-          subdomainId: { type: 'text', required: false },
-          isClosed: { type: 'boolean', required: false }
-        },
-        'business_reviews': {
-          businessId: { type: 'text', required: true },
-          rating: { type: 'number', required: true },
-          reviewText: { type: 'textarea', required: false },
-          reviewerName: { type: 'text', required: true },
-          reviewerEmail: { type: 'text', required: false },
-          subdomainId: { type: 'text', required: false }
-        },
-        'business_photos': {
-          businessId: { type: 'text', required: true },
-          imageUrl: { type: 'text', required: true },
-          caption: { type: 'text', required: false },
-          isPrimary: { type: 'boolean', required: false },
-          subdomainId: { type: 'text', required: false }
-        },
-        'click_thru': {
-          pageName: { type: 'text', required: true },
-          pageUrl: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false },
-          advertisementId: { type: 'text', required: true },
-          advertisementTitle: { type: 'text', required: true },
-          advertisementClickUrl: { type: 'text', required: true },
-          bannerPosition: { type: 'text', required: true },
-          ipAddress: { type: 'text', required: true },
-          userAgent: { type: 'text', required: false }
-        },
-        'newsletter_popup_settings': {
-          isEnabled: { type: 'boolean', required: false },
-          popupType: { type: 'select', required: true, options: [
-            { value: 'dark', label: 'Dark' },
-            { value: 'light', label: 'Light' }
-          ]},
-          showDelay: { type: 'number', required: false },
-          showOnPages: { type: 'textarea', required: false, help: 'JSON array of page URLs' },
-          frequency: { type: 'select', required: false, options: [
-            { value: 'once_per_session', label: 'Once Per Session' },
-            { value: 'daily', label: 'Daily' },
-            { value: 'always', label: 'Always' }
-          ]}
-        },
-        'page_views': {
-          pageName: { type: 'text', required: true },
-          pageUrl: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false },
-          ipAddress: { type: 'text', required: true },
-          userAgent: { type: 'text', required: false }
-        },
-        'site_settings': {
-          siteName: { type: 'text', required: true },
-          siteDescription: { type: 'textarea', required: false },
-          logoUrl: { type: 'text', required: false },
-          faviconUrl: { type: 'text', required: false },
-          primaryColor: { type: 'color', required: false },
-          secondaryColor: { type: 'color', required: false }
-        },
-        'subdomains': {
-          subdomain: { type: 'text', required: true },
-          displayName: { type: 'text', required: true },
-          description: { type: 'textarea', required: false },
-          isActive: { type: 'boolean', required: false }
-        },
-        'user_favorites': {
-          userId: { type: 'text', required: true },
-          dealId: { type: 'text', required: true },
-          pageUrl: { type: 'text', required: true },
-          subdomainId: { type: 'text', required: false }
-        }
-      };
-
-      const schema = schemaMap[tableName];
-      if (!schema) {
-        return res.status(400).json({ error: "Schema not found for table" });
-      }
-
-      res.json(schema);
-    } catch (error) {
-      console.error("Error fetching table schema:", error);
-      res.status(500).json({ error: "Failed to fetch table schema" });
-    }
-  });
-
-  app.post("/api/admin/table-data/:tableName", async (req, res) => {
-    try {
-      const { tableName } = req.params;
-      const data = req.body;
-
-      // Use the existing storage methods where available
-      switch (tableName) {
-        case 'categories':
-          const category = await storage.createCategory(data);
-          res.json(category);
-          break;
-        case 'stores':
-          const store = await storage.createStore(data);
-          res.json(store);
-          break;
-        case 'deals':
-          const deal = await storage.createDeal(data);
-          res.json(deal);
-          break;
-        case 'products':
-          const product = await storage.createProduct(data);
-          res.json(product);
-          break;
-        default:
-          // Generic table insert for all other tables
-          const tableMap: Record<string, any> = {
-            'video_channels': videoChannels,
-            'posts': posts,
-            'youtube_videos': youtubeVideos,
-            'blogs': blogs,
-            'advertisement_banners': advertisementBanners,
-            'banner_settings': bannerSettings,
-            'page_views': pageViews,
-            'click_thru': clickThru,
-            'subdomains': subdomains,
-            'business_categories': businessCategories,
-            'businesses': businesses,
-            'business_hours': businessHours,
-            'business_reviews': businessReviews,
-            'business_photos': businessPhotos,
-            'users': users,
-            'newsletter_subscribers': newsletterSubscribers,
-            'newsletter_popup_settings': newsletterPopupSettings,
-            'user_favorites': userFavorites,
-            'site_settings': siteSettings
-          };
-
-          const table = tableMap[tableName];
-          if (!table) {
-            return res.status(400).json({ error: "Invalid table name" });
-          }
-
-          // Remove timestamp fields that shouldn't be set manually
-          delete data.createdAt;
-          delete data.updatedAt;
-
-          const result = await db.insert(table)
-            .values(data)
-            .returning();
-
-          const newRecord = Array.isArray(result) ? result[0] : result;
-          res.json(newRecord);
-          break;
-      }
-    } catch (error) {
-      console.error("Error creating record:", error);
-      res.status(500).json({ error: "Failed to create record" });
-    }
-  });
-
-  app.put("/api/admin/table-data/:tableName/:id", async (req, res) => {
-    try {
-      const { tableName, id } = req.params;
-      const data = req.body;
-
-      const tableMap: Record<string, any> = {
-        'categories': categories,
-        'stores': stores,
-        'deals': deals,
-        'products': products,
-        'video_channels': videoChannels,
-        'posts': posts,
-        'youtube_videos': youtubeVideos,
-        'blogs': blogs,
-        'advertisement_banners': advertisementBanners,
-        'banner_settings': bannerSettings,
-        'page_views': pageViews,
-        'click_thru': clickThru,
-        'subdomains': subdomains,
-        'business_categories': businessCategories,
-        'businesses': businesses,
-        'business_hours': businessHours,
-        'business_reviews': businessReviews,
-        'business_photos': businessPhotos,
-        'users': users,
-        'newsletter_subscribers': newsletterSubscribers,
-        'newsletter_popup_settings': newsletterPopupSettings,
-        'user_favorites': userFavorites,
-        'site_settings': siteSettings
-      };
-
-      const table = tableMap[tableName];
-      if (!table) {
-        return res.status(400).json({ error: "Invalid table name" });
-      }
-
-      // Remove timestamp fields that shouldn't be updated manually
-      delete data.createdAt;
-      delete data.updatedAt;
-      delete data.id;
-
-      const [updatedRecord] = await db.update(table)
-        .set(data)
-        .where(eq(table.id, id))
-        .returning();
-
-      res.json(updatedRecord);
-    } catch (error) {
-      console.error("Error updating record:", error);
-      res.status(500).json({ error: "Failed to update record" });
-    }
-  });
-
-  app.delete("/api/admin/table-data/:tableName/:id", async (req, res) => {
-    try {
-      const { tableName, id } = req.params;
-
-      const tableMap: Record<string, any> = {
-        'categories': categories,
-        'stores': stores,
-        'deals': deals,
-        'products': products,
-        'video_channels': videoChannels,
-        'posts': posts,
-        'youtube_videos': youtubeVideos,
-        'blogs': blogs,
-        'advertisement_banners': advertisementBanners,
-        'banner_settings': bannerSettings,
-        'page_views': pageViews,
-        'click_thru': clickThru,
-        'subdomains': subdomains,
-        'business_categories': businessCategories,
-        'businesses': businesses,
-        'business_hours': businessHours,
-        'business_reviews': businessReviews,
-        'business_photos': businessPhotos,
-        'users': users,
-        'newsletter_subscribers': newsletterSubscribers,
-        'newsletter_popup_settings': newsletterPopupSettings,
-        'user_favorites': userFavorites,
-        'site_settings': siteSettings
-      };
-
-      const table = tableMap[tableName];
-      if (!table) {
-        return res.status(400).json({ error: "Invalid table name" });
-      }
-
-      await db.delete(table).where(eq(table.id, id));
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting record:", error);
-      res.status(500).json({ error: "Failed to delete record" });
     }
   });
 
@@ -1278,25 +618,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {
-      const subdomainString = getSubdomainFromRequest(req);
-      
-      // If subdomain is specified in query, always filter by subdomain
-      let categoriesData;
-      if (subdomainString) {
-        const subdomainId = await getSubdomainId(subdomainString);
-        if (subdomainId) {
-          // Subdomain exists, filter by it
-          categoriesData = await db.select().from(categories).where(eq(categories.subdomainId, subdomainId));
-        } else {
-          // Subdomain specified but doesn't exist, return empty results
-          categoriesData = [];
-        }
-      } else {
-        // No subdomain specified, use main site data
-        categoriesData = await storage.getCategoriesWithChildren();
-      }
-      
-      res.json(categoriesData);
+      const categories = await storage.getCategoriesWithChildren();
+      res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Failed to fetch categories" });
@@ -1319,25 +642,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stores
   app.get("/api/stores", async (req, res) => {
     try {
-      const subdomainString = getSubdomainFromRequest(req);
-      
-      // If subdomain is specified in query, always filter by subdomain
-      let storesData;
-      if (subdomainString) {
-        const subdomainId = await getSubdomainId(subdomainString);
-        if (subdomainId) {
-          // Subdomain exists, filter by it
-          storesData = await db.select().from(stores).where(eq(stores.subdomainId, subdomainId));
-        } else {
-          // Subdomain specified but doesn't exist, return empty results
-          storesData = [];
-        }
-      } else {
-        // No subdomain specified, use main site data
-        storesData = await storage.getStores();
-      }
-      
-      res.json(storesData);
+      const stores = await storage.getStores();
+      res.json(stores);
     } catch (error) {
       console.error("Error fetching stores:", error);
       res.status(500).json({ error: "Failed to fetch stores" });
@@ -1346,20 +652,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/stores/featured", async (req, res) => {
     try {
-      // const subdomainString = getSubdomainFromRequest(req);
-      // const subdomainId = await getSubdomainId(subdomainString);
-      
-      // If subdomain is specified, filter by it; otherwise get all featured stores
-      let featuredStores;
-      if (req.subdomain) {
-        featuredStores = await db.select().from(stores)
-          // .where(sql`${stores.subdomainId} = ${req.subdomain} AND ${stores.isFeatured} = true`);
-          .where(and(eq(stores.isActive, true), eq(stores.featured, true), eq(stores.subdomainId, req.subdomain)));
-      } else {
-        featuredStores = await storage.getFeaturedStores();
-      }
-      
-      res.json(featuredStores);
+      const stores = await storage.getFeaturedStores();
+      res.json(stores);
     } catch (error) {
       console.error("Error fetching featured stores:", error);
       res.status(500).json({ error: "Failed to fetch featured stores" });
@@ -1397,25 +691,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/deals", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 50;
-      const subdomainString = getSubdomainFromRequest(req);
-      
-      // If subdomain is specified in query, always filter by subdomain
-      let dealsData;
-      if (subdomainString) {
-        const subdomainId = await getSubdomainId(subdomainString);
-        if (subdomainId) {
-          // Subdomain exists, filter by it
-          dealsData = await db.select().from(deals).where(eq(deals.subdomainId, subdomainId)).limit(limit);
-        } else {
-          // Subdomain specified but doesn't exist, return empty results
-          dealsData = [];
-        }
-      } else {
-        // No subdomain specified, use main site data
-        dealsData = await storage.getDeals(limit);
-      }
-      
-      res.json(dealsData);
+      const deals = await storage.getDeals(limit);
+      res.json(deals);
     } catch (error) {
       console.error("Error fetching deals:", error);
       res.status(500).json({ error: "Failed to fetch deals" });
@@ -1425,20 +702,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/deals/featured", async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
-      
-      // If subdomain is specified, filter by it; otherwise get all featured deals
-      let featuredDeals;
-      if (subdomainId) {
-        featuredDeals = await db.select().from(deals)
-          .where(sql`${deals.subdomainId} = ${subdomainId} AND ${deals.isFeatured} = true`)
-          .limit(limit);
-      } else {
-        featuredDeals = await storage.getFeaturedDeals(limit);
-      }
-      
-      res.json(featuredDeals);
+      const deals = await storage.getFeaturedDeals(limit);
+      res.json(deals);
     } catch (error) {
       console.error("Error fetching featured deals:", error);
       res.status(500).json({ error: "Failed to fetch featured deals" });
@@ -1557,19 +822,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/video-channels", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
-      
-      let channelsData;
-      if (subdomainId) {
-        channelsData = await db.select().from(videoChannels)
-          .where(eq(videoChannels.subdomainId, subdomainId))
-          .limit(limit);
-      } else {
-        channelsData = await storage.getVideoChannels(limit);
-      }
-      
-      res.json(channelsData);
+      const channels = await storage.getVideoChannels(limit);
+      res.json(channels);
     } catch (error) {
       console.error("Error fetching video channels:", error);
       res.status(500).json({ error: "Failed to fetch video channels" });
@@ -1594,31 +848,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const query = req.query.q as string;
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
       
-      let postsData;
-      if (subdomainId) {
-        // Filter by subdomain using direct database query
-        if (query) {
-          postsData = await db.select().from(posts)
-            .where(sql`${posts.subdomainId} = ${subdomainId} AND (${posts.title} ILIKE ${'%' + query + '%'} OR ${posts.content} ILIKE ${'%' + query + '%'})`)
-            .limit(limit);
-        } else {
-          postsData = await db.select().from(posts)
-            .where(eq(posts.subdomainId, subdomainId))
-            .limit(limit);
-        }
+      let posts;
+      if (query) {
+        posts = await storage.searchPosts(query, limit);
       } else {
-        // Use storage methods for main site
-        if (query) {
-          postsData = await storage.searchPosts(query, limit);
-        } else {
-          postsData = await storage.getPosts(limit);
-        }
+        posts = await storage.getPosts(limit);
       }
       
-      res.json(postsData);
+      res.json(posts);
     } catch (error) {
       console.error("Error fetching posts:", error);
       res.status(500).json({ error: "Failed to fetch posts" });
@@ -1643,31 +881,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const search = req.query.search as string;
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
       
-      let videosData;
-      if (subdomainId) {
-        // Filter by subdomain using direct database query
-        if (search) {
-          videosData = await db.select().from(youtubeVideos)
-            .where(sql`${youtubeVideos.subdomainId} = ${subdomainId} AND (${youtubeVideos.title} ILIKE ${'%' + search + '%'} OR ${youtubeVideos.description} ILIKE ${'%' + search + '%'})`)
-            .limit(limit);
-        } else {
-          videosData = await db.select().from(youtubeVideos)
-            .where(eq(youtubeVideos.subdomainId, subdomainId))
-            .limit(limit);
-        }
+      let videos;
+      if (search) {
+        videos = await storage.searchYoutubeVideos(search, limit);
       } else {
-        // Use storage methods for main site
-        if (search) {
-          videosData = await storage.searchYoutubeVideos(search, limit);
-        } else {
-          videosData = await storage.getYoutubeVideos(limit);
-        }
+        videos = await storage.getYoutubeVideos(limit);
       }
       
-      res.json(videosData);
+      res.json(videos);
     } catch (error) {
       console.error("Error fetching YouTube videos:", error);
       res.status(500).json({ error: "Failed to fetch YouTube videos" });
@@ -1692,31 +914,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const search = req.query.search as string;
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
       
-      let blogsData;
-      if (subdomainId) {
-        // Filter by subdomain using direct database query
-        if (search) {
-          blogsData = await db.select().from(blogs)
-            .where(sql`${blogs.subdomainId} = ${subdomainId} AND (${blogs.title} ILIKE ${'%' + search + '%'} OR ${blogs.description} ILIKE ${'%' + search + '%'})`)
-            .limit(limit);
-        } else {
-          blogsData = await db.select().from(blogs)
-            .where(eq(blogs.subdomainId, subdomainId))
-            .limit(limit);
-        }
+      let blogs;
+      if (search) {
+        blogs = await storage.searchBlogs(search, limit);
       } else {
-        // Use storage methods for main site
-        if (search) {
-          blogsData = await storage.searchBlogs(search, limit);
-        } else {
-          blogsData = await storage.getBlogs(limit);
-        }
+        blogs = await storage.getBlogs(limit);
       }
       
-      res.json(blogsData);
+      res.json(blogs);
     } catch (error) {
       console.error("Error fetching blogs:", error);
       res.status(500).json({ error: "Failed to fetch blogs" });
@@ -1945,18 +1151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Directory Business Categories API
   app.get("/api/business-categories", async (req, res) => {
     try {
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
-      
-      let categoriesData;
-      if (subdomainId) {
-        categoriesData = await db.select().from(businessCategories)
-          .where(eq(businessCategories.subdomainId, subdomainId));
-      } else {
-        categoriesData = await storage.getBusinessCategories();
-      }
-      
-      res.json(categoriesData);
+      const categories = await storage.getBusinessCategories();
+      res.json(categories);
     } catch (error) {
       console.error("Error fetching business categories:", error);
       res.status(500).json({ error: "Failed to fetch business categories" });
@@ -1984,39 +1180,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = req.query.location as string;
       const category = req.query.category as string;
       const featured = req.query.featured === "true";
-      const subdomainString = getSubdomainFromRequest(req);
-      const subdomainId = await getSubdomainId(subdomainString);
       
-      let businessesData;
-      if (subdomainId) {
-        // Filter by subdomain using direct database query
-        if (search) {
-          businessesData = await db.select().from(businesses)
-            .where(sql`${businesses.subdomainId} = ${subdomainId} AND (${businesses.name} ILIKE ${'%' + search + '%'} OR ${businesses.description} ILIKE ${'%' + search + '%'})`)
-            .limit(limit);
-        } else if (featured) {
-          businessesData = await db.select().from(businesses)
-            .where(sql`${businesses.subdomainId} = ${subdomainId} AND ${businesses.isActive} = true`)
-            .limit(limit);
-        } else {
-          businessesData = await db.select().from(businesses)
-            .where(eq(businesses.subdomainId, subdomainId))
-            .limit(limit);
-        }
+      let businesses;
+      if (search) {
+        businesses = await storage.searchBusinesses(search, location, limit);
+      } else if (category) {
+        businesses = await storage.getBusinessesByCategory(category, limit);
+      } else if (featured) {
+        businesses = await storage.getFeaturedBusinesses(limit);
       } else {
-        // Use storage methods for main site
-        if (search) {
-          businessesData = await storage.searchBusinesses(search, location, limit);
-        } else if (category) {
-          businessesData = await storage.getBusinessesByCategory(category, limit);
-        } else if (featured) {
-          businessesData = await storage.getFeaturedBusinesses(limit);
-        } else {
-          businessesData = await storage.getBusinesses(limit);
-        }
+        businesses = await storage.getBusinesses(limit);
       }
       
-      res.json(businessesData);
+      res.json(businesses);
     } catch (error) {
       console.error("Error fetching businesses:", error);
       res.status(500).json({ error: "Failed to fetch businesses" });
@@ -2457,23 +1633,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Subdomains API endpoints
-  app.get('/api/subdomains', async (req, res) => {
-    try {
-      const subdomainsList = await storage.getSubdomains();
-      res.json(subdomainsList);
-    } catch (error) {
-      console.error('Error getting subdomains:', error);
-      res.status(500).json({ error: 'Failed to get subdomains' });
-    }
-  });
-
   // Analytics endpoints
   app.get('/api/analytics/page-views', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const subdomainId = req.query.subdomain as string;
-      const analytics = await storage.getPageViewAnalytics(days, subdomainId);
+      const analytics = await storage.getPageViewAnalytics(days);
       res.json(analytics);
     } catch (error) {
       console.error('Error getting page view analytics:', error);
@@ -2484,8 +1648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/click-thru', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const subdomainId = req.query.subdomain as string;
-      const analytics = await storage.getClickThruAnalytics(days, subdomainId);
+      const analytics = await storage.getClickThruAnalytics(days);
       res.json(analytics);
     } catch (error) {
       console.error('Error getting click-through analytics:', error);
@@ -2496,8 +1659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/daily-summary', async (req, res) => {
     try {
       const days = req.query.days ? parseInt(req.query.days as string) : 7;
-      const subdomainId = req.query.subdomain as string;
-      const summary = await storage.getDailySummary(days, subdomainId);
+      const summary = await storage.getDailySummary(days);
       res.json(summary);
     } catch (error) {
       console.error('Error getting daily summary:', error);

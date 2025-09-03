@@ -15,6 +15,13 @@
       "when": 1756753390682,
       "tag": "0001_premium_toro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1756921602246,
+      "tag": "0002_fearless_eddie_brock",
+      "breakpoints": true
     }
   ]
 }

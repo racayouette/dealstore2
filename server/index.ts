@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { tenantDb } from "./db";
+import { setTenant } from "./db-context";
 
 const app = express();
 app.use(express.json());
@@ -26,6 +28,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
   next();
 });
+
+// middleware/tenant.ts
+
+export function tenantMiddleware(req: any, res: any, next: any) {
+  const subdomainId = req.subdomain || "bagpack";
+  if (!subdomainId) {
+    return res.status(400).json({ error: "Missing subdomainId" });
+  }
+
+  setTenant(subdomainId, async () => {
+    await next();
+  });
+}
+
+app.use(tenantMiddleware);
+
 
 app.use((req, res, next) => {
   const start = Date.now();

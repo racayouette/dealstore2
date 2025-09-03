@@ -51,7 +51,7 @@ function Router() {
   ];
 
   // Find dynamic pages that aren't static routes
-  const dynamicPages = bannerSettings.filter((setting: any) => 
+  const dynamicPages = bannerSettings?.filter((setting: any) => 
     !staticRoutes.includes(setting.pageUrl) && 
     !setting.pageUrl.startsWith('/category/') && 
     !setting.pageUrl.startsWith('/deal/')

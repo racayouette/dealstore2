@@ -180,13 +180,13 @@ export default function AdminLoginPage() {
               </Button>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-gray-700">
+            {/* <div className="mt-6 pt-4 border-t border-gray-700">
               <div className="text-xs text-gray-400 text-center space-y-1">
                 <p>Demo Credentials:</p>
                 <p><span className="text-gray-300">Username:</span> admin</p>
                 <p><span className="text-gray-300">Password:</span> netdiscount2024</p>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 

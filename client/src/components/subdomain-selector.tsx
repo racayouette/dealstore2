@@ -71,7 +71,7 @@ export function SubdomainSelector({
             </SelectItem>
           ))}
           {activeSubdomains.length === 0 && !isLoading && (
-            <SelectItem value="" disabled>
+            <SelectItem value="_" disabled>
               No subdomains available
             </SelectItem>
           )}

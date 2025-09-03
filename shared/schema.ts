@@ -69,6 +69,7 @@ export const products = pgTable("products", {
 export const dealProducts = pgTable("deal_products", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   dealId: uuid("deal_id").notNull(),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   productId: uuid("product_id").notNull(),
 });
 
@@ -213,6 +214,7 @@ export const bannerSettings = pgTable("banner_settings", {
   showBottom: boolean("show_bottom").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
+  subdomainId: text("subdomain_id")
 });
 
 // User favorites table
@@ -234,6 +236,7 @@ export const siteSettings = pgTable("site_settings", {
   id: text("id").primaryKey().default(sql`gen_random_uuid()`),
   siteName: text("site_name").notNull().default("NetDiscount"),
   siteDescription: text("site_description").default("Deal Aggregation Platform"),
+  subdomainId: text("subdomain_id"), // Reference to subdomains table for multi-tenant support
   affiliateDisclosure: text("affiliate_disclosure").default("NetDiscount is supported by savers like you. When you buy through links on our site, we may earn an affiliate commission."),
   createdAt: timestamp("created_at").default(sql`now()`),
   updatedAt: timestamp("updated_at").default(sql`now()`),
@@ -472,6 +475,7 @@ export const newsletterPopupSettings = pgTable("newsletter_popup_settings", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   isEnabled: boolean("is_enabled").default(false),
   popupType: varchar("popup_type", { length: 20 }).notNull().default("dark"), // 'dark' or 'light'
+  subdomainId: text("subdomain_id"), 
   showDelay: integer("show_delay").default(5000), // milliseconds
   showOnPages: text("show_on_pages").array().default([]), // array of page URLs
   frequency: varchar("frequency", { length: 20 }).default("once_per_session"), // 'once_per_session', 'daily', 'always'
@@ -576,7 +580,7 @@ export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscrib
 export type InsertNewsletterPopupSettings = z.infer<typeof insertNewsletterPopupSettingsSchema>;
 
 // Extended types for API responses
-export type DealWithRelations = Deal & {
+export type DealWithRelations = Omit<Deal, 'subdomainId'> & {
   store: Store;
   category: Category;
 };
@@ -586,14 +590,14 @@ export type CategoryWithChildren = Category & {
 };
 
 // Directory extended types for API responses
-export type BusinessWithDetails = Business & {
+export type BusinessWithDetails = Omit<Business, 'subdomainId' > & {
   category: BusinessCategory | null;
   hours: BusinessHours[];
   reviews: BusinessReview[];
   photos: BusinessPhoto[];
 };
 
-export type BusinessWithCategory = Business & {
+export type BusinessWithCategory = Omit<Business, 'subdomainId' > & {
   category: BusinessCategory | null;
 };
 
