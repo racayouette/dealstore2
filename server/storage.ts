@@ -81,27 +81,31 @@ export interface IStorage {
   // ...interface unchanged...
 }
 
-const subdomainId = getTenantId() || "";
 
-console.log('subdomainid ', subdomainId)
 
 export class DatabaseStorage implements IStorage {
+
+  private get subdomainId() {
+    const id = getTenantId();
+    // if (!id) throw new Error("No tenant context found");
+    return id || "";
+  }
   // Categories
   async getCategories(): Promise<Category[]> {
     return await db.select().from(categories)
-      .where(and(eq(categories.isActive, true), eq(categories.subdomainId, subdomainId)))
+      .where(and(eq(categories.isActive, true), eq(categories.subdomainId, this.subdomainId)))
       .orderBy(asc(categories.sortOrder));
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
     const [category] = await db.select().from(categories)
-      .where(and(eq(categories.slug, slug), eq(categories.isActive, true), eq(categories.subdomainId, subdomainId)));
+      .where(and(eq(categories.slug, slug), eq(categories.isActive, true), eq(categories.subdomainId, this.subdomainId)));
     return category || undefined;
   }
 
   async getCategoriesWithChildren(): Promise<CategoryWithChildren[]> {
     const allCategories = await db.select().from(categories)
-      .where(and(eq(categories.isActive, true), eq(categories.subdomainId, subdomainId)))
+      .where(and(eq(categories.isActive, true), eq(categories.subdomainId, this.subdomainId)))
       .orderBy(asc(categories.sortOrder));
     const parentCategories = allCategories.filter(cat => !cat.parentId);
     return parentCategories.map(parent => ({
@@ -112,7 +116,7 @@ export class DatabaseStorage implements IStorage {
 
   async createCategory(category: InsertCategory): Promise<Category> {
     const [newCategory] = await db.insert(categories)
-      .values({ ...category, subdomainId })
+      .values({ ...category, subdomainId: this.subdomainId })
       .returning();
     return newCategory;
   }
@@ -120,19 +124,19 @@ export class DatabaseStorage implements IStorage {
   // Stores
   async getStores(): Promise<Store[]> {
     return await db.select().from(stores)
-      .where(and(eq(stores.isActive, true), eq(stores.subdomainId, subdomainId)))
+      .where(and(eq(stores.isActive, true), eq(stores.subdomainId, this.subdomainId)))
       .orderBy(asc(stores.name));
   }
 
   async getStoreBySlug(slug: string): Promise<Store | undefined> {
     const [store] = await db.select().from(stores)
-      .where(and(eq(stores.slug, slug), eq(stores.isActive, true), eq(stores.subdomainId, subdomainId)));
+      .where(and(eq(stores.slug, slug), eq(stores.isActive, true), eq(stores.subdomainId, this.subdomainId)));
     return store || undefined;
   }
 
   async getFeaturedStores(): Promise<Store[]> {
     return await db.select().from(stores)
-      .where(and(eq(stores.isActive, true), eq(stores.featured, true), eq(stores.subdomainId, subdomainId)));
+      .where(and(eq(stores.isActive, true), eq(stores.featured, true), eq(stores.subdomainId, this.subdomainId)));
   }
 
   async getStoresByLetter(letter: string): Promise<Store[]> {
@@ -140,7 +144,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(stores)
       .where(and(
         eq(stores.isActive, true),
-        eq(stores.subdomainId, subdomainId),
+        eq(stores.subdomainId, this.subdomainId),
         sql`${stores.name} ~* ${pattern}`
       ))
       .orderBy(asc(stores.name));
@@ -148,7 +152,7 @@ export class DatabaseStorage implements IStorage {
 
   async createStore(store: InsertStore): Promise<Store> {
     const [newStore] = await db.insert(stores)
-      .values({ ...store, subdomainId })
+      .values({ ...store, subdomainId: this.subdomainId })
       .returning();
     return newStore;
   }
@@ -185,7 +189,7 @@ export class DatabaseStorage implements IStorage {
     .from(deals)
     .innerJoin(stores, eq(deals.storeId, stores.id))
     .innerJoin(categories, eq(deals.categoryId, categories.id))
-    .where(and(eq(deals.isActive, true), eq(deals.subdomainId, subdomainId)))
+    .where(and(eq(deals.isActive, true), eq(deals.subdomainId, this.subdomainId)))
     .orderBy(desc(deals.createdAt))
     .limit(limit);
   }
@@ -221,7 +225,7 @@ export class DatabaseStorage implements IStorage {
     .from(deals)
     .innerJoin(stores, eq(deals.storeId, stores.id))
     .innerJoin(categories, eq(deals.categoryId, categories.id))
-    .where(and(eq(deals.id, id), eq(deals.isActive, true), eq(deals.subdomainId, subdomainId)));
+    .where(and(eq(deals.id, id), eq(deals.isActive, true), eq(deals.subdomainId, this.subdomainId)));
     return deal || undefined;
   }
 
@@ -256,7 +260,7 @@ export class DatabaseStorage implements IStorage {
     .from(deals)
     .innerJoin(stores, eq(deals.storeId, stores.id))
     .innerJoin(categories, eq(deals.categoryId, categories.id))
-    .where(and(eq(deals.isActive, true), eq(deals.isFeatured, true), eq(deals.subdomainId, subdomainId)))
+    .where(and(eq(deals.isActive, true), eq(deals.isFeatured, true), eq(deals.subdomainId, this.subdomainId)))
     .orderBy(desc(deals.createdAt))
     .limit(limit);
   }
@@ -292,7 +296,7 @@ export class DatabaseStorage implements IStorage {
     .from(deals)
     .innerJoin(stores, eq(deals.storeId, stores.id))
     .innerJoin(categories, eq(deals.categoryId, categories.id))
-    .where(and(eq(deals.isActive, true), eq(categories.slug, categorySlug), eq(deals.subdomainId, subdomainId)))
+    .where(and(eq(deals.isActive, true), eq(categories.slug, categorySlug), eq(deals.subdomainId, this.subdomainId)))
     .orderBy(desc(deals.createdAt))
     .limit(limit);
   }
@@ -328,7 +332,7 @@ export class DatabaseStorage implements IStorage {
     .from(deals)
     .innerJoin(stores, eq(deals.storeId, stores.id))
     .innerJoin(categories, eq(deals.categoryId, categories.id))
-    .where(and(eq(deals.isActive, true), eq(stores.slug, storeSlug), eq(deals.subdomainId, subdomainId)))
+    .where(and(eq(deals.isActive, true), eq(stores.slug, storeSlug), eq(deals.subdomainId, this.subdomainId)))
     .orderBy(desc(deals.createdAt))
     .limit(limit);
   }
@@ -367,7 +371,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(deals.isActive, true),
       ilike(deals.title, `%${query}%`),
-      eq(deals.subdomainId, subdomainId)
+      eq(deals.subdomainId, this.subdomainId)
     ))
     .orderBy(desc(deals.createdAt))
     .limit(limit);
@@ -375,7 +379,7 @@ export class DatabaseStorage implements IStorage {
 
   async createDeal(deal: InsertDeal): Promise<Deal> {
     const [newDeal] = await db.insert(deals)
-      .values({ ...deal, subdomainId })
+      .values({ ...deal, subdomainId: this.subdomainId })
       .returning();
     return newDeal;
   }
@@ -383,23 +387,23 @@ export class DatabaseStorage implements IStorage {
   // Products
   async getProducts(): Promise<Product[]> {
     return await db.select().from(products)
-      .where(and(eq(products.isActive, true), eq(products.subdomainId, subdomainId)));
+      .where(and(eq(products.isActive, true), eq(products.subdomainId, this.subdomainId)));
   }
 
   async getProductById(id: string): Promise<Product | undefined> {
     const [product] = await db.select().from(products)
-      .where(and(eq(products.id, id), eq(products.isActive, true), eq(products.subdomainId, subdomainId)));
+      .where(and(eq(products.id, id), eq(products.isActive, true), eq(products.subdomainId, this.subdomainId)));
     return product || undefined;
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
     return await db.select().from(products)
-      .where(and(eq(products.categoryId, categoryId), eq(products.isActive, true), eq(products.subdomainId, subdomainId)));
+      .where(and(eq(products.categoryId, categoryId), eq(products.isActive, true), eq(products.subdomainId, this.subdomainId)));
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const [newProduct] = await db.insert(products)
-      .values({ ...product, subdomainId })
+      .values({ ...product, subdomainId: this.subdomainId })
       .returning();
     return newProduct;
   }
@@ -407,7 +411,7 @@ export class DatabaseStorage implements IStorage {
   // Deal Products
   async createDealProduct(dealProduct: InsertDealProduct): Promise<DealProduct> {
     const [newDealProduct] = await db.insert(dealProducts)
-      .values({ ...dealProduct, subdomainId })
+      .values({ ...dealProduct, subdomainId: this.subdomainId })
       .returning();
     return newDealProduct;
   }
@@ -415,20 +419,20 @@ export class DatabaseStorage implements IStorage {
   // Video Channels
   async getVideoChannels(limit = 20): Promise<VideoChannel[]> {
     return await db.select().from(videoChannels)
-      .where(and(eq(videoChannels.isActive, true), eq(videoChannels.subdomainId, subdomainId)))
+      .where(and(eq(videoChannels.isActive, true), eq(videoChannels.subdomainId, this.subdomainId)))
       .orderBy(desc(videoChannels.createdAt))
       .limit(limit);
   }
 
   async getVideoChannelById(id: string): Promise<VideoChannel | undefined> {
     const [channel] = await db.select().from(videoChannels)
-      .where(and(eq(videoChannels.id, id), eq(videoChannels.isActive, true), eq(videoChannels.subdomainId, subdomainId)));
+      .where(and(eq(videoChannels.id, id), eq(videoChannels.isActive, true), eq(videoChannels.subdomainId, this.subdomainId)));
     return channel || undefined;
   }
 
   async createVideoChannel(channel: InsertVideoChannel): Promise<VideoChannel> {
     const [newChannel] = await db.insert(videoChannels)
-      .values({ ...channel, subdomainId })
+      .values({ ...channel, subdomainId: this.subdomainId })
       .returning();
     return newChannel;
   }
@@ -436,14 +440,14 @@ export class DatabaseStorage implements IStorage {
   // Posts
   async getPosts(limit = 20): Promise<Post[]> {
     return await db.select().from(posts)
-      .where(and(eq(posts.isActive, true), eq(posts.subdomainId, subdomainId)))
+      .where(and(eq(posts.isActive, true), eq(posts.subdomainId, this.subdomainId)))
       .orderBy(desc(posts.createdAt))
       .limit(limit);
   }
 
   async getPostById(id: string): Promise<Post | undefined> {
     const [post] = await db.select().from(posts)
-      .where(and(eq(posts.id, id), eq(posts.isActive, true), eq(posts.subdomainId, subdomainId)));
+      .where(and(eq(posts.id, id), eq(posts.isActive, true), eq(posts.subdomainId, this.subdomainId)));
     return post || undefined;
   }
 
@@ -452,7 +456,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(posts.isActive, true),
         ilike(posts.title, `%${query}%`),
-        eq(posts.subdomainId, subdomainId)
+        eq(posts.subdomainId, this.subdomainId)
       ))
       .orderBy(desc(posts.createdAt))
       .limit(limit);
@@ -460,7 +464,7 @@ export class DatabaseStorage implements IStorage {
 
   async createPost(post: InsertPost): Promise<Post> {
     const [newPost] = await db.insert(posts)
-      .values({ ...post, subdomainId })
+      .values({ ...post, subdomainId: this.subdomainId })
       .returning();
     return newPost;
   }
@@ -468,14 +472,14 @@ export class DatabaseStorage implements IStorage {
   // YouTube Videos
   async getYoutubeVideos(limit = 20): Promise<YoutubeVideo[]> {
     return await db.select().from(youtubeVideos)
-      .where(and(eq(youtubeVideos.isActive, true), eq(youtubeVideos.subdomainId, subdomainId)))
+      .where(and(eq(youtubeVideos.isActive, true), eq(youtubeVideos.subdomainId, this.subdomainId)))
       .orderBy(desc(youtubeVideos.createdAt))
       .limit(limit);
   }
 
   async getYoutubeVideoById(id: string): Promise<YoutubeVideo | undefined> {
     const [video] = await db.select().from(youtubeVideos)
-      .where(and(eq(youtubeVideos.id, id), eq(youtubeVideos.isActive, true), eq(youtubeVideos.subdomainId, subdomainId)));
+      .where(and(eq(youtubeVideos.id, id), eq(youtubeVideos.isActive, true), eq(youtubeVideos.subdomainId, this.subdomainId)));
     return video || undefined;
   }
 
@@ -484,7 +488,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(youtubeVideos.isActive, true),
         ilike(youtubeVideos.title, `%${query}%`),
-        eq(youtubeVideos.subdomainId, subdomainId)
+        eq(youtubeVideos.subdomainId, this.subdomainId)
       ))
       .orderBy(desc(youtubeVideos.createdAt))
       .limit(limit);
@@ -492,7 +496,7 @@ export class DatabaseStorage implements IStorage {
 
   async createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo> {
     const [newVideo] = await db.insert(youtubeVideos)
-      .values({ ...video, subdomainId })
+      .values({ ...video, subdomainId: this.subdomainId })
       .returning();
     return newVideo;
   }
@@ -500,14 +504,14 @@ export class DatabaseStorage implements IStorage {
   // Blogs
   async getBlogs(limit = 20): Promise<Blog[]> {
     return await db.select().from(blogs)
-      .where(and(eq(blogs.isActive, true), eq(blogs.subdomainId, subdomainId)))
+      .where(and(eq(blogs.isActive, true), eq(blogs.subdomainId, this.subdomainId)))
       .orderBy(desc(blogs.createdAt))
       .limit(limit);
   }
 
   async getBlogById(id: string): Promise<Blog | undefined> {
     const [blog] = await db.select().from(blogs)
-      .where(and(eq(blogs.id, id), eq(blogs.isActive, true), eq(blogs.subdomainId, subdomainId)));
+      .where(and(eq(blogs.id, id), eq(blogs.isActive, true), eq(blogs.subdomainId, this.subdomainId)));
     return blog || undefined;
   }
 
@@ -516,7 +520,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(blogs.isActive, true),
         ilike(blogs.title, `%${query}%`),
-        eq(blogs.subdomainId, subdomainId)
+        eq(blogs.subdomainId, this.subdomainId)
       ))
       .orderBy(desc(blogs.createdAt))
       .limit(limit);
@@ -524,14 +528,14 @@ export class DatabaseStorage implements IStorage {
 
   async createBlog(blog: InsertBlog): Promise<Blog> {
     const [newBlog] = await db.insert(blogs)
-      .values({ ...blog, subdomainId })
+      .values({ ...blog, subdomainId: this.subdomainId })
       .returning();
     return newBlog;
   }
 
   // Advertisement Banners
   async getAdvertisementBanners(position?: string, pageUrl?: string): Promise<AdvertisementBanner[]> {
-    let whereConditions = [eq(advertisementBanners.isActive, true), eq(advertisementBanners.subdomainId, subdomainId)];
+    let whereConditions = [eq(advertisementBanners.isActive, true), eq(advertisementBanners.subdomainId, this.subdomainId)];
     if (position) {
       whereConditions.push(eq(advertisementBanners.position, position));
     }
@@ -545,69 +549,69 @@ export class DatabaseStorage implements IStorage {
 
   async getAdvertisementBannerById(id: string): Promise<AdvertisementBanner | undefined> {
     const [banner] = await db.select().from(advertisementBanners)
-      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.isActive, true), eq(advertisementBanners.subdomainId, subdomainId)));
+      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.isActive, true), eq(advertisementBanners.subdomainId, this.subdomainId)));
     return banner || undefined;
   }
 
   async getAdvertisementBannersByPosition(position: string): Promise<AdvertisementBanner[]> {
     return await db.select().from(advertisementBanners)
-      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.position, position), eq(advertisementBanners.subdomainId, subdomainId)))
+      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.position, position), eq(advertisementBanners.subdomainId, this.subdomainId)))
       .orderBy(asc(advertisementBanners.displayOrder));
   }
 
   async createAdvertisementBanner(banner: InsertAdvertisementBanner): Promise<AdvertisementBanner> {
     const [newBanner] = await db.insert(advertisementBanners)
-      .values({ ...banner, subdomainId })
+      .values({ ...banner, subdomainId: this.subdomainId })
       .returning();
     return newBanner;
   }
 
   async getAdvertisementBannersByPage(pageUrl: string): Promise<AdvertisementBanner[]> {
     return await db.select().from(advertisementBanners)
-      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.pageUrl, pageUrl), eq(advertisementBanners.subdomainId, subdomainId)))
+      .where(and(eq(advertisementBanners.isActive, true), eq(advertisementBanners.pageUrl, pageUrl), eq(advertisementBanners.subdomainId, this.subdomainId)))
       .orderBy(asc(advertisementBanners.displayOrder));
   }
 
   async updateAdvertisementBanner(id: string, updates: Partial<InsertAdvertisementBanner>): Promise<AdvertisementBanner | undefined> {
     const [updatedBanner] = await db.update(advertisementBanners)
       .set({ ...updates, updatedAt: sql`now()` })
-      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.subdomainId, subdomainId)))
+      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.subdomainId, this.subdomainId)))
       .returning();
     return updatedBanner || undefined;
   }
 
   async deleteAdvertisementBanner(id: string): Promise<void> {
     await db.delete(advertisementBanners)
-      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.subdomainId, subdomainId)));
+      .where(and(eq(advertisementBanners.id, id), eq(advertisementBanners.subdomainId, this.subdomainId)));
   }
 
   // Banner Settings
   async getBannerSettings(pageUrl?: string): Promise<BannerSettings[]> {
     if (pageUrl) {
       return await db.select().from(bannerSettings)
-        .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, subdomainId)));
+        .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, this.subdomainId)));
     }
     return await db.select().from(bannerSettings)
-      .where(eq(bannerSettings.subdomainId, subdomainId))
+      .where(eq(bannerSettings.subdomainId, this.subdomainId))
       .orderBy(asc(bannerSettings.sortOrder), asc(bannerSettings.pageName));
   }
 
   async getBannerSettingByPage(pageUrl: string): Promise<BannerSettings | undefined> {
     const [setting] = await db.select().from(bannerSettings)
-      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, subdomainId)));
+      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, this.subdomainId)));
     return setting || undefined;
   }
 
   async getVisiblePages(): Promise<BannerSettings[]> {
     return await db.select().from(bannerSettings)
-      .where(and(eq(bannerSettings.isVisible, true), eq(bannerSettings.subdomainId, subdomainId)))
+      .where(and(eq(bannerSettings.isVisible, true), eq(bannerSettings.subdomainId, this.subdomainId)))
       .orderBy(asc(bannerSettings.sortOrder), asc(bannerSettings.pageName));
   }
 
   async createBannerSettings(settings: InsertBannerSettings): Promise<BannerSettings> {
     const { createdAt, updatedAt, ...insertData } = settings as any;
     const [newSettings] = await db.insert(bannerSettings)
-      .values({ ...insertData, subdomainId })
+      .values({ ...insertData, subdomainId: this.subdomainId })
       .returning();
     return newSettings;
   }
@@ -616,7 +620,7 @@ export class DatabaseStorage implements IStorage {
     const { createdAt, updatedAt, ...updateData } = updates as any;
     const [updatedSettings] = await db.update(bannerSettings)
       .set(updateData)
-      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, subdomainId)))
+      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, this.subdomainId)))
       .returning();
     return updatedSettings || undefined;
   }
@@ -632,9 +636,9 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBannerSettings(pageUrl: string): Promise<void> {
     await db.delete(advertisementBanners)
-      .where(and(eq(advertisementBanners.pageUrl, pageUrl), eq(advertisementBanners.subdomainId, subdomainId)));
+      .where(and(eq(advertisementBanners.pageUrl, pageUrl), eq(advertisementBanners.subdomainId, this.subdomainId)));
     await db.delete(bannerSettings)
-      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, subdomainId)));
+      .where(and(eq(bannerSettings.pageUrl, pageUrl), eq(bannerSettings.subdomainId, this.subdomainId)));
   }
 
   async reorderPages(pageUrls: string[]): Promise<void> {
@@ -642,26 +646,26 @@ export class DatabaseStorage implements IStorage {
       await db
         .update(bannerSettings)
         .set({ sortOrder: i + 1 })
-        .where(and(eq(bannerSettings.pageUrl, pageUrls[i]), eq(bannerSettings.subdomainId, subdomainId)));
+        .where(and(eq(bannerSettings.pageUrl, pageUrls[i]), eq(bannerSettings.subdomainId, this.subdomainId)));
     }
   }
 
   // Directory Business Categories
   async getBusinessCategories(): Promise<BusinessCategory[]> {
     return await db.select().from(businessCategories)
-      .where(and(eq(businessCategories.isActive, true), eq(businessCategories.subdomainId, subdomainId)))
+      .where(and(eq(businessCategories.isActive, true), eq(businessCategories.subdomainId, this.subdomainId)))
       .orderBy(asc(businessCategories.sortOrder));
   }
 
   async getBusinessCategoryBySlug(slug: string): Promise<BusinessCategory | undefined> {
     const [category] = await db.select().from(businessCategories)
-      .where(and(eq(businessCategories.slug, slug), eq(businessCategories.isActive, true), eq(businessCategories.subdomainId, subdomainId)));
+      .where(and(eq(businessCategories.slug, slug), eq(businessCategories.isActive, true), eq(businessCategories.subdomainId, this.subdomainId)));
     return category || undefined;
   }
 
   async createBusinessCategory(category: InsertBusinessCategory): Promise<BusinessCategory> {
     const [newCategory] = await db.insert(businessCategories)
-      .values({ ...category, subdomainId })
+      .values({ ...category, subdomainId: this.subdomainId })
       .returning();
     return newCategory;
   }
@@ -697,7 +701,7 @@ export class DatabaseStorage implements IStorage {
     })
     .from(businesses)
     .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
-    .where(and(eq(businesses.isActive, true), eq(businesses.subdomainId, subdomainId)))
+    .where(and(eq(businesses.isActive, true), eq(businesses.subdomainId, this.subdomainId)))
     .orderBy(desc(businesses.createdAt))
     .limit(limit);
   }
@@ -732,7 +736,7 @@ export class DatabaseStorage implements IStorage {
     })
     .from(businesses)
     .leftJoin(businessCategories, eq(businesses.businessCategoryId, businessCategories.id))
-    .where(and(eq(businesses.id, id), eq(businesses.isActive, true), eq(businesses.subdomainId, subdomainId)))
+    .where(and(eq(businesses.id, id), eq(businesses.isActive, true), eq(businesses.subdomainId, this.subdomainId)))
     .limit(1);
 
     if (!businessResult[0]) return undefined;
@@ -783,7 +787,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(businesses.isActive, true),
       eq(businessCategories.slug, categorySlug),
-      eq(businesses.subdomainId, subdomainId)
+      eq(businesses.subdomainId, this.subdomainId)
     ))
     .orderBy(desc(businesses.createdAt))
     .limit(limit);
@@ -823,7 +827,7 @@ export class DatabaseStorage implements IStorage {
       eq(businesses.isActive, true),
       eq(businesses.city, city),
       eq(businesses.state, state),
-      eq(businesses.subdomainId, subdomainId)
+      eq(businesses.subdomainId, this.subdomainId)
     ))
     .orderBy(desc(businesses.createdAt))
     .limit(limit);
@@ -833,7 +837,7 @@ export class DatabaseStorage implements IStorage {
     let whereCondition = and(
       eq(businesses.isActive, true),
       ilike(businesses.name, `%${query}%`),
-      eq(businesses.subdomainId, subdomainId)
+      eq(businesses.subdomainId, this.subdomainId)
     );
     if (location) {
       whereCondition = and(
@@ -908,7 +912,7 @@ export class DatabaseStorage implements IStorage {
     .where(and(
       eq(businesses.isActive, true),
       eq(businesses.isFeatured, true),
-      eq(businesses.subdomainId, subdomainId)
+      eq(businesses.subdomainId, this.subdomainId)
     ))
     .orderBy(desc(businesses.createdAt))
     .limit(limit);
@@ -916,7 +920,7 @@ export class DatabaseStorage implements IStorage {
 
   async createBusiness(business: InsertBusiness): Promise<Business> {
     const [newBusiness] = await db.insert(businesses)
-      .values({...business, subdomainId})
+      .values({...business, subdomainId: this.subdomainId })
       .returning();
     return newBusiness;
   }
@@ -924,13 +928,13 @@ export class DatabaseStorage implements IStorage {
   // Business Hours
   async getBusinessHours(businessId: string): Promise<BusinessHours[]> {
     return await db.select().from(businessHours)
-      .where(and(eq(businessHours.businessId, businessId), eq(businessHours.subdomainId, subdomainId)))
+      .where(and(eq(businessHours.businessId, businessId), eq(businessHours.subdomainId, this.subdomainId)))
       .orderBy(asc(businessHours.dayOfWeek));
   }
 
   async createBusinessHours(hours: InsertBusinessHours): Promise<BusinessHours> {
     const [newHours] = await db.insert(businessHours)
-      .values({...hours, subdomainId})
+      .values({...hours, subdomainId: this.subdomainId })
       .returning();
     return newHours;
   }
@@ -938,14 +942,14 @@ export class DatabaseStorage implements IStorage {
   // Business Reviews
   async getBusinessReviews(businessId: string, limit = 10): Promise<BusinessReview[]> {
     return await db.select().from(businessReviews)
-      .where(and(eq(businessReviews.businessId, businessId), eq(businessReviews.subdomainId, subdomainId)))
+      .where(and(eq(businessReviews.businessId, businessId), eq(businessReviews.subdomainId, this.subdomainId)))
       .orderBy(desc(businessReviews.createdAt))
       .limit(limit);
   }
 
   async createBusinessReview(review: InsertBusinessReview): Promise<BusinessReview> {
     const [newReview] = await db.insert(businessReviews)
-      .values({...review, subdomainId})
+      .values({...review, subdomainId: this.subdomainId })
       .returning();
     return newReview;
   }
@@ -953,13 +957,13 @@ export class DatabaseStorage implements IStorage {
   // Business Photos
   async getBusinessPhotos(businessId: string): Promise<BusinessPhoto[]> {
     return await db.select().from(businessPhotos)
-      .where(and(eq(businessPhotos.businessId, businessId), eq(businessPhotos.subdomainId, subdomainId)))
+      .where(and(eq(businessPhotos.businessId, businessId), eq(businessPhotos.subdomainId, this.subdomainId)))
       .orderBy(asc(businessPhotos.sortOrder));
   }
 
   async createBusinessPhoto(photo: InsertBusinessPhoto): Promise<BusinessPhoto> {
     const [newPhoto] = await db.insert(businessPhotos)
-      .values({...photo, subdomainId})
+      .values({...photo, subdomainId: this.subdomainId })
       .returning();
     return newPhoto;
   }
@@ -986,7 +990,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users)
-      // .where(eq(users.subdomainId, subdomainId))
+      // .where(eq(users.subdomainId, this.subdomainId))
       .orderBy(desc(users.createdAt));
   }
 
@@ -994,10 +998,10 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * limit;
     const [usersResult, totalResult] = await Promise.all([
       db.select().from(users)
-        // .where(eq(users.subdomainId, subdomainId))
+        // .where(eq(users.subdomainId, this.subdomainId))
         .orderBy(desc(users.createdAt)).limit(limit).offset(offset),
       db.select({ count: sql<number>`count(*)` }).from(users)
-        // .where(eq(users.subdomainId, subdomainId))
+        // .where(eq(users.subdomainId, this.subdomainId))
     ]);
     return {
       users: usersResult,
@@ -1008,27 +1012,27 @@ export class DatabaseStorage implements IStorage {
   // Newsletter Subscribers
   async createNewsletterSubscriber(subscriber: InsertNewsletterSubscriber): Promise<NewsletterSubscriber> {
     const [newSubscriber] = await db.insert(newsletterSubscribers)
-      .values({ ...subscriber, subdomainId })
+      .values({ ...subscriber, subdomainId: this.subdomainId })
       .returning();
     return newSubscriber;
   }
 
   async getNewsletterSubscriberByEmail(email: string): Promise<NewsletterSubscriber | undefined> {
     const [subscriber] = await db.select().from(newsletterSubscribers)
-      .where(and(eq(newsletterSubscribers.email, email), eq(newsletterSubscribers.subdomainId, subdomainId)));
+      .where(and(eq(newsletterSubscribers.email, email), eq(newsletterSubscribers.subdomainId, this.subdomainId)));
     return subscriber || undefined;
   }
 
   async getAllNewsletterSubscribers(): Promise<NewsletterSubscriber[]> {
     return await db.select().from(newsletterSubscribers)
-      .where(eq(newsletterSubscribers.subdomainId, subdomainId))
+      .where(eq(newsletterSubscribers.subdomainId, this.subdomainId))
       .orderBy(desc(newsletterSubscribers.createdAt));
   }
 
   // Newsletter Popup Settings
   async getNewsletterPopupSettings(): Promise<NewsletterPopupSettings | undefined> {
     const [settings] = await db.select().from(newsletterPopupSettings)
-      .where(eq(newsletterPopupSettings.subdomainId, subdomainId))
+      .where(eq(newsletterPopupSettings.subdomainId, this.subdomainId))
       .limit(1);
     return settings || undefined;
   }
@@ -1039,12 +1043,12 @@ export class DatabaseStorage implements IStorage {
       const [updated] = await db
         .update(newsletterPopupSettings)
         .set({ ...settings, updatedAt: new Date() })
-        .where(and(eq(newsletterPopupSettings.id, existing.id), eq(newsletterPopupSettings.subdomainId, subdomainId)))
+        .where(and(eq(newsletterPopupSettings.id, existing.id), eq(newsletterPopupSettings.subdomainId, this.subdomainId)))
         .returning();
       return updated;
     } else {
       const [created] = await db.insert(newsletterPopupSettings)
-        .values({ ...settings, subdomainId })
+        .values({ ...settings, subdomainId: this.subdomainId })
         .returning();
       return created;
     }
@@ -1053,7 +1057,7 @@ export class DatabaseStorage implements IStorage {
   // Page Views
   async createPageView(pageView: InsertPageView): Promise<PageView> {
     const [newPageView] = await db.insert(pageViews)
-      .values({ ...pageView, subdomainId })
+      .values({ ...pageView, subdomainId: this.subdomainId })
       .returning();
     return newPageView;
   }
@@ -1061,18 +1065,18 @@ export class DatabaseStorage implements IStorage {
   async getPageViews(pageName?: string, limit = 100): Promise<PageView[]> {
     if (pageName) {
       return await db.select().from(pageViews)
-        .where(and(eq(pageViews.pageName, pageName), eq(pageViews.subdomainId, subdomainId)))
+        .where(and(eq(pageViews.pageName, pageName), eq(pageViews.subdomainId, this.subdomainId)))
         .orderBy(desc(pageViews.createdAt))
         .limit(limit);
     }
     return await db.select().from(pageViews)
-      .where(eq(pageViews.subdomainId, subdomainId))
+      .where(eq(pageViews.subdomainId, this.subdomainId))
       .orderBy(desc(pageViews.createdAt))
       .limit(limit);
   }
 
   async getPageViewCount(pageName: string, ipAddress?: string): Promise<number> {
-    let conditions = [eq(pageViews.pageName, pageName), eq(pageViews.subdomainId, subdomainId)];
+    let conditions = [eq(pageViews.pageName, pageName), eq(pageViews.subdomainId, this.subdomainId)];
     if (ipAddress) {
       conditions.push(eq(pageViews.ipAddress, ipAddress));
     }
@@ -1085,7 +1089,7 @@ export class DatabaseStorage implements IStorage {
   // Click-through tracking methods
   async createClickThru(clickThruData: InsertClickThru): Promise<ClickThru> {
     const [newClickThru] = await db.insert(clickThru)
-      .values({ ...clickThruData, subdomainId })
+      .values({ ...clickThruData, subdomainId: this.subdomainId })
       .returning();
     return newClickThru;
   }
@@ -1093,13 +1097,13 @@ export class DatabaseStorage implements IStorage {
     async getClickThrus(pageName?: string, limit = 100): Promise<ClickThru[]> {
     if (pageName) {
       return await db.select().from(clickThru)
-        .where(and(eq(clickThru.pageName, pageName), eq(clickThru.subdomainId, subdomainId)))
+        .where(and(eq(clickThru.pageName, pageName), eq(clickThru.subdomainId, this.subdomainId)))
         .orderBy(desc(clickThru.createdAt))
         .limit(limit);
     }
     
     return await db.select().from(clickThru)
-      .where(eq(clickThru.subdomainId, subdomainId))
+      .where(eq(clickThru.subdomainId, this.subdomainId))
       .orderBy(desc(clickThru.createdAt))
       .limit(limit);
   }
@@ -1107,7 +1111,7 @@ export class DatabaseStorage implements IStorage {
   async getClickThruCount(advertisementId: string): Promise<number> {
     const [result] = await db.select({ count: sql`count(*)` })
       .from(clickThru)
-      .where(and(eq(clickThru.advertisementId, advertisementId), eq(clickThru.subdomainId, subdomainId)));
+      .where(and(eq(clickThru.advertisementId, advertisementId), eq(clickThru.subdomainId, this.subdomainId)));
     
     return Number(result.count) || 0;
   }
@@ -1127,7 +1131,7 @@ export class DatabaseStorage implements IStorage {
       uniqueClickers: sql`COUNT(DISTINCT ${clickThru.ipAddress})`.as('uniqueClickers')
     })
     .from(clickThru)
-    .where(and(sql`${clickThru.createdAt} >= ${cutoffDate.toISOString()}`, eq(clickThru.subdomainId, subdomainId)))
+    .where(and(sql`${clickThru.createdAt} >= ${cutoffDate.toISOString()}`, eq(clickThru.subdomainId, this.subdomainId)))
     .groupBy(
       clickThru.advertisementId,
       clickThru.advertisementTitle,
@@ -1163,7 +1167,7 @@ export class DatabaseStorage implements IStorage {
       uniqueVisitors: sql`COUNT(DISTINCT ${pageViews.ipAddress})`.as('uniqueVisitors')
     })
     .from(pageViews)
-    .where(and(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`, eq(pageViews.subdomainId, subdomainId)))
+    .where(and(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`, eq(pageViews.subdomainId, this.subdomainId)))
     .groupBy(pageViews.pageName, pageViews.pageUrl, sql`DATE(${pageViews.createdAt})`)
     .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
 
@@ -1194,7 +1198,7 @@ export class DatabaseStorage implements IStorage {
       `.as('topPage')
     })
     .from(pageViews)
-    .where(and(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`, eq(pageViews.subdomainId, subdomainId)))
+    .where(and(sql`${pageViews.createdAt} >= ${cutoffDate.toISOString()}`, eq(pageViews.subdomainId, this.subdomainId)))
     .groupBy(sql`DATE(${pageViews.createdAt})`)
     .orderBy(sql`DATE(${pageViews.createdAt}) DESC`);
 
@@ -1209,14 +1213,14 @@ export class DatabaseStorage implements IStorage {
   // Site Settings
   async getSiteSettings(): Promise<SiteSettings> {
     // Get first site settings record or create default if none exists
-    let [settings] = await db.select().from(siteSettings).where(eq(siteSettings.subdomainId, subdomainId)).limit(1);
+    let [settings] = await db.select().from(siteSettings).where(eq(siteSettings.subdomainId, this.subdomainId)).limit(1);
     
     if (!settings) {
       // Create default settings if none exist
       [settings] = await db.insert(siteSettings).values({
         siteName: "NetDiscount",
         siteDescription: "Deal Aggregation Platform",
-        subdomainId: subdomainId
+        subdomainId: this.subdomainId
       }).returning();
     }
     
@@ -1231,7 +1235,7 @@ export class DatabaseStorage implements IStorage {
     const [updatedSettings] = await db
       .update(siteSettings)
       .set({ ...updates, updatedAt: sql`now()` })
-      .where(and(eq(siteSettings.id, existingSettings.id), eq(siteSettings.subdomainId, subdomainId)))
+      .where(and(eq(siteSettings.id, existingSettings.id), eq(siteSettings.subdomainId, this.subdomainId)))
       .returning();
     
     return updatedSettings;
@@ -1239,7 +1243,7 @@ export class DatabaseStorage implements IStorage {
 
   // User favorites
   async getUserFavorites(userId: string, pageUrl?: string): Promise<string[]> {
-    let whereConditions = [eq(userFavorites.userId, userId), eq(userFavorites.subdomainId, subdomainId)];
+    let whereConditions = [eq(userFavorites.userId, userId), eq(userFavorites.subdomainId, this.subdomainId)];
     
     if (pageUrl) {
       whereConditions.push(eq(userFavorites.pageUrl, pageUrl));
@@ -1255,7 +1259,7 @@ export class DatabaseStorage implements IStorage {
 
   async addUserFavorite(userId: string, dealId: string, pageUrl: string): Promise<void> {
     try {
-      await db.insert(userFavorites).values({ userId, dealId, pageUrl, subdomainId });
+      await db.insert(userFavorites).values({ userId, dealId, pageUrl, subdomainId: this.subdomainId });
     } catch (error) {
       // Handle unique constraint violation silently (user already favorited this deal on this page)
       if (error instanceof Error && !error.message.includes('unique_user_deal_page')) {
@@ -1270,7 +1274,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userFavorites.userId, userId), 
         eq(userFavorites.dealId, dealId),
-        eq(userFavorites.subdomainId, subdomainId),
+        eq(userFavorites.subdomainId, this.subdomainId),
         // eq(userFavorites.pageUrl, pageUrl)
       ));
   }
@@ -1282,7 +1286,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userFavorites.userId, userId), 
         eq(userFavorites.dealId, dealId),
-        eq(userFavorites.subdomainId, subdomainId),
+        eq(userFavorites.subdomainId, this.subdomainId),
         // eq(userFavorites.pageUrl, pageUrl)
       ))
       .limit(1);
