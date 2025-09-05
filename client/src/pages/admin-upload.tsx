@@ -64,14 +64,14 @@ export default function AdminUpload() {
       return;
     }
 
-    if (!selectedSubdomain) {
-      toast({
-        title: "Subdomain Required",
-        description: "Please select a subdomain before uploading files.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // if (!selectedSubdomain) {
+    //   toast({
+    //     title: "Subdomain Required",
+    //     description: "Please select a subdomain before uploading files.",
+    //     variant: "destructive",
+    //   });
+    //   return;
+    // }
 
     setUploading(true);
     setUploadResults([]);
