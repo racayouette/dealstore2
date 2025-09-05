@@ -7,6 +7,8 @@ import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import fetch from "node-fetch";
+import { getTenantId } from "./db-context";
+import { tenantMiddleware } from "server";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -308,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Helper function to process CSV data
-  const processCsvData = async (csvData: string, tableName: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
+  const processCsvData = async (csvData: string, tableName: string, subdomainId: string): Promise<{ recordsProcessed: number, duplicatesSkipped: number }> => {
     return new Promise((resolve, reject) => {
       const results: any[] = [];
       const stream = Readable.from([csvData]);
@@ -337,8 +339,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         slug: row.slug,
                         description: row.description || null,
                         parentId: row.parent_id || null,
-                        isActive: row.is_active === 'true',
-                        sortOrder: parseInt(row.sort_order) || 0
+                        isActive: row.is_active?.toLowerCase() === 'true',
+                        sortOrder: parseInt(row.sort_order) || 0,
+                        subdomainId
                       });
                     }
                     break;
@@ -354,8 +357,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         description: row.description || null,
                         logoUrl: row.logo_url || null,
                         websiteUrl: row.website_url || null,
-                        isActive: row.is_active === 'true',
-                        featured: row.featured === 'true'
+                        isActive: row.is_active?.toLowerCase() === 'true',
+                        featured: row.featured?.toLowerCase() === 'true',
+                        subdomainId
                       });
                     }
                     break;
@@ -376,13 +380,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         reviewCount: row.review_count ? parseInt(row.review_count) : 0,
                         storeId: row.store_id,
                         categoryId: row.category_id,
-                        isActive: row.is_active === 'true',
-                        isFeatured: row.is_featured === 'true',
-                        freeShipping: row.free_shipping === 'true',
+                        isActive: row.is_active?.toLowerCase() === 'true',
+                        isFeatured: row.is_featured?.toLowerCase() === 'true',
+                        freeShipping: row.free_shipping?.toLowerCase() === 'true',
                         editorInsights: row.editor_insights || null,
                         howToGetIt: row.how_to_get_it || null,
                         expiresAt: row.expires_at ? new Date(row.expires_at) : null,
-                        authorName: row.author_name || null
+                        authorName: row.author_name || null,
+                        subdomainId
                       });
                     } catch (error) {
                       // If creation fails due to duplicate constraint, skip
@@ -401,7 +406,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         sku: row.sku || null,
                         imageUrl: row.image_url || null,
                         categoryId: row.category_id,
-                        isActive: row.is_active === 'true'
+                        isActive: row.is_active?.toLowerCase() === 'true',
+                        subdomainId
                       });
                     } catch (error) {
                       // If creation fails due to duplicate constraint, skip
@@ -447,7 +453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // CSV Upload endpoint
-  app.post("/api/admin/upload-csv", upload.single('csv'), async (req, res) => {
+  app.post("/api/admin/upload-csv", upload.single('csv'), tenantMiddleware, async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ 
@@ -455,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "No CSV file uploaded" 
         });
       }
-
+      const subdomainId = getTenantId() || "";
       const filename = req.file.originalname;
       const tableName = getTableFromFilename(filename);
 
@@ -467,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const csvData = req.file.buffer.toString('utf-8');
-      const result = await processCsvData(csvData, tableName);
+      const result = await processCsvData(csvData, tableName, subdomainId);
 
       res.json({
         success: true,
@@ -489,7 +495,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/process-remote-csv", async (req, res) => {
     try {
       const { filename, fileUrl } = req.body;
-
       if (!filename || !fileUrl) {
         return res.status(400).json({
           success: false,
@@ -512,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const csvData = await response.text();
-      const result = await processCsvData(csvData, tableName);
+      const result = await processCsvData(csvData, tableName, req.subdomain || "");
 
       res.json({
         success: true,

@@ -32,7 +32,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // middleware/tenant.ts
 
 export function tenantMiddleware(req: any, res: any, next: any) {
-  const subdomainId = req.subdomain || "bagpack";
+  const subdomainId = req.subdomain;
   if (!subdomainId) {
     return res.status(400).json({ error: "Missing subdomainId" });
   }
