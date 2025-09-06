@@ -25,6 +25,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   if (host.endsWith(mainDomain)) {
     const subdomain = host.replace(`.${mainDomain}`, ""); 
     req.subdomain = subdomain === mainDomain ? '' : subdomain; 
+  }else{
+    req.subdomain = ''
   }
   next();
 });
@@ -33,9 +35,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 export function tenantMiddleware(req: any, res: any, next: any) {
   const subdomainId = req.subdomain;
-  if (!subdomainId) {
-    return res.status(400).json({ error: "Missing subdomainId" });
-  }
+  // if (!subdomainId) {
+  //   return res.status(400).json({ error: "Missing subdomainId" });
+  // }
 
   setTenant(subdomainId, async () => {
     await next();
