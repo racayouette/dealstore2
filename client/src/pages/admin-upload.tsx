@@ -138,7 +138,7 @@ export default function AdminUpload() {
               </p>
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Upload Settings</CardTitle>
@@ -163,7 +163,7 @@ export default function AdminUpload() {
                   </Alert>
                 </CardContent>
               </Card>
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Upload Area */}

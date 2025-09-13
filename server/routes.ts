@@ -9,6 +9,34 @@ import { Readable } from "stream";
 import fetch from "node-fetch";
 import { getTenantId } from "./db-context";
 import { tenantMiddleware } from "server";
+import { 
+  categories, 
+  stores, 
+  deals, 
+  products, 
+  videoChannels,
+  posts,
+  youtubeVideos,
+  blogs,
+  advertisementBanners,
+  bannerSettings,
+  pageViews,
+  clickThru,
+  subdomains,
+  businessCategories,
+  businesses,
+  businessHours,
+  businessReviews,
+  businessPhotos,
+  users,
+  newsletterSubscribers,
+  newsletterPopupSettings,
+  userFavorites,
+  siteSettings
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, sql } from "drizzle-orm";
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -298,7 +326,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const baseName = filename.toLowerCase().replace('.csv', '');
     const supportedTables = [
       'categories', 'stores', 'deals', 'products', 'video-channels', 
-      'posts', 'blogs', 'business-categories', 'businesses', 'users'
+      'posts', 'blogs', 'business-categories', 'businesses', 'users',
+      'amazon_products'
     ];
     
     for (const table of supportedTables) {
@@ -390,6 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         subdomainId
                       });
                     } catch (error) {
+                      console.log('err ----', error)
                       // If creation fails due to duplicate constraint, skip
                       isDuplicate = true;
                     }
@@ -411,6 +441,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       });
                     } catch (error) {
                       // If creation fails due to duplicate constraint, skip
+                      isDuplicate = true;
+                    }
+                    break;
+
+                  case 'amazon_products':
+                    // For products, try to create and catch duplicate errors
+                    try {
+                      await storage.createAmazonProduct({
+                        asin: row.asin,
+                        title: row.title,
+                        thumbnailUrl: row.thumbnail || '',
+                        price: row.price || null,
+                        rating: Number(row.rating),
+                        reviewCount: Number(row.reviews) || 0,
+                        link: row.link,
+                        subdomainId
+                      });
+                    } catch (error) {
+                      // If creation fails due to duplicate constraint, skip
+                      console.log('err ', error)
                       isDuplicate = true;
                     }
                     break;
@@ -532,6 +582,478 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: `Failed to process remote CSV: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
+    }
+  });
+
+  app.get("/api/admin/table-data/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const offset = (page - 1) * pageSize;
+
+      // Map frontend table names to actual database table names
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores, 
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'subdomains': subdomains,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      // Get total count
+      const totalCountResult = await db.select({ count: sql<number>`count(*)` }).from(table);
+      const total = totalCountResult[0]?.count || 0;
+
+      // Get paginated data
+      const data = await db.select().from(table).limit(pageSize).offset(offset);
+
+      res.json({
+        data,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize)
+      });
+    } catch (error) {
+      console.error("Error fetching table data:", error);
+      res.status(500).json({ error: "Failed to fetch table data" });
+    }
+  });
+
+  app.get("/api/admin/table-schema/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      
+      // Define field types for each table to help with form generation
+      const schemaMap: Record<string, Record<string, any>> = {
+        'categories': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          parentId: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          sortOrder: { type: 'number', required: false }
+        },
+        'stores': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          logoUrl: { type: 'text', required: false },
+          websiteUrl: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          featured: { type: 'boolean', required: false }
+        },
+        'deals': {
+          title: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          originalPrice: { type: 'number', required: false },
+          salePrice: { type: 'number', required: true },
+          discountPercent: { type: 'number', required: false },
+          couponCode: { type: 'text', required: false },
+          dealUrl: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: false },
+          rating: { type: 'number', required: false },
+          reviewCount: { type: 'number', required: false },
+          storeId: { type: 'text', required: true },
+          categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          isFeatured: { type: 'boolean', required: false },
+          freeShipping: { type: 'boolean', required: false },
+          editorInsights: { type: 'textarea', required: false },
+          howToGetIt: { type: 'textarea', required: false },
+          expiresAt: { type: 'datetime-local', required: false },
+          authorName: { type: 'text', required: false }
+        },
+        'products': {
+          name: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          brand: { type: 'text', required: false },
+          model: { type: 'text', required: false },
+          sku: { type: 'text', required: false },
+          imageUrl: { type: 'text', required: false },
+          categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'video_channels': {
+          title: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          thumbnailUrl: { type: 'text', required: true },
+          channelUrl: { type: 'text', required: true },
+          videoCount: { type: 'number', required: false },
+          followerCount: { type: 'number', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'posts': {
+          title: { type: 'text', required: true },
+          content: { type: 'textarea', required: true },
+          author: { type: 'text', required: true },
+          subreddit: { type: 'text', required: false },
+          imageUrl: { type: 'text', required: false },
+          postUrl: { type: 'text', required: true },
+          upvotes: { type: 'number', required: false },
+          commentCount: { type: 'number', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'youtube_videos': {
+          title: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          channelName: { type: 'text', required: true },
+          channelUrl: { type: 'text', required: true },
+          videoUrl: { type: 'text', required: true },
+          thumbnailUrl: { type: 'text', required: true },
+          duration: { type: 'text', required: false },
+          viewCount: { type: 'number', required: false },
+          uploadDate: { type: 'text', required: false },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'blogs': {
+          title: { type: 'text', required: true },
+          description: { type: 'textarea', required: true },
+          excerpt: { type: 'textarea', required: true },
+          author: { type: 'text', required: true },
+          website: { type: 'text', required: true },
+          websiteUrl: { type: 'text', required: true },
+          blogUrl: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: true },
+          publishDate: { type: 'text', required: true },
+          readTime: { type: 'text', required: true },
+          category: { type: 'text', required: true },
+          tags: { type: 'textarea', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'advertisement_banners': {
+          content: { type: 'textarea', required: true },
+          backgroundColor: { type: 'text', required: false },
+          textColor: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          impressionLimit: { type: 'number', required: false },
+          currentImpressions: { type: 'number', required: false }
+        },
+        'banner_settings': {
+          pageUrl: { type: 'text', required: true },
+          showBanner: { type: 'boolean', required: false },
+          isVisible: { type: 'boolean', required: false }
+        },
+        'users': {
+          username: { type: 'text', required: true },
+          email: { type: 'text', required: true },
+          password: { type: 'text', required: true },
+          isActive: { type: 'boolean', required: false }
+        },
+        'newsletter_subscribers': {
+          email: { type: 'text', required: true },
+          signupMethod: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'businesses': {
+          name: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          address: { type: 'text', required: false },
+          phone: { type: 'text', required: false },
+          website: { type: 'text', required: false },
+          email: { type: 'text', required: false },
+          categoryId: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'business_categories': {
+          name: { type: 'text', required: true },
+          slug: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          iconName: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false },
+          isActive: { type: 'boolean', required: false },
+          sortOrder: { type: 'number', required: false }
+        },
+        'business_hours': {
+          businessId: { type: 'text', required: true },
+          dayOfWeek: { type: 'number', required: true },
+          openTime: { type: 'time', required: false },
+          closeTime: { type: 'time', required: false },
+          subdomainId: { type: 'text', required: false },
+          isClosed: { type: 'boolean', required: false }
+        },
+        'business_reviews': {
+          businessId: { type: 'text', required: true },
+          rating: { type: 'number', required: true },
+          reviewText: { type: 'textarea', required: false },
+          reviewerName: { type: 'text', required: true },
+          reviewerEmail: { type: 'text', required: false },
+          subdomainId: { type: 'text', required: false }
+        },
+        'business_photos': {
+          businessId: { type: 'text', required: true },
+          imageUrl: { type: 'text', required: true },
+          caption: { type: 'text', required: false },
+          isPrimary: { type: 'boolean', required: false },
+          subdomainId: { type: 'text', required: false }
+        },
+        'click_thru': {
+          pageName: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          advertisementId: { type: 'text', required: true },
+          advertisementTitle: { type: 'text', required: true },
+          advertisementClickUrl: { type: 'text', required: true },
+          bannerPosition: { type: 'text', required: true },
+          ipAddress: { type: 'text', required: true },
+          userAgent: { type: 'text', required: false }
+        },
+        'newsletter_popup_settings': {
+          isEnabled: { type: 'boolean', required: false },
+          popupType: { type: 'select', required: true, options: [
+            { value: 'dark', label: 'Dark' },
+            { value: 'light', label: 'Light' }
+          ]},
+          showDelay: { type: 'number', required: false },
+          showOnPages: { type: 'textarea', required: false, help: 'JSON array of page URLs' },
+          frequency: { type: 'select', required: false, options: [
+            { value: 'once_per_session', label: 'Once Per Session' },
+            { value: 'daily', label: 'Daily' },
+            { value: 'always', label: 'Always' }
+          ]}
+        },
+        'page_views': {
+          pageName: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false },
+          ipAddress: { type: 'text', required: true },
+          userAgent: { type: 'text', required: false }
+        },
+        'site_settings': {
+          siteName: { type: 'text', required: true },
+          siteDescription: { type: 'textarea', required: false },
+          logoUrl: { type: 'text', required: false },
+          faviconUrl: { type: 'text', required: false },
+          primaryColor: { type: 'color', required: false },
+          secondaryColor: { type: 'color', required: false }
+        },
+        'subdomains': {
+          subdomain: { type: 'text', required: true },
+          displayName: { type: 'text', required: true },
+          description: { type: 'textarea', required: false },
+          isActive: { type: 'boolean', required: false }
+        },
+        'user_favorites': {
+          userId: { type: 'text', required: true },
+          dealId: { type: 'text', required: true },
+          pageUrl: { type: 'text', required: true },
+          subdomainId: { type: 'text', required: false }
+        }
+      };
+
+      const schema = schemaMap[tableName];
+      if (!schema) {
+        return res.status(400).json({ error: "Schema not found for table" });
+      }
+
+      res.json(schema);
+    } catch (error) {
+      console.error("Error fetching table schema:", error);
+      res.status(500).json({ error: "Failed to fetch table schema" });
+    }
+  });
+
+  app.post("/api/admin/table-data/:tableName", async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const data = req.body;
+
+      // Use the existing storage methods where available
+      switch (tableName) {
+        case 'categories':
+          const category = await storage.createCategory(data);
+          res.json(category);
+          break;
+        case 'stores':
+          const store = await storage.createStore(data);
+          res.json(store);
+          break;
+        case 'deals':
+          const deal = await storage.createDeal(data);
+          res.json(deal);
+          break;
+        case 'products':
+          const product = await storage.createProduct(data);
+          res.json(product);
+          break;
+        default:
+          // Generic table insert for all other tables
+          const tableMap: Record<string, any> = {
+            'video_channels': videoChannels,
+            'posts': posts,
+            'youtube_videos': youtubeVideos,
+            'blogs': blogs,
+            'advertisement_banners': advertisementBanners,
+            'banner_settings': bannerSettings,
+            'page_views': pageViews,
+            'click_thru': clickThru,
+            'subdomains': subdomains,
+            'business_categories': businessCategories,
+            'businesses': businesses,
+            'business_hours': businessHours,
+            'business_reviews': businessReviews,
+            'business_photos': businessPhotos,
+            'users': users,
+            'newsletter_subscribers': newsletterSubscribers,
+            'newsletter_popup_settings': newsletterPopupSettings,
+            'user_favorites': userFavorites,
+            'site_settings': siteSettings
+          };
+
+          const table = tableMap[tableName];
+          if (!table) {
+            return res.status(400).json({ error: "Invalid table name" });
+          }
+
+          // Remove timestamp fields that shouldn't be set manually
+          delete data.createdAt;
+          delete data.updatedAt;
+
+          const result = await db.insert(table)
+            .values(data)
+            .returning();
+
+          const newRecord = Array.isArray(result) ? result[0] : result;
+          res.json(newRecord);
+          break;
+      }
+    } catch (error) {
+      console.error("Error creating record:", error);
+      res.status(500).json({ error: "Failed to create record" });
+    }
+  });
+
+  app.put("/api/admin/table-data/:tableName/:id", async (req, res) => {
+    try {
+      const { tableName, id } = req.params;
+      const data = req.body;
+
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores,
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'subdomains': subdomains,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      // Remove timestamp fields that shouldn't be updated manually
+      delete data.createdAt;
+      delete data.updatedAt;
+      delete data.id;
+
+      const [updatedRecord] = await db.update(table)
+        .set(data)
+        .where(eq(table.id, id))
+        .returning();
+
+      res.json(updatedRecord);
+    } catch (error) {
+      console.error("Error updating record:", error);
+      res.status(500).json({ error: "Failed to update record" });
+    }
+  });
+
+  app.delete("/api/admin/table-data/:tableName/:id", async (req, res) => {
+    try {
+      const { tableName, id } = req.params;
+
+      const tableMap: Record<string, any> = {
+        'categories': categories,
+        'stores': stores,
+        'deals': deals,
+        'products': products,
+        'video_channels': videoChannels,
+        'posts': posts,
+        'youtube_videos': youtubeVideos,
+        'blogs': blogs,
+        'advertisement_banners': advertisementBanners,
+        'banner_settings': bannerSettings,
+        'page_views': pageViews,
+        'click_thru': clickThru,
+        'subdomains': subdomains,
+        'business_categories': businessCategories,
+        'businesses': businesses,
+        'business_hours': businessHours,
+        'business_reviews': businessReviews,
+        'business_photos': businessPhotos,
+        'users': users,
+        'newsletter_subscribers': newsletterSubscribers,
+        'newsletter_popup_settings': newsletterPopupSettings,
+        'user_favorites': userFavorites,
+        'site_settings': siteSettings
+      };
+
+      const table = tableMap[tableName];
+      if (!table) {
+        return res.status(400).json({ error: "Invalid table name" });
+      }
+
+      await db.delete(table).where(eq(table.id, id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting record:", error);
+      res.status(500).json({ error: "Failed to delete record" });
     }
   });
 

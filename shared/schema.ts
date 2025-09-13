@@ -1,8 +1,21 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, decimal, timestamp, boolean, uuid, real } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+
+export const amazonProducts = pgTable("amazon_products", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  asin: varchar("asin", { length: 100 }).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  price: varchar("price", { length: 10 }),
+  rating: real("rating"),
+  reviewCount: integer("review_count").default(0),
+  link: text("link"),
+  subdomainId: text("subdomain_id"),
+});
 
 export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -310,6 +323,10 @@ export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
 });
 
+export const insertAmazonProductSchema = createInsertSchema(amazonProducts).omit({
+  id: true,
+});
+
 export const insertDealProductSchema = createInsertSchema(dealProducts).omit({
   id: true,
 });
@@ -488,6 +505,7 @@ export type Category = typeof categories.$inferSelect;
 export type Store = typeof stores.$inferSelect;
 export type Deal = typeof deals.$inferSelect;
 export type Product = typeof products.$inferSelect;
+export type AmazonProduct = typeof amazonProducts.$inferSelect;
 export type DealProduct = typeof dealProducts.$inferSelect;
 export type VideoChannel = typeof videoChannels.$inferSelect;
 export type Post = typeof posts.$inferSelect;
@@ -504,6 +522,7 @@ export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
 export type InsertDeal = z.infer<typeof insertDealSchema>;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertAmazonProduct = z.infer<typeof insertAmazonProductSchema>;
 export type InsertDealProduct = z.infer<typeof insertDealProductSchema>;
 export type InsertVideoChannel = z.infer<typeof insertVideoChannelSchema>;
 export type InsertPost = z.infer<typeof insertPostSchema>;

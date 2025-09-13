@@ -1,0 +1,1 @@
+ALTER TABLE "amazon_products" ALTER COLUMN "price" DROP NOT NULL;

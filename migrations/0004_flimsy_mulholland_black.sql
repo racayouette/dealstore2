@@ -1,0 +1,1 @@
+ALTER TABLE "amazon_products" ADD COLUMN "subdomain_id" text;

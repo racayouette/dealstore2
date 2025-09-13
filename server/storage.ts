@@ -71,7 +71,10 @@ import {
   type DealWithRelations,
   type CategoryWithChildren,
   type BusinessWithDetails,
-  type BusinessWithCategory
+  type BusinessWithCategory,
+  amazonProducts,
+  InsertAmazonProduct,
+  AmazonProduct
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, like, and, sql, ilike, isNull } from "drizzle-orm";
@@ -403,6 +406,13 @@ export class DatabaseStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const [newProduct] = await db.insert(products)
+      .values({ ...product, subdomainId: this.subdomainId })
+      .returning();
+    return newProduct;
+  }
+
+  async createAmazonProduct(product: InsertAmazonProduct): Promise<AmazonProduct> {
+    const [newProduct] = await db.insert(amazonProducts)
       .values({ ...product, subdomainId: this.subdomainId })
       .returning();
     return newProduct;
